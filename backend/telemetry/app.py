@@ -1,18 +1,12 @@
 import paho.mqtt.client as mqtt
 from pydantic import ValidationError
 
-from database import SessionLocal, init_db
+from database import SessionLocal
 from repository import TelemetryRepository
 from schemas import TelemetryCreate
 from service import TelemetryService
+from config import BROKER_HOST, BROKER_PORT, MQTT_TOPIC
 
-
-BROKER_HOST = "localhost"
-BROKER_PORT = 1883
-TOPIC = "engine/+/telemetry"
-
-
-init_db()
 
 repository = TelemetryRepository()
 service = TelemetryService(repository)
@@ -27,12 +21,13 @@ def on_connect(
 ):
     print("Connected to MQTT broker")
 
-    client.subscribe(TOPIC)
+    client.subscribe(MQTT_TOPIC)
 
-    print(f"Subscribed to: {TOPIC}")
+    print(f"Subscribed to: {MQTT_TOPIC}")
 
 
 def on_message(client, userdata, msg):
+
     try:
         payload = msg.payload.decode("utf-8")
         telemetry = TelemetryCreate.model_validate_json(payload)
@@ -47,7 +42,11 @@ def on_message(client, userdata, msg):
 
     try:
         with SessionLocal.begin() as session:
-            stored = service.process(session, telemetry)
+            stored = service.process(
+                session,
+                telemetry,
+                msg.topic,
+            )
 
         if stored:
             print(f"Telemetry stored: {telemetry.engine_id}")

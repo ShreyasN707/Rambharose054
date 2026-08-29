@@ -2,8 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
-from models import Telemetry
-
+from models import IngestionEvent, Telemetry
 
 class TelemetryRepository:
 
@@ -14,6 +13,7 @@ class TelemetryRepository:
     ) -> bool:
         statement = insert(Telemetry).values(
             time=telemetry.time,
+            received_at=telemetry.received_at,
             engine_id=telemetry.engine_id,
             mission_id=telemetry.mission_id,
             rpm=telemetry.rpm,
@@ -32,9 +32,11 @@ class TelemetryRepository:
             constraint="uq_telemetry_event",
         )
 
-        result = session.execute(statement)
+        result = session.execute(
+            statement.returning(Telemetry.id)
+        )
 
-        return result.rowcount == 1
+        return result.scalar_one_or_none() is not None
 
     def get_by_mission(
         self,
@@ -48,3 +50,106 @@ class TelemetryRepository:
         )
 
         return list(session.scalars(statement))
+    
+    def save_ingestion_event(
+        self,
+        session: Session,
+        event: IngestionEvent,
+    ) -> IngestionEvent:
+        session.add(event)
+        session.flush()
+
+        return event
+    
+    def get_latest_timestamp(
+        self,
+        session: Session,
+        engine_id: str,
+        mission_id: str,
+    ):
+        statement = (
+            select(Telemetry.time)
+            .where(
+                Telemetry.engine_id == engine_id,
+                Telemetry.mission_id == mission_id,
+            )
+            .order_by(Telemetry.time.desc())
+            .limit(1)
+        )
+
+        return session.scalar(statement)
+    
+    def exists(
+        self,
+        session: Session,
+        engine_id: str,
+        mission_id: str,
+        timestamp,
+    ) -> bool:
+        statement = (
+            select(Telemetry.id)
+            .where(
+                Telemetry.engine_id == engine_id,
+                Telemetry.mission_id == mission_id,
+                Telemetry.time == timestamp,
+            )
+            .limit(1)
+        )
+
+        return session.scalar(statement) is not None
+    
+    def get_ingestion_events(
+        self,
+        session: Session,
+        engine_id: str,
+        mission_id: str,
+    ) -> list[IngestionEvent]:
+        statement = (
+            select(IngestionEvent)
+            .where(
+                IngestionEvent.engine_id == engine_id,
+                IngestionEvent.mission_id == mission_id,
+            )
+            .order_by(IngestionEvent.event_time)
+        )
+
+        return list(session.scalars(statement))
+    
+    def get_by_time_range(
+        self,
+        session: Session,
+        engine_id: str,
+        mission_id: str,
+        start_time,
+        end_time,
+    ) -> list[Telemetry]:
+        statement = (
+            select(Telemetry)
+            .where(
+                Telemetry.engine_id == engine_id,
+                Telemetry.mission_id == mission_id,
+                Telemetry.time >= start_time,
+                Telemetry.time <= end_time,
+            )
+            .order_by(Telemetry.time)
+        )
+
+        return list(session.scalars(statement))
+    
+    def get_latest(
+        self,
+        session: Session,
+        engine_id: str,
+        mission_id: str,
+    ) -> Telemetry | None:
+        statement = (
+            select(Telemetry)
+            .where(
+                Telemetry.engine_id == engine_id,
+                Telemetry.mission_id == mission_id,
+            )
+            .order_by(Telemetry.time.desc())
+            .limit(1)
+        )
+
+        return session.scalar(statement)
