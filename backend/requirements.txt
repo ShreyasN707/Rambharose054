@@ -1,1 +1,7 @@
+fastapi
+uvicorn[standard]
 paho-mqtt
+pydantic
+sqlalchemy
+psycopg[binary]
+python-dotenv
