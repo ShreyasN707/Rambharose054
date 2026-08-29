@@ -1,8 +1,7 @@
 import paho.mqtt.client as mqtt
 from pydantic import ValidationError
 
-from database import SessionLocal, engine
-from models import Base
+from database import SessionLocal, init_db
 from repository import TelemetryRepository
 from schemas import TelemetryCreate
 from service import TelemetryService
@@ -13,9 +12,7 @@ BROKER_PORT = 1883
 TOPIC = "engine/+/telemetry"
 
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
-
+init_db()
 
 repository = TelemetryRepository()
 service = TelemetryService(repository)
@@ -50,9 +47,15 @@ def on_message(client, userdata, msg):
 
     try:
         with SessionLocal.begin() as session:
-            service.process(session, telemetry)
+            stored = service.process(session, telemetry)
 
-        print(f"Telemetry stored: {telemetry.engine_id}")
+        if stored:
+            print(f"Telemetry stored: {telemetry.engine_id}")
+        else:
+            print(f"Duplicate telemetry ignored: {telemetry.engine_id}")
+
+    except ValueError as error:
+        print(f"Invalid telemetry: {error}")
 
     except Exception as error:
         print(f"Telemetry processing failed: {error}")
@@ -78,16 +81,6 @@ def main():
     finally:
         client.disconnect()
 
-try:
-    stored = service.process(session, telemetry)
-
-    if stored:
-        print(f"Telemetry stored: {telemetry.engine_id}")
-    else:
-        print(f"Duplicate telemetry ignored: {telemetry.engine_id}")
-
-except Exception as error:
-    print(f"Telemetry processing failed: {error}")
 
 if __name__ == "__main__":
     main()

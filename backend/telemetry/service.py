@@ -1,8 +1,13 @@
+from datetime import datetime, timezone
+
 from sqlalchemy.orm import Session
 
 from models import Telemetry
 from repository import TelemetryRepository
 from schemas import TelemetryCreate
+
+
+MAX_FUTURE_SECONDS = 30
 
 
 class TelemetryService:
@@ -15,8 +20,22 @@ class TelemetryService:
         session: Session,
         data: TelemetryCreate,
     ) -> bool:
+
+        now = datetime.now(timezone.utc)
+
+        if data.timestamp > now:
+            future_seconds = (
+                data.timestamp - now
+            ).total_seconds()
+
+            if future_seconds > MAX_FUTURE_SECONDS:
+                raise ValueError(
+                    "telemetry timestamp is too far in the future"
+                )
+
         telemetry = Telemetry(
             time=data.timestamp,
+            received_at=now,
             engine_id=data.engine_id,
             mission_id=data.mission_id,
             rpm=data.rpm,
