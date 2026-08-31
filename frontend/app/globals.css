@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  --color-panel-bg: #0B0E14;
+  --color-panel-card: #121721;
+  --color-panel-border: #1E2638;
+  --color-panel-hover: #1A202C;
+
+  --color-engine-blue: #1E68D8;
+  --color-engine-blue-muted: rgba(30, 104, 216, 0.15);
+  --color-engine-green: #10B981;
+  --color-engine-amber: #F59E0B;
+  --color-engine-red: #EF4444;
+
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+@layer base {
+  body {
+    background-color: #080A0F;
+    color: #CBD5E1;
+    font-family: var(--font-mono);
+    overflow: hidden;
+    height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Custom engineering scrollbars */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0E14;
+}
+::-webkit-scrollbar-thumb {
+  background: #1E2638;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2D3748;
+}
