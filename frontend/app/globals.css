@@ -1,43 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;500;600;700&family=Public+Sans:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-panel-bg: #0B0E14;
-  --color-panel-card: #121721;
-  --color-panel-border: #1E2638;
-  --color-panel-hover: #1A202C;
+  --font-mono: "Martian Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
 
-  --color-engine-blue: #1E68D8;
-  --color-engine-blue-muted: rgba(30, 104, 216, 0.15);
-  --color-engine-green: #10B981;
-  --color-engine-amber: #F59E0B;
-  --color-engine-red: #EF4444;
+  /* Surfaces — cool gunmetal, not pure black, not slate-900 */
+  --color-bg: #0A0C10;
+  --color-panel: #12151B;
+  --color-panel-raised: #181C24;
+  --color-border: #232830;
+  --color-border-strong: #2E3542;
 
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  /* Text */
+  --color-text: #DADFE6;
+  --color-text-muted: #6A7280;
+  --color-text-dim: #454C57;
+
+  /* Instrument status colors — desaturated, annunciator-panel register.
+     Deliberately NOT Tailwind's emerald-400/red-500/amber-400 defaults. */
+  --color-nominal: #3FAE72;   /* healthy / running / in-range */
+  --color-caution: #E0A83E;   /* degraded / approaching limit */
+  --color-critical: #D6543F;  /* fault / out of range */
+  --color-data: #4C8FD1;      /* live readouts, active nav, focus */
 }
 
 @layer base {
+  html,
   body {
-    background-color: #080A0F;
-    color: #CBD5E1;
-    font-family: var(--font-mono);
-    overflow: hidden;
-    height: 100vh;
+    height: 100%;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
 }
 
-/* Custom engineering scrollbars */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 8px;
+  height: 8px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #0B0E14;
+  background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #1E2638;
-  border-radius: 2px;
+  background: var(--color-border-strong);
+  border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #2D3748;
+  background: var(--color-text-dim);
 }
