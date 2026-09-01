@@ -33,7 +33,7 @@ services:
 
     build:
       context: ./backend
-      dockerfile: telemetry/Dockerfile
+      dockerfile: Dockerfile
 
     environment:
       MQTT_BROKER_HOST: mosquitto

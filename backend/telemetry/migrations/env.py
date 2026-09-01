@@ -3,6 +3,7 @@ from logging.config import fileConfig
 from alembic import context
 
 from telemetry.models import Base
+from twin.models import HealthSnapshot
 from telemetry.database import engine
 
 config = context.config

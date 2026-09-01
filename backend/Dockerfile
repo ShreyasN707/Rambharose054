@@ -7,6 +7,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY alembic.ini .
-COPY telemetry ./telemetry
 
-CMD ["sh", "-c", "cd /app/telemetry && python -u app.py"]
+COPY telemetry ./telemetry
+COPY twin ./twin
+
+ENV PYTHONPATH=/app:/app/telemetry
+CMD ["python", "-u", "-m", "telemetry.app"]

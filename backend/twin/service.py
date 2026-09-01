@@ -1,21 +1,81 @@
+from datetime import datetime
+
+from sqlalchemy.orm import Session
+
+from telemetry.repository import TelemetryRepository
+from telemetry.schemas import TelemetryCreate
+
+from twin.ml import MLPredictor
+from twin.models import HealthSnapshot
+from twin.repository import HealthSnapshotRepository
 from twin.schemas import (
     DigitalTwinState,
     HealthState,
     MLPrediction,
 )
-from telemetry.schemas import TelemetryCreate
-from twin.models import HealthSnapshot
-from twin.repository import HealthSnapshotRepository
-from datetime import datetime
-from sqlalchemy.orm import Session
 
 class DigitalTwinService:
-
+    
     def __init__(
         self,
         repository: HealthSnapshotRepository,
+        telemetry_repository: TelemetryRepository,
+        predictor: MLPredictor,
     ):
         self.repository = repository
+        self.telemetry_repository = telemetry_repository
+        self.predictor = predictor
+        
+        
+    def process(
+        self,
+        session: Session,
+        telemetry: TelemetryCreate,
+    ) -> DigitalTwinState | None:
+
+        telemetry_records = (
+            self.telemetry_repository.get_latest_window(
+                session,
+                telemetry.engine_id,
+                telemetry.mission_id,
+            )
+        )
+
+        if len(telemetry_records) < 60:
+            return None
+
+        telemetry_window = [
+            {
+                "rpm": item.rpm,
+                "cht": item.cht,
+                "egt": item.egt,
+                "oil_pressure": item.oil_pressure,
+                "oil_temperature": item.oil_temperature,
+                "fuel_flow": item.fuel_flow,
+                "vibration": item.vibration,
+                "battery_voltage": item.battery_voltage,
+                "alternator_current": item.alternator_current,
+                "injection_timing": item.injection_timing,
+            }
+            for item in telemetry_records
+        ]
+
+        prediction = self.predictor.predict(
+            telemetry_window,
+        )
+
+        state = self.build_state(
+            telemetry,
+            prediction,
+        )
+
+        self.save_health_snapshot(
+            session,
+            state,
+            telemetry.timestamp,
+        )
+
+        return state
         
     def calculate_health(
         self,

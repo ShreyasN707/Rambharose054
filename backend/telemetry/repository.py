@@ -61,6 +61,27 @@ class TelemetryRepository:
 
         return event
     
+    def get_latest_window(
+        self,
+        session: Session,
+        engine_id: str,
+        mission_id: str,
+        limit: int = 60,
+    ) -> list[Telemetry]:
+        statement = (
+            select(Telemetry)
+            .where(
+                Telemetry.engine_id == engine_id,
+                Telemetry.mission_id == mission_id,
+            )
+            .order_by(Telemetry.time.desc())
+            .limit(limit)
+        )
+
+        telemetry = list(session.scalars(statement))
+
+        return list(reversed(telemetry))
+    
     def get_latest_timestamp(
         self,
         session: Session,

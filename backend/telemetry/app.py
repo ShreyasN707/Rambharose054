@@ -1,15 +1,21 @@
 import paho.mqtt.client as mqtt
 from pydantic import ValidationError
 
+from config import BROKER_HOST, BROKER_PORT, MQTT_TOPIC
 from database import SessionLocal
 from repository import TelemetryRepository
 from schemas import TelemetryCreate
 from service import TelemetryService
-from config import BROKER_HOST, BROKER_PORT, MQTT_TOPIC
 
+from twin.factory import create_digital_twin_service
+from twin.ml_predictor import ModelPredictor
 
 repository = TelemetryRepository()
 service = TelemetryService(repository)
+
+twin_service = create_digital_twin_service(
+    ModelPredictor()
+)
 
 
 def on_connect(
@@ -27,7 +33,6 @@ def on_connect(
 
 
 def on_message(client, userdata, msg):
-
     try:
         payload = msg.payload.decode("utf-8")
         telemetry = TelemetryCreate.model_validate_json(payload)
@@ -48,10 +53,29 @@ def on_message(client, userdata, msg):
                 msg.topic,
             )
 
-        if stored:
-            print(f"Telemetry stored: {telemetry.engine_id}")
-        else:
-            print(f"Duplicate telemetry ignored: {telemetry.engine_id}")
+            if stored:
+                print(
+                    f"Telemetry stored: "
+                    f"{telemetry.engine_id}"
+                )
+
+                state = twin_service.process(
+                    session,
+                    telemetry,
+                )
+
+                if state:
+                    print(
+                        f"Twin state: "
+                        f"{state.operating_state} "
+                        f"health={state.health.overall}"
+                    )
+
+            else:
+                print(
+                    f"Duplicate telemetry ignored: "
+                    f"{telemetry.engine_id}"
+                )
 
     except ValueError as error:
         print(f"Invalid telemetry: {error}")
