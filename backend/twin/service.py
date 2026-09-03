@@ -27,6 +27,7 @@ class DigitalTwinService:
         self.telemetry_repository = telemetry_repository
         self.predictor = predictor
 
+
     def process(
         self,
         session: Session,
@@ -83,15 +84,13 @@ class DigitalTwinService:
         combustion = self._combustion_health(telemetry)
         lubrication = self._lubrication_health(telemetry)
         mechanical = self._mechanical_health(telemetry)
-        electrical = self._electrical_health(telemetry)
 
         overall = (
             thermal
             + combustion
             + lubrication
             + mechanical
-            + electrical
-        ) / 5
+        ) / 4
 
         return HealthState(
             overall=round(overall, 2),
@@ -99,7 +98,6 @@ class DigitalTwinService:
             combustion=combustion,
             lubrication=lubrication,
             mechanical=mechanical,
-            electrical=electrical,
         )
 
     def save_health_snapshot(
@@ -118,7 +116,6 @@ class DigitalTwinService:
             combustion=state.health.combustion,
             lubrication=state.health.lubrication,
             mechanical=state.health.mechanical,
-            electrical=state.health.electrical,
         )
 
         return self.repository.save(
@@ -190,17 +187,6 @@ class DigitalTwinService:
         return self._score(
             100 - vibration_penalty
         )
-
-    def _electrical_health(
-        self,
-        telemetry: TelemetryCreate,
-    ) -> float:
-
-        # Electrical telemetry is currently not provided
-        # by the simulator, so do not penalize engine health
-        # based on unavailable electrical measurements.
-
-        return 100.0
 
     @staticmethod
     def _score(value: float) -> float:

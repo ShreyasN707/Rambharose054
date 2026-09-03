@@ -74,9 +74,6 @@ def latest_telemetry(
         oil_temperature=row.oil_temperature,
         fuel_flow=row.fuel_flow,
         vibration=row.vibration,
-        battery_voltage=row.battery_voltage,
-        alternator_current=row.alternator_current,
-        injection_timing=row.injection_timing,
     )
 
 
@@ -105,7 +102,6 @@ def engine_health(
         combustion=latest_snapshot.combustion,
         lubrication=latest_snapshot.lubrication,
         mechanical=latest_snapshot.mechanical,
-        electrical=latest_snapshot.electrical,
     )
 
     window = telemetry_repo.get_latest_window(session, engine_id, mission_id)
@@ -123,9 +119,6 @@ def engine_health(
                 "oil_temperature": t.oil_temperature,
                 "fuel_flow": t.fuel_flow,
                 "vibration": t.vibration,
-                "battery_voltage": t.battery_voltage,
-                "alternator_current": t.alternator_current,
-                "injection_timing": t.injection_timing,
             }
             for t in window
         ]
@@ -180,7 +173,6 @@ def health_history(
                     combustion=s.combustion,
                     lubrication=s.lubrication,
                     mechanical=s.mechanical,
-                    electrical=s.electrical,
                 ),
             )
             for s in snapshots

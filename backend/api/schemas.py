@@ -18,9 +18,6 @@ class TelemetryResponse(BaseModel):
     oil_temperature: float
     fuel_flow: float
     vibration: float
-    battery_voltage: float
-    alternator_current: float
-    injection_timing: float
 
 
 # ---------------------------------------------------------------------------
@@ -34,7 +31,6 @@ class HealthResponse(BaseModel):
     combustion: float
     lubrication: float
     mechanical: float
-    electrical: float
 
 
 class PredictionResponse(BaseModel):
