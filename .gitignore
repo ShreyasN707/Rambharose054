@@ -27,3 +27,4 @@ out/
 *.sublime-workspace
 *.sublime-projectsimulink/engine_digital_twin_dataset.csv
 simulink/engine_digital_twin_dataset.csv
+simulink/fault_command.txt

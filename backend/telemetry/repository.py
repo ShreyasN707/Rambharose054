@@ -12,6 +12,7 @@ class TelemetryRepository:
         telemetry: Telemetry,
     ) -> bool:
         statement = insert(Telemetry).values(
+            torque=telemetry.torque,
             time=telemetry.time,
             received_at=telemetry.received_at,
             engine_id=telemetry.engine_id,

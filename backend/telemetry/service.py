@@ -72,6 +72,7 @@ class TelemetryService:
             received_at=now,
             engine_id=data.engine_id,
             mission_id=data.mission_id,
+            torque=data.torque,
             rpm=data.rpm,
             cht=data.cht,
             egt=data.egt,

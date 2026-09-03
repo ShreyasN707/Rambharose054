@@ -51,6 +51,7 @@ class DigitalTwinService:
                 "cht": item.cht,
                 "egt": item.egt,
                 "oil_pressure": item.oil_pressure,
+                "torque": item.torque,
                 "oil_temperature": item.oil_temperature,
                 "fuel_flow": item.fuel_flow,
                 "vibration": item.vibration,

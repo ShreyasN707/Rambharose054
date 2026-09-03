@@ -60,6 +60,7 @@ class Telemetry(Base):
     )
 
     rpm: Mapped[float] = mapped_column(Float, nullable=False)
+    torque: Mapped[float] = mapped_column(Float, nullable=False)
     cht: Mapped[float] = mapped_column(Float, nullable=False)
     egt: Mapped[float] = mapped_column(Float, nullable=False)
 

@@ -12,6 +12,7 @@ class TelemetryCreate(BaseModel):
     mission_id: str
 
     rpm: float
+    torque: float
     cht: float
     egt: float
 
