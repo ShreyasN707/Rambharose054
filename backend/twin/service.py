@@ -14,8 +14,9 @@ from twin.schemas import (
     MLPrediction,
 )
 
+
 class DigitalTwinService:
-    
+
     def __init__(
         self,
         repository: HealthSnapshotRepository,
@@ -25,8 +26,7 @@ class DigitalTwinService:
         self.repository = repository
         self.telemetry_repository = telemetry_repository
         self.predictor = predictor
-        
-        
+
     def process(
         self,
         session: Session,
@@ -53,9 +53,6 @@ class DigitalTwinService:
                 "oil_temperature": item.oil_temperature,
                 "fuel_flow": item.fuel_flow,
                 "vibration": item.vibration,
-                "battery_voltage": item.battery_voltage,
-                "alternator_current": item.alternator_current,
-                "injection_timing": item.injection_timing,
             }
             for item in telemetry_records
         ]
@@ -76,7 +73,7 @@ class DigitalTwinService:
         )
 
         return state
-        
+
     def calculate_health(
         self,
         telemetry: TelemetryCreate,
@@ -128,20 +125,31 @@ class DigitalTwinService:
             session,
             snapshot,
         )
-        
+
     def _thermal_health(
         self,
         telemetry: TelemetryCreate,
     ) -> float:
-        cht_penalty = max(0, telemetry.cht - 170) * 0.5
-        egt_penalty = max(0, telemetry.egt - 680) * 0.2
 
-        return self._score(100 - cht_penalty - egt_penalty)
+        cht_penalty = max(
+            0,
+            telemetry.cht - 170,
+        ) * 0.5
+
+        egt_penalty = max(
+            0,
+            telemetry.egt - 680,
+        ) * 0.2
+
+        return self._score(
+            100 - cht_penalty - egt_penalty
+        )
 
     def _combustion_health(
         self,
         telemetry: TelemetryCreate,
     ) -> float:
+
         return self._score(
             100
             - abs(telemetry.rpm - 2500) * 0.02
@@ -152,6 +160,7 @@ class DigitalTwinService:
         self,
         telemetry: TelemetryCreate,
     ) -> float:
+
         pressure_penalty = max(
             0,
             50 - telemetry.oil_pressure,
@@ -163,37 +172,44 @@ class DigitalTwinService:
         ) * 0.5
 
         return self._score(
-            100 - pressure_penalty - temperature_penalty
+            100
+            - pressure_penalty
+            - temperature_penalty
         )
 
     def _mechanical_health(
         self,
         telemetry: TelemetryCreate,
     ) -> float:
+
         vibration_penalty = max(
             0,
             telemetry.vibration - 0.3,
         ) * 100
 
-        return self._score(100 - vibration_penalty)
+        return self._score(
+            100 - vibration_penalty
+        )
 
     def _electrical_health(
         self,
         telemetry: TelemetryCreate,
     ) -> float:
-        voltage_penalty = abs(
-            telemetry.battery_voltage - 28
-        ) * 3
 
-        return self._score(100 - voltage_penalty)
+        # Electrical telemetry is currently not provided
+        # by the simulator, so do not penalize engine health
+        # based on unavailable electrical measurements.
+
+        return 100.0
 
     @staticmethod
     def _score(value: float) -> float:
+
         return round(
             max(0, min(100, value)),
             2,
         )
-        
+
     def build_state(
         self,
         telemetry: TelemetryCreate,
