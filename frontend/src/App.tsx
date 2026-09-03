@@ -7,7 +7,12 @@ import {
     ArrowUp, ArrowDown, Minus, AlertTriangle, Wrench, RefreshCw,
 } from "lucide-react";
 import { useEngineData } from "./hooks/useEngineData";
-import { getMissionReplay } from "./services/api";
+import {
+    getMissionReplay,
+    startSimulation,
+    stopSimulation,
+    injectFault,
+} from "./services/api";
 
 const FONTS = `
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
@@ -435,7 +440,8 @@ function HealthSparkline({ data }: { data: number[] }) {
         </svg>
     );
 }
-function HudSection({
+
+function HudSection({
     engineData,
 }: {
     engineData: ReturnType<typeof useEngineData>;
@@ -443,6 +449,12 @@ function HealthSparkline({ data }: { data: number[] }) {
     const time = useClock();
     const [replayStatus, setReplayStatus] = useState<string | null>(null);
     const [isFetchingReplay, setIsFetchingReplay] = useState<boolean>(false);
+    const [simulationStatus, setSimulationStatus] = useState<
+        "stopped" | "starting" | "running" | "stopping"
+    >("stopped");
+
+    const [isInjectingFault, setIsInjectingFault] = useState(false);
+    const [controlStatus, setControlStatus] = useState<string | null>(null);
 
     const handleFetchReplay = async () => {
         setIsFetchingReplay(true);
@@ -454,6 +466,63 @@ function HealthSparkline({ data }: { data: number[] }) {
             setReplayStatus(`REPLAY: ${err.message}`);
         } finally {
             setIsFetchingReplay(false);
+        }
+    };
+
+    const handleStartSimulation = async () => {
+        setSimulationStatus("starting");
+        setControlStatus(null);
+
+        try {
+            const result = await startSimulation(engineData.selectedEngine);
+
+            setSimulationStatus("running");
+            setControlStatus(
+                result.fault_id === 0
+                    ? "SIMULATION STARTED — ENGINE HEALTHY"
+                    : "SIMULATION STARTED"
+            );
+        } catch (err: any) {
+            setSimulationStatus("stopped");
+            setControlStatus(`START FAILED: ${err.message}`);
+        }
+    };
+
+    const handleStopSimulation = async () => {
+        setSimulationStatus("stopping");
+        setControlStatus(null);
+
+        try {
+            await stopSimulation(engineData.selectedEngine);
+
+            setSimulationStatus("stopped");
+            setControlStatus("SIMULATION STOPPED");
+        } catch (err: any) {
+            setSimulationStatus("running");
+            setControlStatus(`STOP FAILED: ${err.message}`);
+        }
+    };
+
+    const handleInjectFault = async (faultId: number) => {
+        setIsInjectingFault(true);
+        setControlStatus(null);
+
+        try {
+            await injectFault(
+                engineData.selectedEngine,
+                faultId
+            );
+
+            const label =
+                faultId === 0
+                    ? "HEALTHY"
+                    : `FAULT ${faultId}`;
+
+            setControlStatus(`FAULT COMMAND SENT — ${label}`);
+        } catch (err: any) {
+            setControlStatus(`FAULT FAILED: ${err.message}`);
+        } finally {
+            setIsInjectingFault(false);
         }
     };
 
@@ -576,6 +645,149 @@ function HealthSparkline({ data }: { data: number[] }) {
                     </div>
                 </div>
 
+                <div
+                    className="mb-6 p-4"
+                    style={{
+                        border: "1px solid #2a2a2a",
+                        background: "#0e0e0e",
+                    }}
+                >
+                    <div
+                        className="flex items-center justify-between mb-3"
+                        style={{
+                            fontFamily: "'JetBrains Mono', monospace",
+                        }}
+                    >
+                        <span className="text-xs" style={{ color: "#888" }}>
+                            SIMULATION CONTROL
+                        </span>
+
+                        <span
+                            className="text-[10px]"
+                            style={{
+                                color:
+                                    simulationStatus === "running"
+                                        ? "#7fe0a0"
+                                        : simulationStatus === "starting" ||
+                                        simulationStatus === "stopping"
+                                        ? "#e8c34a"
+                                        : "#777",
+                            }}
+                        >
+                            ● {simulationStatus.toUpperCase()}
+                        </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            onClick={handleStartSimulation}
+                            disabled={
+                                simulationStatus === "running" ||
+                                simulationStatus === "starting"
+                            }
+                            className="px-3 py-2 text-xs font-semibold transition"
+                            style={{
+                                background:
+                                    simulationStatus === "running"
+                                        ? "#222"
+                                        : "#C6FF3D",
+                                color:
+                                    simulationStatus === "running"
+                                        ? "#666"
+                                        : "#050505",
+                                cursor:
+                                    simulationStatus === "running"
+                                        ? "not-allowed"
+                                        : "pointer",
+                            }}
+                        >
+                            {simulationStatus === "starting"
+                                ? "STARTING..."
+                                : "START SIMULATION"}
+                        </button>
+
+                        <button
+                            onClick={handleStopSimulation}
+                            disabled={
+                                simulationStatus === "stopped" ||
+                                simulationStatus === "stopping"
+                            }
+                            className="px-3 py-2 text-xs font-semibold transition"
+                            style={{
+                                border: "1px solid #444",
+                                background: "#151515",
+                                color: "#ccc",
+                                cursor:
+                                    simulationStatus === "stopped"
+                                        ? "not-allowed"
+                                        : "pointer",
+                            }}
+                        >
+                            {simulationStatus === "stopping"
+                                ? "STOPPING..."
+                                : "STOP SIMULATION"}
+                        </button>
+                    </div>
+
+                    <div
+                        className="mt-4 text-[10px]"
+                        style={{
+                            color: "#666",
+                            fontFamily: "'JetBrains Mono', monospace",
+                        }}
+                    >
+                        FAULT INJECTION
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mt-2">
+                        {[0, 1, 2, 3, 4].map((faultId) => (
+                            <button
+                                key={faultId}
+                                onClick={() => handleInjectFault(faultId)}
+                                disabled={
+                                    isInjectingFault ||
+                                    simulationStatus !== "running"
+                                }
+                                className="px-3 py-1.5 text-[10px] transition"
+                                style={{
+                                    border: "1px solid #333",
+                                    background:
+                                        faultId === 0
+                                            ? "#151515"
+                                            : "rgba(232,84,63,0.08)",
+                                    color:
+                                        faultId === 0
+                                            ? "#7fe0a0"
+                                            : "#e8543f",
+                                    cursor:
+                                        simulationStatus !== "running"
+                                            ? "not-allowed"
+                                            : "pointer",
+                                    opacity:
+                                        simulationStatus !== "running"
+                                            ? 0.4
+                                            : 1,
+                                }}
+                            >
+                                {faultId === 0
+                                    ? "HEALTHY"
+                                    : `FAULT ${faultId}`}
+                            </button>
+                        ))}
+                    </div>
+
+                    {controlStatus && (
+                        <div
+                            className="mt-3 text-[10px]"
+                            style={{
+                                color: "#7fd4ff",
+                                fontFamily: "'JetBrains Mono', monospace",
+                            }}
+                        >
+                            {controlStatus}
+                        </div>
+                    )}
+                </div>
                 {replayStatus && (
                     <div className="mb-6 px-4 py-2 text-xs rounded" style={{ background: "rgba(127,212,255,0.1)", border: "1px solid #7fd4ff", color: "#7fd4ff", fontFamily: "'JetBrains Mono', monospace" }}>
                         {replayStatus}
