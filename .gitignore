@@ -10,6 +10,8 @@ __pycache__/
 
 # Node / Next.js
 node_modules/
+dist/
+.vite/
 .next/
 out/
 *.tsbuildinfo
