@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import type { LucideIcon } from "lucide-react";
 import DroneOverviewSection from "./DroneOverview";
 import {
-    Radio, Activity, GitBranch, ArrowUpRight, Circle,
+    Radio, Activity, GitBranch, ArrowUpRight, Circle, Wifi,
     Gauge, Thermometer, Droplet, Timer,
     ArrowUp, ArrowDown, Minus, AlertTriangle, Wrench,
 } from "lucide-react";
@@ -371,14 +371,6 @@ function CyberBrutalSection({ onViewTwin }: { onViewTwin: () => void }) {
     );
 }
 
-function HexTile({ filled }: { filled: boolean }) {
-    return (
-        <svg width="18" height="20" viewBox="0 0 18 20">
-            <polygon points="9,0 18,5 18,15 9,20 0,15 0,5" fill={filled ? "#ffffff" : "none"} stroke="#666" strokeWidth="1" />
-        </svg>
-    );
-}
-
 function TrendArrow({ trend }: { trend: string }) {
     if (trend === "up") return <ArrowUp size={12} color="#e8543f" />;
     if (trend === "down") return <ArrowDown size={12} color="#7fd4ff" />;
@@ -416,20 +408,80 @@ interface SensorItem {
     trend: string;
 }
 
+function HealthSparkline({ data }: { data: number[] }) {
+    const min = Math.min(...data) - 5;
+    const max = Math.max(...data) + 5;
+    const w = 280;
+    const h = 44;
+    const points = data.map((val, idx) => {
+        const x = (idx / (data.length - 1)) * w;
+        const y = h - ((val - min) / (max - min)) * (h - 8) - 4;
+        return `${x},${y}`;
+    }).join(" ");
+
+    return (
+        <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-11 overflow-visible">
+            <polyline points={points} fill="none" stroke="#e8543f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            {data.map((val, idx) => {
+                const x = (idx / (data.length - 1)) * w;
+                const y = h - ((val - min) / (max - min)) * (h - 8) - 4;
+                if (idx === 0 || idx === data.length - 1) {
+                    return <circle key={idx} cx={x} cy={y} r="3" fill="#e8543f" />;
+                }
+                return null;
+            })}
+        </svg>
+    );
+}
+
 function HudSection() {
     const time = useClock();
 
     const engine = {
+        engineId: "ENG-TEST",
+        missionId: "MISSION-1",
+        operatingState: "WARNING",
+        sampleCount: 300,
+        startTime: "03:20:00Z",
+        endTime: "03:25:00Z",
         health: 82,
         healthLabel: "GOOD",
-        status: "WARNING",
         fault: "Misfire detected",
         confidence: 94,
         rul: "18.4 hrs",
+        anomalyScore: "0.28",
         trend: "DECLINING",
         subsystem: "COMBUSTION",
         action: "Inspect injector / combustion system",
     };
+
+    const subsystems = [
+        { name: "THERMAL", score: 97.5, status: "ok" },
+        { name: "COMBUSTION", score: 76.2, status: "warn" },
+        { name: "LUBRICATION", score: 94.8, status: "ok" },
+        { name: "MECHANICAL", score: 88.0, status: "ok" },
+        { name: "ELECTRICAL", score: 99.4, status: "ok" },
+    ];
+
+    const alerts = [
+        {
+            severity: "DEGRADED",
+            message: "Combustion efficiency dropped below 80%",
+            source: "operating_state",
+            timestamp: "03:25:00Z",
+        },
+        {
+            severity: "WARNING",
+            message: "Ingestion event: TELEMETRY_GAP (2 dropped packets)",
+            source: "ingestion_event",
+            timestamp: "03:26:00Z",
+        },
+    ];
+
+    const recentHealthHistory = [
+        99.1, 98.8, 98.4, 98.5, 97.9, 96.5, 95.0, 94.2, 92.8, 91.0,
+        89.5, 88.2, 87.0, 86.1, 85.5, 84.8, 83.9, 83.0, 82.4, 82.0
+    ];
 
     const indicators = [
         { label: "EGT", trend: "up" },
@@ -457,105 +509,208 @@ function HudSection() {
             />
 
             <div className="relative z-10 px-6 md:px-10 py-16 md:py-20">
-                <div className="flex items-center justify-between mb-12 flex-wrap gap-4">
+                <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
                     <div>
                         <div className="text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#777" }}>
-                            /03 &nbsp; ENGINE STATUS MESSAGE
+                            /03 &nbsp; ENGINE STATUS &amp; REPLAY DIAGNOSTICS
                         </div>
                         <h2 className="mt-2 font-semibold" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}>
                             Live diagnostic readout
                         </h2>
                     </div>
-                    <div className="flex gap-1">
-                        {[...Array(9)].map((_, i) => <HexTile key={i} filled={i === 4} />)}
+                    <div className="flex items-center gap-3 flex-wrap text-xs" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                        <span className="px-2.5 py-1 rounded" style={{ border: "1px solid #333", background: "#151515", color: "#aaa" }}>
+                            ENGINE: <span style={{ color: "#fff" }}>{engine.engineId}</span>
+                        </span>
+                        <span className="px-2.5 py-1 rounded" style={{ border: "1px solid #333", background: "#151515", color: "#aaa" }}>
+                            MISSION: <span style={{ color: "#7fd4ff" }}>{engine.missionId}</span>
+                        </span>
+                        <span className="px-2.5 py-1 rounded" style={{ border: "1px solid #333", background: "#151515", color: "#aaa" }}>
+                            SAMPLES: <span style={{ color: "#7fe0a0" }}>{engine.sampleCount} (WARMED UP &ge; 60)</span>
+                        </span>
+                        <span className="px-2.5 py-1 rounded" style={{ border: "1px solid #e8c34a", background: "rgba(232,195,74,0.1)", color: "#e8c34a" }}>
+                            STATE: {engine.operatingState}
+                        </span>
                     </div>
                 </div>
 
                 <div className="grid md:grid-cols-5 gap-8">
-                    <div className="md:col-span-2" style={{ border: "1px solid #2a2a2a" }}>
-                        <div className="flex items-center justify-between px-4 py-3 text-xs" style={{ borderBottom: "1px solid #2a2a2a", fontFamily: "'JetBrains Mono', monospace", color: "#888" }}>
-                            <span>UNIT — ENG_01</span>
-                            <span style={{ color: statusColor.warn }}>{engine.status}</span>
-                        </div>
+                    <div className="md:col-span-2 flex flex-col gap-6">
+                        <div style={{ border: "1px solid #2a2a2a", background: "#0e0e0e" }}>
+                            <div className="flex items-center justify-between px-4 py-3 text-xs" style={{ borderBottom: "1px solid #2a2a2a", fontFamily: "'JetBrains Mono', monospace", color: "#888" }}>
+                                <span>UNIT &mdash; {engine.engineId}</span>
+                                <span style={{ color: statusColor.warn }}>{engine.operatingState}</span>
+                            </div>
 
-                        <div className="p-5 flex gap-4 items-center">
-                            <RadialHealth value={engine.health} />
-                            <div className="flex-1">
-                                <div className="font-semibold tracking-tight">{engine.healthLabel}</div>
-                                <div className="text-xs" style={{ color: "#888", fontFamily: "'JetBrains Mono', monospace" }}>
-                                    TREND: {engine.trend}
+                            <div className="p-5 flex gap-4 items-center">
+                                <RadialHealth value={engine.health} />
+                                <div className="flex-1">
+                                    <div className="font-semibold tracking-tight">{engine.healthLabel}</div>
+                                    <div className="text-xs" style={{ color: "#888", fontFamily: "'JetBrains Mono', monospace" }}>
+                                        TREND: {engine.trend}
+                                    </div>
+                                    <div className="mt-3 flex items-center gap-2 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                                        <AlertTriangle size={12} color={statusColor.critical} />
+                                        <span style={{ color: "#fff" }}>{engine.fault}</span>
+                                    </div>
+                                    <div className="text-xs mt-1" style={{ color: "#888", fontFamily: "'JetBrains Mono', monospace" }}>
+                                        CONFIDENCE {engine.confidence}% &bull; ANOMALY {engine.anomalyScore}
+                                    </div>
                                 </div>
-                                <div className="mt-3 flex items-center gap-2 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                    <AlertTriangle size={12} color={statusColor.critical} />
-                                    <span style={{ color: "#fff" }}>{engine.fault}</span>
+                            </div>
+
+                            <div className="px-5 pb-4 grid grid-cols-2 gap-y-2 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#999" }}>
+                                <span>EST. RUL</span><span style={{ color: "#fff" }}>{engine.rul}</span>
+                                <span>SUBSYSTEM</span><span style={{ color: "#fff" }}>{engine.subsystem}</span>
+                                <span>MISSION TIME</span><span style={{ color: "#888" }}>{engine.startTime} &rarr; {engine.endTime}</span>
+                                <span>DATA HEALTH</span><span style={{ color: "#7fe0a0" }}>60+ SAMPLE SYNCED</span>
+                            </div>
+
+                            <div className="px-5 pb-4">
+                                <div className="text-xs mb-1.5" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#777" }}>KEY INDICATORS</div>
+                                <div className="flex flex-wrap gap-3">
+                                    {indicators.map((ind, i) => (
+                                        <span key={i} className="flex items-center gap-1 text-xs px-2 py-1" style={{ border: "1px solid #2a2a2a", fontFamily: "'JetBrains Mono', monospace" }}>
+                                            {ind.label} <TrendArrow trend={ind.trend} />
+                                        </span>
+                                    ))}
                                 </div>
-                                <div className="text-xs mt-1" style={{ color: "#888", fontFamily: "'JetBrains Mono', monospace" }}>
-                                    CONFIDENCE {engine.confidence}%
-                                </div>
+                            </div>
+
+                            <div className="px-5 pb-4 flex items-start gap-2 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#ccc" }}>
+                                <Wrench size={12} className="mt-0.5 shrink-0" color="#C6FF3D" />
+                                <span>{engine.action}</span>
+                            </div>
+
+                            <div className="px-4 py-3 text-xs flex justify-between" style={{ borderTop: "1px solid #2a2a2a", fontFamily: "'JetBrains Mono', monospace", color: "#666" }}>
+                                <span>LAST UPDATED</span>
+                                <span>{pad(time.getHours())}:{pad(time.getMinutes())}:{pad(time.getSeconds())}</span>
                             </div>
                         </div>
 
-                        <div className="px-5 pb-4 grid grid-cols-2 gap-y-2 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#999" }}>
-                            <span>EST. RUL</span><span style={{ color: "#fff" }}>{engine.rul}</span>
-                            <span>SUBSYSTEM</span><span style={{ color: "#fff" }}>{engine.subsystem}</span>
-                        </div>
-
-                        <div className="px-5 pb-4">
-                            <div className="text-xs mb-1.5" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#777" }}>KEY INDICATORS</div>
-                            <div className="flex flex-wrap gap-3">
-                                {indicators.map((ind, i) => (
-                                    <span key={i} className="flex items-center gap-1 text-xs px-2 py-1" style={{ border: "1px solid #2a2a2a", fontFamily: "'JetBrains Mono', monospace" }}>
-                                        {ind.label} <TrendArrow trend={ind.trend} />
-                                    </span>
+                        <div style={{ border: "1px solid #2a2a2a", background: "#0e0e0e" }} className="p-4">
+                            <div className="text-xs mb-3 flex items-center justify-between" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#888" }}>
+                                <span>SUBSYSTEM HEALTH SCORES</span>
+                                <span style={{ color: "#666" }}>/api/engines/{engine.engineId}/health</span>
+                            </div>
+                            <div className="flex flex-col gap-2.5">
+                                {subsystems.map((sub, idx) => (
+                                    <div key={idx} className="text-xs">
+                                        <div className="flex justify-between items-center mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                                            <span style={{ color: "#aaa" }}>{sub.name}</span>
+                                            <span style={{ color: sub.status === "warn" ? "#e8c34a" : "#fff" }}>{sub.score}%</span>
+                                        </div>
+                                        <div className="w-full h-1.5 rounded-full" style={{ background: "#222" }}>
+                                            <div
+                                                className="h-full rounded-full"
+                                                style={{
+                                                    width: `${sub.score}%`,
+                                                    background: sub.status === "warn" ? "#e8c34a" : "#7fe0a0",
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
                         </div>
-
-                        <div className="px-5 pb-4 flex items-start gap-2 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#ccc" }}>
-                            <Wrench size={12} className="mt-0.5 shrink-0" color="#C6FF3D" />
-                            <span>{engine.action}</span>
-                        </div>
-
-                        <div className="px-4 py-3 text-xs flex justify-between" style={{ borderTop: "1px solid #2a2a2a", fontFamily: "'JetBrains Mono', monospace", color: "#666" }}>
-                            <span>LAST UPDATED</span>
-                            <span>{pad(time.getHours())}:{pad(time.getMinutes())}:{pad(time.getSeconds())}</span>
-                        </div>
                     </div>
 
-                    <div className="md:col-span-3" style={{ border: "1px solid #2a2a2a" }}>
-                        <div className="px-4 py-3 text-xs flex items-center gap-2" style={{ borderBottom: "1px solid #2a2a2a", fontFamily: "'JetBrains Mono', monospace", color: "#888" }}>
-                            <Activity size={12} /> TELEMETRY_CHANNELS
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-2">
-                            {sensors.map((s, i) => {
-                                const SensorIcon = s.icon;
-                                return (
-                                    <div
-                                        key={i}
-                                        className="flex items-center gap-3 px-4 py-3"
-                                        style={{
-                                            borderBottom: i < sensors.length - 2 ? "1px solid #1e1e1e" : "none",
-                                            borderRight: i % 2 === 0 ? "1px solid #1e1e1e" : "none",
-                                        }}
-                                    >
-                                        <SensorIcon size={14} color="#888" className="shrink-0" />
-                                        <div className="flex-1 min-w-0">
-                                            <div className="text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#888" }}>{s.label}</div>
-                                            <div className="text-sm font-semibold" style={{ color: "#fff" }}>
-                                                {s.value} <span className="text-xs font-normal" style={{ color: "#888" }}>{s.unit}</span>
+                    <div className="md:col-span-3 flex flex-col gap-6">
+                        <div style={{ border: "1px solid #2a2a2a", background: "#0e0e0e" }}>
+                            <div className="px-4 py-3 text-xs flex items-center justify-between" style={{ borderBottom: "1px solid #2a2a2a", fontFamily: "'JetBrains Mono', monospace", color: "#888" }}>
+                                <div className="flex items-center gap-2">
+                                    <Activity size={12} /> TELEMETRY_CHANNELS
+                                </div>
+                                <span className="text-[10px]" style={{ color: "#666" }}>/api/engines/{engine.engineId}/telemetry/latest</span>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-2">
+                                {sensors.map((s, i) => {
+                                    const SensorIcon = s.icon;
+                                    return (
+                                        <div
+                                            key={i}
+                                            className="flex items-center gap-3 px-4 py-3"
+                                            style={{
+                                                borderBottom: i < sensors.length - 2 ? "1px solid #1e1e1e" : "none",
+                                                borderRight: i % 2 === 0 ? "1px solid #1e1e1e" : "none",
+                                            }}
+                                        >
+                                            <SensorIcon size={14} color="#888" className="shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#888" }}>{s.label}</div>
+                                                <div className="text-sm font-semibold" style={{ color: "#fff" }}>
+                                                    {s.value} <span className="text-xs font-normal" style={{ color: "#888" }}>{s.unit}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col items-center gap-1 shrink-0">
+                                                <TrendArrow trend={s.trend} />
+                                                <span style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor[s.status] }} />
                                             </div>
                                         </div>
-                                        <div className="flex flex-col items-center gap-1 shrink-0">
-                                            <TrendArrow trend={s.trend} />
-                                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor[s.status] }} />
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
+                            </div>
+                            <div className="px-4 py-3 flex items-center justify-between text-xs" style={{ borderTop: "1px solid #2a2a2a", fontFamily: "'JetBrains Mono', monospace", color: "#666" }}>
+                                <span className="flex items-center gap-1.5"><GitBranch size={12} /> 10 channels, 50Hz sample rate</span>
+                                <span>{engine.engineId}_STREAM</span>
+                            </div>
                         </div>
-                        <div className="px-4 py-3 flex items-center justify-between text-xs" style={{ borderTop: "1px solid #2a2a2a", fontFamily: "'JetBrains Mono', monospace", color: "#666" }}>
-                            <span className="flex items-center gap-1.5"><GitBranch size={12} /> 10 channels, 50Hz sample rate</span>
-                            <span>SCN_ENG01</span>
+
+                        <div style={{ border: "1px solid #2a2a2a", background: "#0e0e0e" }} className="p-4">
+                            <div className="flex items-center justify-between mb-3 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                                <div className="flex items-center gap-2" style={{ color: "#888" }}>
+                                    <Activity size={12} color="#e8543f" />
+                                    <span>HEALTH HISTORY TREND &mdash; RECENT 20 SNAPSHOTS</span>
+                                </div>
+                                <span style={{ color: "#e8543f" }}>99.1% &rarr; 82.0%</span>
+                            </div>
+                            <HealthSparkline data={recentHealthHistory} />
+                            <div className="flex justify-between items-center mt-2 text-[10px]" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#666" }}>
+                                <span>03:20:00Z (START)</span>
+                                <span>TREND: SLOW DEGRADATION (COMBUSTION)</span>
+                                <span>03:25:00Z (LATEST)</span>
+                            </div>
+                        </div>
+
+                        <div style={{ border: "1px solid #2a2a2a", background: "#0e0e0e" }} className="p-4">
+                            <div className="flex items-center justify-between mb-3 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#888" }}>
+                                <span>ACTIVE ALERTS &mdash; /api/engines/{engine.engineId}/alerts</span>
+                                <span style={{ color: "#e8c34a" }}>2 DETECTED</span>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                {alerts.map((al, idx) => {
+                                    const isEngine = al.source === "operating_state";
+                                    return (
+                                        <div
+                                            key={idx}
+                                            className="flex items-start justify-between gap-3 p-2.5 rounded text-xs"
+                                            style={{
+                                                border: isEngine ? "1px solid rgba(232,84,63,0.3)" : "1px solid rgba(127,212,255,0.3)",
+                                                background: isEngine ? "rgba(232,84,63,0.06)" : "rgba(127,212,255,0.06)",
+                                            }}
+                                        >
+                                            <div className="flex items-start gap-2.5">
+                                                {isEngine ? (
+                                                    <AlertTriangle size={14} className="shrink-0 mt-0.5" color="#e8543f" />
+                                                ) : (
+                                                    <Wifi size={14} className="shrink-0 mt-0.5" color="#7fd4ff" />
+                                                )}
+                                                <div>
+                                                    <div className="font-semibold text-xs" style={{ color: isEngine ? "#fff" : "#7fd4ff" }}>
+                                                        {al.message}
+                                                    </div>
+                                                    <div className="text-[10px] mt-0.5" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#888" }}>
+                                                        SOURCE: <span style={{ color: isEngine ? "#e8c34a" : "#7fd4ff" }}>{al.source.toUpperCase()}</span> &bull; SEVERITY: {al.severity}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span className="text-[10px] shrink-0" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#666" }}>
+                                                {al.timestamp}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -563,7 +718,7 @@ function HudSection() {
 
             <div className="relative z-10 px-6 md:px-10 py-6 flex items-center justify-between text-xs" style={{ borderTop: "1px solid #1e1e1e", fontFamily: "'JetBrains Mono', monospace", color: "#666" }}>
                 <span>ENGINE_TWIN &copy; 2026</span>
-                <span>MODEL: PHYSICS-INFORMED HYBRID</span>
+                <span>MODEL: PHYSICS-INFORMED HYBRID &bull; API CONTRACT: BE-3</span>
             </div>
         </section>
     );
