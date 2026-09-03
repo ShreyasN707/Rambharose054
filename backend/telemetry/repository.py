@@ -174,3 +174,17 @@ class TelemetryRepository:
         )
 
         return session.scalar(statement)
+
+    def get_distinct_engines(
+        self,
+        session: Session,
+    ) -> list[str]:
+        statement = select(Telemetry.engine_id).distinct()
+        return list(session.scalars(statement))
+
+    def get_distinct_missions(
+        self,
+        session: Session,
+    ) -> list[str]:
+        statement = select(Telemetry.mission_id).distinct()
+        return list(session.scalars(statement))
