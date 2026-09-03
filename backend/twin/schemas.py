@@ -16,7 +16,6 @@ class HealthState(BaseModel):
     combustion: float
     lubrication: float
     mechanical: float
-    electrical: float
 
 
 class DigitalTwinState(BaseModel):

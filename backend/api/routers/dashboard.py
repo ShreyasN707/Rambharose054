@@ -51,9 +51,6 @@ def dashboard(
         oil_temperature=latest_row.oil_temperature,
         fuel_flow=latest_row.fuel_flow,
         vibration=latest_row.vibration,
-        battery_voltage=latest_row.battery_voltage,
-        alternator_current=latest_row.alternator_current,
-        injection_timing=latest_row.injection_timing,
     )
 
     snapshots = health_repo.get_by_engine(session, engine_id)
@@ -71,7 +68,6 @@ def dashboard(
             combustion=latest_snapshot.combustion,
             lubrication=latest_snapshot.lubrication,
             mechanical=latest_snapshot.mechanical,
-            electrical=latest_snapshot.electrical,
         )
         recent_health_history = [
             HealthHistoryPoint(
@@ -82,7 +78,6 @@ def dashboard(
                     combustion=s.combustion,
                     lubrication=s.lubrication,
                     mechanical=s.mechanical,
-                    electrical=s.electrical,
                 ),
             )
             for s in snapshots[-20:]
@@ -103,9 +98,6 @@ def dashboard(
                 "oil_temperature": t.oil_temperature,
                 "fuel_flow": t.fuel_flow,
                 "vibration": t.vibration,
-                "battery_voltage": t.battery_voltage,
-                "alternator_current": t.alternator_current,
-                "injection_timing": t.injection_timing,
             }
             for t in window
         ]

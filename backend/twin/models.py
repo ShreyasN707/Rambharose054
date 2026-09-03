@@ -54,8 +54,3 @@ class HealthSnapshot(Base):
         Float,
         nullable=False,
     )
-
-    electrical: Mapped[float] = mapped_column(
-        Float,
-        nullable=False,
-    )

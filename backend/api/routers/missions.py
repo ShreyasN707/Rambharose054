@@ -91,9 +91,6 @@ def mission_telemetry(
             oil_temperature=r.oil_temperature,
             fuel_flow=r.fuel_flow,
             vibration=r.vibration,
-            battery_voltage=r.battery_voltage,
-            alternator_current=r.alternator_current,
-            injection_timing=r.injection_timing,
         )
         for r in rows
     ]
@@ -130,7 +127,6 @@ def mission_replay(
                 combustion=snapshot.combustion,
                 lubrication=snapshot.lubrication,
                 mechanical=snapshot.mechanical,
-                electrical=snapshot.electrical,
             )
 
         points.append(
@@ -147,9 +143,6 @@ def mission_replay(
                     oil_temperature=r.oil_temperature,
                     fuel_flow=r.fuel_flow,
                     vibration=r.vibration,
-                    battery_voltage=r.battery_voltage,
-                    alternator_current=r.alternator_current,
-                    injection_timing=r.injection_timing,
                 ),
                 health=health,
             )

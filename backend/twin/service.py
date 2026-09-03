@@ -15,7 +15,7 @@ from twin.schemas import (
 )
 
 class DigitalTwinService:
-    
+
     def __init__(
         self,
         repository: HealthSnapshotRepository,
@@ -25,8 +25,8 @@ class DigitalTwinService:
         self.repository = repository
         self.telemetry_repository = telemetry_repository
         self.predictor = predictor
-        
-        
+
+
     def process(
         self,
         session: Session,
@@ -53,9 +53,6 @@ class DigitalTwinService:
                 "oil_temperature": item.oil_temperature,
                 "fuel_flow": item.fuel_flow,
                 "vibration": item.vibration,
-                "battery_voltage": item.battery_voltage,
-                "alternator_current": item.alternator_current,
-                "injection_timing": item.injection_timing,
             }
             for item in telemetry_records
         ]
@@ -76,7 +73,7 @@ class DigitalTwinService:
         )
 
         return state
-        
+
     def calculate_health(
         self,
         telemetry: TelemetryCreate,
@@ -86,15 +83,13 @@ class DigitalTwinService:
         combustion = self._combustion_health(telemetry)
         lubrication = self._lubrication_health(telemetry)
         mechanical = self._mechanical_health(telemetry)
-        electrical = self._electrical_health(telemetry)
 
         overall = (
             thermal
             + combustion
             + lubrication
             + mechanical
-            + electrical
-        ) / 5
+        ) / 4
 
         return HealthState(
             overall=round(overall, 2),
@@ -102,7 +97,6 @@ class DigitalTwinService:
             combustion=combustion,
             lubrication=lubrication,
             mechanical=mechanical,
-            electrical=electrical,
         )
 
     def save_health_snapshot(
@@ -121,14 +115,13 @@ class DigitalTwinService:
             combustion=state.health.combustion,
             lubrication=state.health.lubrication,
             mechanical=state.health.mechanical,
-            electrical=state.health.electrical,
         )
 
         return self.repository.save(
             session,
             snapshot,
         )
-        
+
     def _thermal_health(
         self,
         telemetry: TelemetryCreate,
@@ -177,23 +170,13 @@ class DigitalTwinService:
 
         return self._score(100 - vibration_penalty)
 
-    def _electrical_health(
-        self,
-        telemetry: TelemetryCreate,
-    ) -> float:
-        voltage_penalty = abs(
-            telemetry.battery_voltage - 28
-        ) * 3
-
-        return self._score(100 - voltage_penalty)
-
     @staticmethod
     def _score(value: float) -> float:
         return round(
             max(0, min(100, value)),
             2,
         )
-        
+
     def build_state(
         self,
         telemetry: TelemetryCreate,
