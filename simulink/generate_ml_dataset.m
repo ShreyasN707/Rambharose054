@@ -1,43 +1,83 @@
-% generate_ml_dataset.m
-model_name = 'AeroPistonEngineTwin';
+%% generate_ml_dataset.m
+
+clear;
+clc;
+
+model_name = 'AeroPistonEngineSimulator';
+
 load_system(model_name);
+engine_params;
 
-% Define the scenarios you want to simulate
-fault_types = [0, 1, 2, 3]; % 0: Healthy, 1: Misfire, 2: Overheating, 3: Oil Leak
-runs_per_fault = 10; % Increase this for your final ML dataset
+% Simulation input
+t = (0:0.1:1200)';
 
-% Initialize an empty table to hold all data
+u = [
+    ones(size(t)), ...          % Throttle
+    0.5 * ones(size(t)), ...    % Engine Load
+    zeros(size(t)), ...         % Altitude
+    25 * ones(size(t))          % Ambient Temperature
+];
+
+fault_types = [0, 1];
+runs_per_fault = 10;
+
 master_dataset = table();
 
 for fault = fault_types
+
     for run = 1:runs_per_fault
-        disp(['Simulating Fault ID: ', num2str(fault), ' - Run: ', num2str(run)]);
 
-        % 1. Set the fault state in the base workspace
-        assignin('base', 'Fault_ID', fault);
+        fprintf('\nSimulating Fault ID: %d - Run: %d\n', fault, run);
 
-        % Optional: Randomize ambient temp or payload slightly per run 
-        % to prevent the ML model from memorizing a single perfect flight
-        assignin('base', 'AmbientTemp', 25 + (randn * 2)); 
+        % Set fault
+        set_param( ...
+            [model_name '/Fault_ID'], ...
+            'Value', num2str(fault) ...
+        );
 
-        % 2. Execute the Simulink model programmatically
-        % Assuming a 1500 second mission profile
-        simOut = sim(model_name, 'StopTime', '1500'); 
+        % Run simulation
+        simOut = sim(model_name, 'StopTime', '1200');
 
-        % 3. Extract the timetable from the simulation output
-        run_data = simOut.telemetry_log;
+        % Get telemetry
+        telemetry_log = simOut.telemetry_log;
 
-        
-        % 4. Add a "Run_ID" column to track separate flights
-        run_data.Run_ID = repmat(run + (fault * 100), height(run_data), 1);
+        % Convert timetable to table
+        run_table = timetable2table(telemetry_log);
 
-        % 5. Append to the master dataset
-        % Convert timetable to standard table to easily stack them
-        run_table = timetable2table(run_data); 
-        master_dataset = [master_dataset; run_table];
+        % Rename columns
+        run_table.Properties.VariableNames = {
+            'Time', ...
+            'RPM', ...
+            'FuelFlow', ...
+            'Torque', ...
+            'OilTemperature', ...
+            'OilPressure', ...
+            'CHT', ...
+            'FaultID', ...
+            'EGT', ...
+            'Vibration'
+        };
+
+        % Add run identifier
+        run_table.RunID = ...
+            repmat(run + fault * 100, height(run_table), 1);
+
+        % Add to master dataset
+        master_dataset = [
+            master_dataset;
+            run_table
+        ];
+
     end
 end
 
-% 6. Export the massive compiled table to a CSV file for Python
-writetable(master_dataset, 'engine_digital_twin_dataset.csv');
-disp('Dataset generation complete. Saved to engine_digital_twin_dataset.csv');
+% Save dataset
+output_file = 'engine_digital_twin_dataset.csv';
+
+writetable(master_dataset, output_file);
+
+fprintf('\n========================================\n');
+fprintf('Dataset generation complete.\n');
+fprintf('Saved to: %s\n', output_file);
+fprintf('Rows: %d\n', height(master_dataset));
+fprintf('========================================\n');

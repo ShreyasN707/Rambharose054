@@ -69,14 +69,6 @@ class Telemetry(Base):
     fuel_flow: Mapped[float] = mapped_column(Float, nullable=False)
     vibration: Mapped[float] = mapped_column(Float, nullable=False)
 
-    battery_voltage: Mapped[float] = mapped_column(Float, nullable=False)
-    alternator_current: Mapped[float] = mapped_column(Float, nullable=False)
-
-    injection_timing: Mapped[float] = mapped_column(
-        Float,
-        nullable=False,
-    )
-
 
 class IngestionEvent(Base):
     __tablename__ = "ingestion_events"

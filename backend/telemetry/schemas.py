@@ -21,11 +21,6 @@ class TelemetryCreate(BaseModel):
     fuel_flow: float
     vibration: float
 
-    battery_voltage: float
-    alternator_current: float
-
-    injection_timing: float
-
     @field_validator("timestamp")
     @classmethod
     def validate_timestamp(cls, value: datetime) -> datetime:

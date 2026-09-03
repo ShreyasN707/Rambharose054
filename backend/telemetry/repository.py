@@ -23,9 +23,6 @@ class TelemetryRepository:
             oil_temperature=telemetry.oil_temperature,
             fuel_flow=telemetry.fuel_flow,
             vibration=telemetry.vibration,
-            battery_voltage=telemetry.battery_voltage,
-            alternator_current=telemetry.alternator_current,
-            injection_timing=telemetry.injection_timing,
         )
 
         statement = statement.on_conflict_do_nothing(

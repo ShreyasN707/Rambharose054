@@ -79,9 +79,7 @@ class TelemetryService:
             oil_temperature=data.oil_temperature,
             fuel_flow=data.fuel_flow,
             vibration=data.vibration,
-            battery_voltage=data.battery_voltage,
-            alternator_current=data.alternator_current,
-            injection_timing=data.injection_timing,
+
         )
 
         return self.repository.save(session, telemetry)
