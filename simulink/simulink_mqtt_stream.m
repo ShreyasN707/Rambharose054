@@ -67,7 +67,7 @@ client.connect( ...
 
 client.loop_start();
 
-fprintf("Connected to MQTT.\n");
+fprintf("Connected to MQTT telemetry.\n");
 
 %% Create live Simulation object
 
@@ -85,7 +85,8 @@ fprintf("\n");
 fprintf("========================================\n");
 fprintf("LIVE SIMULATION STARTED\n");
 fprintf("========================================\n");
-fprintf("Fault command file: fault_command.txt\n");
+fprintf("Fault commands: MQTT\n");
+fprintf("Fault topic: %s\n", fault_topic);
 fprintf("Allowed fault IDs: 0, 1, 2, 3, 4\n");
 fprintf("========================================\n\n");
 
@@ -95,47 +96,39 @@ next_time = publish_interval;
 
 while next_time <= simulation_time
 
-    %% Check fault command
+    %% Check MQTT fault command
 
-    command_file = "fault_command.txt";
+    requested_fault = str2double( ...
+        strtrim(fileread("fault_state.txt")));
 
-    if isfile(command_file)
+    %% Validate requested fault
 
-        raw = strtrim( ...
-            fileread(command_file));
+    if requested_fault ~= current_fault
 
-        requested_fault = str2double(raw);
+        if ismember(requested_fault, [0 1 2 3 4])
 
-        %% Validate requested fault
+            current_fault = requested_fault;
 
-        if ~isnan(requested_fault) && ...
-                requested_fault ~= current_fault
+            setBlockParameter( ...
+                sm, ...
+                fault_block, ...
+                "Value", ...
+                num2str(current_fault));
 
-            if ismember(requested_fault, [0 1 2 3 4])
+            fprintf( ...
+                "\n>>> FAULT CHANGED TO %d at t=%.0fs <<<\n\n", ...
+                current_fault, ...
+                next_time - publish_interval);
 
-                current_fault = requested_fault;
+        else
 
-                setBlockParameter( ...
-                    sm, ...
-                    fault_block, ...
-                    "Value", ...
-                    num2str(current_fault));
+            fprintf( ...
+                "\n>>> INVALID FAULT ID: %g <<<\n", ...
+                requested_fault);
 
-                fprintf( ...
-                    "\n>>> FAULT CHANGED TO %d at t=%.0fs <<<\n\n", ...
-                    current_fault, ...
-                    next_time - publish_interval);
+            fprintf( ...
+                ">>> Allowed values: 0, 1, 2, 3, 4 <<<\n\n");
 
-            else
-
-                fprintf( ...
-                    "\n>>> INVALID FAULT ID: %g <<<\n", ...
-                    requested_fault);
-
-                fprintf( ...
-                    ">>> Allowed values: 0, 1, 2, 3, 4 <<<\n\n");
-
-            end
         end
     end
 
@@ -267,7 +260,7 @@ if sm.Status ~= "inactive"
     stop(sm);
 end
 
-%% Disconnect MQTT
+%% Disconnect MQTT telemetry client
 
 client.loop_stop();
 client.disconnect();
