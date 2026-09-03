@@ -36,8 +36,8 @@ fuel_min     = 0.2;      % Minimum idle fuel flow limit (kg/hr)
 %  ========================================================================
 % Cylinder Head Temperature (CHT)
 CHT_capacity = 500;      % Cylinder thermal mass/capacity (J/°C)
-k_h          = 5000;     % Heat generation scaling factor
-k_c          = 0.1;      % Air cooling efficiency scaling factor
+k_h          = 100;     % Heat generation scaling factor
+k_c          = 0.5;      % Air cooling efficiency scaling factor
 CHT_init     = 25;       % Initial engine temperature before start (°C)
 
 % Exhaust Gas Temperature (EGT)
@@ -50,10 +50,14 @@ EGT_tau      = 0.8;      % EGT thermocouple time constant (seconds)
 %  PHASE 7: LUBRICATION MODEL CONSTANTS
 %  ========================================================================
 % Oil Temperature
+C_oil = 5000;
 Oil_capacity = 250;      % Oil thermal mass/capacity (J/°C)
-k_oil_heat   = 2.5;      % Mechanical heat dissipation into oil gain
+k_oil_heat   = 8;      % Mechanical heat dissipation into oil gain
 k_oil_cool   = 0.05;     % Oil cooling dissipation gain
 OilTemp_init = 25;       % Initial oil temperature before start (°C)
+
+k_oil_pressure_rpm = 0.015;
+k_oil_pressure_temp = 0.000075;
 
 % Oil Pressure
 kp_oil       = 0.015;    % Oil pump pressure-to-RPM gain (psi/RPM)
