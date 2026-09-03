@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Layers, Monitor, Lock, Zap, RotateCcw, RotateCw, Move3d } from "lucide-react";
+import type { TelemetryData } from "./types/api";
 
 interface GaugeProps {
     value: number;
@@ -483,7 +484,7 @@ function TelemetryCell({ label, value, unit, color = "#fff", warn = false }: {
     );
 }
 
-export default function DroneOverviewSection() {
+export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?: TelemetryData }) {
     const [tick, setTick] = useState(0);
     const [elapsedSec, setElapsedSec] = useState(0);
 
@@ -499,21 +500,21 @@ export default function DroneOverviewSection() {
 
     const phase = tick * 0.08;
     const idleRPM = 820 + Math.sin(phase * 0.4) * 40 + Math.sin(phase * 1.1) * 15;
-    const rpm = Math.round(idleRPM);
+    const rpm = liveTelemetry?.rpm ?? Math.round(idleRPM);
     const shiftActive = Math.floor((rpm / 9000) * 24);
 
-    const torque = (12.4 + Math.sin(phase * 0.3) * 1.8 + Math.sin(phase * 0.9) * 0.6).toFixed(1);
-    const power = (0.18 + Math.sin(phase * 0.35) * 0.03).toFixed(2);
-    const fuelFlow = (2.1 + Math.sin(phase * 0.25) * 0.4 + Math.sin(phase * 0.7) * 0.15).toFixed(1);
-    const cht = Math.round(185 + Math.sin(phase * 0.15) * 12 + Math.sin(phase * 0.5) * 5);
-    const egt = Math.round(620 + Math.sin(phase * 0.2) * 30 + Math.sin(phase * 0.6) * 10);
-    const oilTemp = Math.round(95 + Math.sin(phase * 0.12) * 8);
-    const oilPressure = (58 + Math.sin(phase * 0.18) * 6 + Math.sin(phase * 0.55) * 2).toFixed(0);
-    const vibration = (0.12 + Math.sin(phase * 1.2) * 0.04 + Math.sin(phase * 2.3) * 0.02).toFixed(2);
-    const altitude = Math.round(150 + Math.sin(phase * 0.05) * 5);
-    const ambientTemp = (28 + Math.sin(phase * 0.02) * 2).toFixed(1);
-    const throttle = (5 + Math.sin(phase * 0.3) * 3 + Math.sin(phase * 0.8) * 1).toFixed(0);
-    const engineLoad = (8 + Math.sin(phase * 0.28) * 4 + Math.sin(phase * 0.7) * 2).toFixed(0);
+    const torque = (liveTelemetry?.torque ?? (12.4 + Math.sin(phase * 0.3) * 1.8 + Math.sin(phase * 0.9) * 0.6)).toFixed(1);
+    const power = (liveTelemetry?.power ?? (0.18 + Math.sin(phase * 0.35) * 0.03)).toFixed(2);
+    const fuelFlow = (liveTelemetry?.fuel_flow ?? (2.1 + Math.sin(phase * 0.25) * 0.4 + Math.sin(phase * 0.7) * 0.15)).toFixed(1);
+    const cht = Math.round(liveTelemetry?.cht ?? (185 + Math.sin(phase * 0.15) * 12 + Math.sin(phase * 0.5) * 5));
+    const egt = Math.round(liveTelemetry?.egt ?? (620 + Math.sin(phase * 0.2) * 30 + Math.sin(phase * 0.6) * 10));
+    const oilTemp = Math.round(liveTelemetry?.oil_temperature ?? (95 + Math.sin(phase * 0.12) * 8));
+    const oilPressure = String(Math.round(liveTelemetry?.oil_pressure ?? (58 + Math.sin(phase * 0.18) * 6 + Math.sin(phase * 0.55) * 2)));
+    const vibration = (liveTelemetry?.vibration ?? (0.12 + Math.sin(phase * 1.2) * 0.04 + Math.sin(phase * 2.3) * 0.02)).toFixed(2);
+    const altitude = Math.round(liveTelemetry?.altitude ?? (150 + Math.sin(phase * 0.05) * 5));
+    const ambientTemp = (liveTelemetry?.ambient_temp ?? (28 + Math.sin(phase * 0.02) * 2)).toFixed(1);
+    const throttle = String(Math.round(liveTelemetry?.throttle ?? (5 + Math.sin(phase * 0.3) * 3 + Math.sin(phase * 0.8) * 1)));
+    const engineLoad = String(Math.round(liveTelemetry?.engine_load ?? (8 + Math.sin(phase * 0.28) * 4 + Math.sin(phase * 0.7) * 2)));
 
     const hrs = String(Math.floor(elapsedSec / 3600)).padStart(2, "0");
     const mins = String(Math.floor((elapsedSec % 3600) / 60)).padStart(2, "0");

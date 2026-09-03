@@ -4,8 +4,10 @@ import DroneOverviewSection from "./DroneOverview";
 import {
     Radio, Activity, GitBranch, ArrowUpRight, Circle, Wifi,
     Gauge, Thermometer, Droplet, Timer,
-    ArrowUp, ArrowDown, Minus, AlertTriangle, Wrench,
+    ArrowUp, ArrowDown, Minus, AlertTriangle, Wrench, RefreshCw,
 } from "lucide-react";
+import { useEngineData } from "./hooks/useEngineData";
+import { getMissionReplay } from "./services/api";
 
 const FONTS = `
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
@@ -433,71 +435,59 @@ function HealthSparkline({ data }: { data: number[] }) {
         </svg>
     );
 }
-
-function HudSection() {
+function HudSection({
+    engineData,
+}: {
+    engineData: ReturnType<typeof useEngineData>;
+}) {
     const time = useClock();
+    const [replayStatus, setReplayStatus] = useState<string | null>(null);
+    const [isFetchingReplay, setIsFetchingReplay] = useState<boolean>(false);
 
-    const engine = {
-        engineId: "ENG-TEST",
-        missionId: "MISSION-1",
-        operatingState: "WARNING",
-        sampleCount: 300,
-        startTime: "03:20:00Z",
-        endTime: "03:25:00Z",
-        health: 82,
-        healthLabel: "GOOD",
-        fault: "Misfire detected",
-        confidence: 94,
-        rul: "18.4 hrs",
-        anomalyScore: "0.28",
-        trend: "DECLINING",
-        subsystem: "COMBUSTION",
-        action: "Inspect injector / combustion system",
+    const handleFetchReplay = async () => {
+        setIsFetchingReplay(true);
+        setReplayStatus(null);
+        try {
+            const data = await getMissionReplay(engineData.selectedMission);
+            setReplayStatus(`REPLAY: ${data.points?.length ?? 0} FRAMES FETCHED`);
+        } catch (err: any) {
+            setReplayStatus(`REPLAY: ${err.message}`);
+        } finally {
+            setIsFetchingReplay(false);
+        }
     };
 
     const subsystems = [
-        { name: "THERMAL", score: 97.5, status: "ok" },
-        { name: "COMBUSTION", score: 76.2, status: "warn" },
-        { name: "LUBRICATION", score: 94.8, status: "ok" },
-        { name: "MECHANICAL", score: 88.0, status: "ok" },
-        { name: "ELECTRICAL", score: 99.4, status: "ok" },
+        { name: "THERMAL", score: engineData.health.thermal, status: engineData.health.thermal < 80 ? "warn" : "ok" },
+        { name: "COMBUSTION", score: engineData.health.combustion, status: engineData.health.combustion < 80 ? "warn" : "ok" },
+        { name: "LUBRICATION", score: engineData.health.lubrication, status: engineData.health.lubrication < 80 ? "warn" : "ok" },
+        { name: "MECHANICAL", score: engineData.health.mechanical, status: engineData.health.mechanical < 80 ? "warn" : "ok" },
+        { name: "ELECTRICAL", score: engineData.health.electrical, status: engineData.health.electrical < 80 ? "warn" : "ok" },
     ];
 
-    const alerts = [
-        {
-            severity: "DEGRADED",
-            message: "Combustion efficiency dropped below 80%",
-            source: "operating_state",
-            timestamp: "03:25:00Z",
-        },
-        {
-            severity: "WARNING",
-            message: "Ingestion event: TELEMETRY_GAP (2 dropped packets)",
-            source: "ingestion_event",
-            timestamp: "03:26:00Z",
-        },
-    ];
-
-    const recentHealthHistory = [
-        99.1, 98.8, 98.4, 98.5, 97.9, 96.5, 95.0, 94.2, 92.8, 91.0,
-        89.5, 88.2, 87.0, 86.1, 85.5, 84.8, 83.9, 83.0, 82.4, 82.0
-    ];
-
-    const indicators = [
-        { label: "EGT", trend: "up" },
-        { label: "VIBRATION", trend: "up" },
-        { label: "RPM STABILITY", trend: "down" },
-    ];
+    const sparklineData = engineData.healthHistory.length > 0
+        ? engineData.healthHistory.map(h => h.health?.overall ?? 82)
+        : [99.1, 98.4, 96.5, 91.0, 86.1, 83.9, 82.0];
 
     const sensors: SensorItem[] = [
-        { icon: Gauge, label: "RPM", value: "2,340", unit: "rpm", status: "warn", trend: "down" },
-        { icon: Thermometer, label: "CHT", value: "218", unit: "°C", status: "ok", trend: "flat" },
-        { icon: Thermometer, label: "EGT", value: "812", unit: "°C", status: "critical", trend: "up" },
-        { icon: Droplet, label: "OIL PRESSURE", value: "54", unit: "psi", status: "ok", trend: "flat" },
-        { icon: Thermometer, label: "OIL TEMP", value: "97", unit: "°C", status: "ok", trend: "up" },
-        { icon: Droplet, label: "FUEL FLOW", value: "11.2", unit: "gal/hr", status: "ok", trend: "flat" },
-        { icon: Activity, label: "VIBRATION", value: "4.8", unit: "mm/s", status: "warn", trend: "up" },
+        { icon: Gauge, label: "RPM", value: engineData.telemetry.rpm.toLocaleString(), unit: "rpm", status: engineData.telemetry.rpm > 3000 ? "warn" : "ok", trend: "flat" },
+        { icon: Thermometer, label: "CHT", value: String(engineData.telemetry.cht), unit: "°C", status: engineData.telemetry.cht > 200 ? "warn" : "ok", trend: "flat" },
+        { icon: Thermometer, label: "EGT", value: String(engineData.telemetry.egt), unit: "°C", status: engineData.telemetry.egt > 750 ? "critical" : "ok", trend: "up" },
+        { icon: Droplet, label: "OIL PRESSURE", value: String(engineData.telemetry.oil_pressure), unit: "psi", status: engineData.telemetry.oil_pressure < 30 ? "critical" : "ok", trend: "flat" },
+        { icon: Thermometer, label: "OIL TEMP", value: String(engineData.telemetry.oil_temperature), unit: "°C", status: engineData.telemetry.oil_temperature > 105 ? "warn" : "ok", trend: "up" },
+        { icon: Droplet, label: "FUEL FLOW", value: String(engineData.telemetry.fuel_flow), unit: "gal/hr", status: "ok", trend: "flat" },
+        { icon: Activity, label: "VIBRATION", value: String(engineData.telemetry.vibration), unit: "mm/s", status: engineData.telemetry.vibration > 4.0 ? "warn" : "ok", trend: "up" },
     ];
+
+    if (engineData.telemetry.battery_voltage !== undefined) {
+        sensors.push({ icon: Activity, label: "BATTERY V", value: String(engineData.telemetry.battery_voltage), unit: "V", status: "ok", trend: "flat" });
+    }
+    if (engineData.telemetry.alternator_current !== undefined) {
+        sensors.push({ icon: Activity, label: "ALTERNATOR I", value: String(engineData.telemetry.alternator_current), unit: "A", status: "ok", trend: "flat" });
+    }
+    if (engineData.telemetry.injection_timing !== undefined) {
+        sensors.push({ icon: Timer, label: "INJECTION TIMING", value: String(engineData.telemetry.injection_timing), unit: "°BTDC", status: "warn", trend: "down" });
+    }
 
     const statusColor: Record<string, string> = { ok: "#7fe0a0", warn: "#e8c34a", critical: "#e8543f" };
 
@@ -512,74 +502,139 @@ function HudSection() {
                 <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
                     <div>
                         <div className="text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#777" }}>
-                            /03 &nbsp; ENGINE STATUS &amp; REPLAY DIAGNOSTICS
+                            /03 &nbsp; ENGINE STATUS &amp; REPLAY DIAGNOSTICS &mdash; BE-3 INTEGRATED
                         </div>
                         <h2 className="mt-2 font-semibold" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}>
                             Live diagnostic readout
                         </h2>
                     </div>
+
                     <div className="flex items-center gap-3 flex-wrap text-xs" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                        <span className="px-2.5 py-1 rounded" style={{ border: "1px solid #333", background: "#151515", color: "#aaa" }}>
-                            ENGINE: <span style={{ color: "#fff" }}>{engine.engineId}</span>
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded" style={{ border: "1px solid #333", background: "#151515" }}>
+                            <span style={{ color: "#777" }}>ENGINE:</span>
+                            <select
+                                value={engineData.selectedEngine}
+                                onChange={(e) => engineData.setSelectedEngine(e.target.value)}
+                                style={{ background: "transparent", color: "#fff", border: "none", outline: "none", cursor: "pointer" }}
+                            >
+                                {engineData.engines.map((eng) => (
+                                    <option key={eng} value={eng} style={{ background: "#111", color: "#fff" }}>
+                                        {eng}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded" style={{ border: "1px solid #333", background: "#151515" }}>
+                            <span style={{ color: "#777" }}>MISSION:</span>
+                            <select
+                                value={engineData.selectedMission}
+                                onChange={(e) => engineData.setSelectedMission(e.target.value)}
+                                style={{ background: "transparent", color: "#7fd4ff", border: "none", outline: "none", cursor: "pointer" }}
+                            >
+                                {engineData.missions.map((m) => (
+                                    <option key={m} value={m} style={{ background: "#111", color: "#7fd4ff" }}>
+                                        {m}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <button
+                            onClick={() => engineData.refreshDashboard()}
+                            className="p-1.5 rounded hover:bg-white/10 transition"
+                            title="Refresh Dashboard (/api/dashboard)"
+                            style={{ border: "1px solid #333", color: "#888" }}
+                        >
+                            <RefreshCw size={13} />
+                        </button>
+
+                        <button
+                            onClick={handleFetchReplay}
+                            disabled={isFetchingReplay}
+                            className="px-2.5 py-1 rounded hover:bg-white/10 transition"
+                            style={{ border: "1px solid #333", background: "#151515", color: "#ccc" }}
+                        >
+                            {isFetchingReplay ? "FETCHING..." : "REPLAY"}
+                        </button>
+
+                        <span
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded"
+                            style={{
+                                border: engineData.isConnected ? "1px solid #22c55e" : "1px solid #eab308",
+                                background: engineData.isConnected ? "rgba(34,197,94,0.1)" : "rgba(234,179,8,0.1)",
+                                color: engineData.isConnected ? "#22c55e" : "#eab308",
+                            }}
+                        >
+                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: engineData.isConnected ? "#22c55e" : "#eab308" }} />
+                            {engineData.isConnected ? "WS LIVE" : "POLLING"}
                         </span>
-                        <span className="px-2.5 py-1 rounded" style={{ border: "1px solid #333", background: "#151515", color: "#aaa" }}>
-                            MISSION: <span style={{ color: "#7fd4ff" }}>{engine.missionId}</span>
-                        </span>
-                        <span className="px-2.5 py-1 rounded" style={{ border: "1px solid #333", background: "#151515", color: "#aaa" }}>
-                            SAMPLES: <span style={{ color: "#7fe0a0" }}>{engine.sampleCount} (WARMED UP &ge; 60)</span>
-                        </span>
+
                         <span className="px-2.5 py-1 rounded" style={{ border: "1px solid #e8c34a", background: "rgba(232,195,74,0.1)", color: "#e8c34a" }}>
-                            STATE: {engine.operatingState}
+                            STATE: {engineData.operatingState}
                         </span>
                     </div>
                 </div>
+
+                {replayStatus && (
+                    <div className="mb-6 px-4 py-2 text-xs rounded" style={{ background: "rgba(127,212,255,0.1)", border: "1px solid #7fd4ff", color: "#7fd4ff", fontFamily: "'JetBrains Mono', monospace" }}>
+                        {replayStatus}
+                    </div>
+                )}
+
+                {engineData.isWarmup && (
+                    <div className="mb-6 px-4 py-2 text-xs rounded" style={{ background: "rgba(234,179,8,0.1)", border: "1px solid #eab308", color: "#eab308", fontFamily: "'JetBrains Mono', monospace" }}>
+                        WARM-UP IN PROGRESS: Health &amp; prediction models calibrating until 60 samples accumulate.
+                    </div>
+                )}
 
                 <div className="grid md:grid-cols-5 gap-8">
                     <div className="md:col-span-2 flex flex-col gap-6">
                         <div style={{ border: "1px solid #2a2a2a", background: "#0e0e0e" }}>
                             <div className="flex items-center justify-between px-4 py-3 text-xs" style={{ borderBottom: "1px solid #2a2a2a", fontFamily: "'JetBrains Mono', monospace", color: "#888" }}>
-                                <span>UNIT &mdash; {engine.engineId}</span>
-                                <span style={{ color: statusColor.warn }}>{engine.operatingState}</span>
+                                <span>UNIT &mdash; {engineData.selectedEngine}</span>
+                                <span style={{ color: statusColor[engineData.operatingState === "NOMINAL" ? "ok" : "warn"] }}>
+                                    {engineData.operatingState}
+                                </span>
                             </div>
 
                             <div className="p-5 flex gap-4 items-center">
-                                <RadialHealth value={engine.health} />
+                                <RadialHealth value={Math.round(engineData.health.overall)} />
                                 <div className="flex-1">
-                                    <div className="font-semibold tracking-tight">{engine.healthLabel}</div>
+                                    <div className="font-semibold tracking-tight">
+                                        {engineData.health.overall > 90 ? "NOMINAL" : engineData.health.overall > 75 ? "GOOD" : "DEGRADED"}
+                                    </div>
                                     <div className="text-xs" style={{ color: "#888", fontFamily: "'JetBrains Mono', monospace" }}>
-                                        TREND: {engine.trend}
+                                        FAULT: {engineData.prediction.fault ?? "None detected"}
                                     </div>
                                     <div className="mt-3 flex items-center gap-2 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                        <AlertTriangle size={12} color={statusColor.critical} />
-                                        <span style={{ color: "#fff" }}>{engine.fault}</span>
+                                        <AlertTriangle size={12} color={statusColor[engineData.operatingState === "NOMINAL" ? "ok" : "critical"]} />
+                                        <span style={{ color: "#fff" }}>
+                                            {engineData.prediction.fault ? engineData.prediction.fault : "Operating within tolerance"}
+                                        </span>
                                     </div>
                                     <div className="text-xs mt-1" style={{ color: "#888", fontFamily: "'JetBrains Mono', monospace" }}>
-                                        CONFIDENCE {engine.confidence}% &bull; ANOMALY {engine.anomalyScore}
+                                        CONFIDENCE {engineData.prediction.confidence}% &bull; ANOMALY {engineData.prediction.anomaly_score.toFixed(2)}
                                     </div>
                                 </div>
                             </div>
 
                             <div className="px-5 pb-4 grid grid-cols-2 gap-y-2 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#999" }}>
-                                <span>EST. RUL</span><span style={{ color: "#fff" }}>{engine.rul}</span>
-                                <span>SUBSYSTEM</span><span style={{ color: "#fff" }}>{engine.subsystem}</span>
-                                <span>MISSION TIME</span><span style={{ color: "#888" }}>{engine.startTime} &rarr; {engine.endTime}</span>
-                                <span>DATA HEALTH</span><span style={{ color: "#7fe0a0" }}>60+ SAMPLE SYNCED</span>
-                            </div>
-
-                            <div className="px-5 pb-4">
-                                <div className="text-xs mb-1.5" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#777" }}>KEY INDICATORS</div>
-                                <div className="flex flex-wrap gap-3">
-                                    {indicators.map((ind, i) => (
-                                        <span key={i} className="flex items-center gap-1 text-xs px-2 py-1" style={{ border: "1px solid #2a2a2a", fontFamily: "'JetBrains Mono', monospace" }}>
-                                            {ind.label} <TrendArrow trend={ind.trend} />
-                                        </span>
-                                    ))}
-                                </div>
+                                <span>EST. RUL</span>
+                                <span style={{ color: "#fff" }}>
+                                    {engineData.prediction.rul_hours !== null ? `${engineData.prediction.rul_hours} hrs` : "N/A (Calibrating)"}
+                                </span>
+                                <span>ENGINE SCOPE</span><span style={{ color: "#fff" }}>{engineData.selectedEngine}</span>
+                                <span>MISSION SCOPE</span><span style={{ color: "#7fd4ff" }}>{engineData.selectedMission}</span>
+                                <span>PIPELINE</span>
+                                <span style={{ color: engineData.isWarmup ? "#eab308" : "#7fe0a0" }}>
+                                    {engineData.isWarmup ? "WARMING UP (<60)" : "LIVE STREAMING"}
+                                </span>
                             </div>
 
                             <div className="px-5 pb-4 flex items-start gap-2 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#ccc" }}>
                                 <Wrench size={12} className="mt-0.5 shrink-0" color="#C6FF3D" />
-                                <span>{engine.action}</span>
+                                <span>Inspect injector / combustion manifold if efficiency drops below 80%</span>
                             </div>
 
                             <div className="px-4 py-3 text-xs flex justify-between" style={{ borderTop: "1px solid #2a2a2a", fontFamily: "'JetBrains Mono', monospace", color: "#666" }}>
@@ -591,7 +646,7 @@ function HudSection() {
                         <div style={{ border: "1px solid #2a2a2a", background: "#0e0e0e" }} className="p-4">
                             <div className="text-xs mb-3 flex items-center justify-between" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#888" }}>
                                 <span>SUBSYSTEM HEALTH SCORES</span>
-                                <span style={{ color: "#666" }}>/api/engines/{engine.engineId}/health</span>
+                                <span style={{ color: "#666" }}>/api/engines/{engineData.selectedEngine}/health</span>
                             </div>
                             <div className="flex flex-col gap-2.5">
                                 {subsystems.map((sub, idx) => (
@@ -621,7 +676,7 @@ function HudSection() {
                                 <div className="flex items-center gap-2">
                                     <Activity size={12} /> TELEMETRY_CHANNELS
                                 </div>
-                                <span className="text-[10px]" style={{ color: "#666" }}>/api/engines/{engine.engineId}/telemetry/latest</span>
+                                <span className="text-[10px]" style={{ color: "#666" }}>/api/engines/{engineData.selectedEngine}/telemetry/latest</span>
                             </div>
                             <div className="grid grid-cols-2 sm:grid-cols-2">
                                 {sensors.map((s, i) => {
@@ -651,8 +706,8 @@ function HudSection() {
                                 })}
                             </div>
                             <div className="px-4 py-3 flex items-center justify-between text-xs" style={{ borderTop: "1px solid #2a2a2a", fontFamily: "'JetBrains Mono', monospace", color: "#666" }}>
-                                <span className="flex items-center gap-1.5"><GitBranch size={12} /> 10 channels, 50Hz sample rate</span>
-                                <span>{engine.engineId}_STREAM</span>
+                                <span className="flex items-center gap-1.5"><GitBranch size={12} /> {sensors.length} channels, 50Hz sample rate</span>
+                                <span>{engineData.selectedEngine}_STREAM</span>
                             </div>
                         </div>
 
@@ -660,25 +715,27 @@ function HudSection() {
                             <div className="flex items-center justify-between mb-3 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                                 <div className="flex items-center gap-2" style={{ color: "#888" }}>
                                     <Activity size={12} color="#e8543f" />
-                                    <span>HEALTH HISTORY TREND &mdash; RECENT 20 SNAPSHOTS</span>
+                                    <span>HEALTH HISTORY TREND &mdash; RECENT SNAPSHOTS (/api/dashboard)</span>
                                 </div>
-                                <span style={{ color: "#e8543f" }}>99.1% &rarr; 82.0%</span>
+                                <span style={{ color: "#e8543f" }}>
+                                    {sparklineData[0]}% &rarr; {sparklineData[sparklineData.length - 1]}%
+                                </span>
                             </div>
-                            <HealthSparkline data={recentHealthHistory} />
+                            <HealthSparkline data={sparklineData} />
                             <div className="flex justify-between items-center mt-2 text-[10px]" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#666" }}>
-                                <span>03:20:00Z (START)</span>
-                                <span>TREND: SLOW DEGRADATION (COMBUSTION)</span>
-                                <span>03:25:00Z (LATEST)</span>
+                                <span>EARLIEST SNAPSHOT</span>
+                                <span>{sparklineData.length} HISTORY SAMPLES</span>
+                                <span>LATEST SNAPSHOT</span>
                             </div>
                         </div>
 
                         <div style={{ border: "1px solid #2a2a2a", background: "#0e0e0e" }} className="p-4">
-                            <div className="flex items-center justify-between mb-3 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#888" }}>
-                                <span>ACTIVE ALERTS &mdash; /api/engines/{engine.engineId}/alerts</span>
-                                <span style={{ color: "#e8c34a" }}>2 DETECTED</span>
+                            <div className="flex items-center justify-between mb-3 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                                <span>ACTIVE ALERTS &mdash; /api/engines/{engineData.selectedEngine}/alerts</span>
+                                <span style={{ color: "#e8c34a" }}>{engineData.alerts.length} DETECTED</span>
                             </div>
                             <div className="flex flex-col gap-2">
-                                {alerts.map((al, idx) => {
+                                {engineData.alerts.map((al, idx) => {
                                     const isEngine = al.source === "operating_state";
                                     return (
                                         <div
@@ -726,6 +783,7 @@ function HudSection() {
 
 export default function EngineTwinLanding() {
     const droneRef = useRef<HTMLDivElement>(null);
+    const engineData = useEngineData();
 
     const handleViewTwin = () => {
         droneRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -736,9 +794,9 @@ export default function EngineTwinLanding() {
             <style>{FONTS}</style>
             <CyberBrutalSection onViewTwin={handleViewTwin} />
             <div ref={droneRef}>
-                <DroneOverviewSection />
+                <DroneOverviewSection liveTelemetry={engineData.telemetry} />
             </div>
-            <HudSection />
+            <HudSection engineData={engineData} />
         </div>
     );
 }
