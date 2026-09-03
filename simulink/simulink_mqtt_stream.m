@@ -13,8 +13,8 @@ engine_params;
 
 %% Settings
 
-simulation_time = 1200;   % 20 min
-publish_interval = 1.0;
+simulation_time = 1200;   % 20 minutes
+publish_interval = 1.0;   % Publish every 1 second
 
 engine_id = "engine_001";
 mission_id = "mission_001";
@@ -36,7 +36,24 @@ u = [
     25 * ones(size(t))
 ];
 
-%% MQTT
+%% Start healthy
+
+% Fault IDs:
+%
+% 0 = Healthy
+% 1 = Fault 1
+% 2 = Fault 2
+% 3 = Fault 3
+% 4 = Fault 4
+
+current_fault = 0;
+
+set_param( ...
+    fault_block, ...
+    "Value", ...
+    num2str(current_fault));
+
+%% Connect to MQTT
 
 mqtt = py.importlib.import_module( ...
     'paho.mqtt.client');
@@ -51,15 +68,6 @@ client.connect( ...
 client.loop_start();
 
 fprintf("Connected to MQTT.\n");
-
-%% Start healthy
-
-current_fault = 0;
-
-set_param( ...
-    fault_block, ...
-    "Value", ...
-    num2str(current_fault));
 
 %% Create live Simulation object
 
@@ -76,8 +84,9 @@ initialize(sm);
 fprintf("\n");
 fprintf("========================================\n");
 fprintf("LIVE SIMULATION STARTED\n");
-fprintf("Fault command topic:\n");
-fprintf("%s\n", fault_topic);
+fprintf("========================================\n");
+fprintf("Fault command file: fault_command.txt\n");
+fprintf("Allowed fault IDs: 0, 1, 2, 3, 4\n");
 fprintf("========================================\n\n");
 
 %% Main live loop
@@ -86,12 +95,7 @@ next_time = publish_interval;
 
 while next_time <= simulation_time
 
-    %% -------------------------------------------------
-    % Check requested fault
-    %
-    % We use a small file as the command bridge.
-    % Default is whatever fault is already active.
-    %% -------------------------------------------------
+    %% Check fault command
 
     command_file = "fault_command.txt";
 
@@ -102,11 +106,12 @@ while next_time <= simulation_time
 
         requested_fault = str2double(raw);
 
+        %% Validate requested fault
+
         if ~isnan(requested_fault) && ...
                 requested_fault ~= current_fault
 
-            if requested_fault == 0 || ...
-                    requested_fault == 1
+            if ismember(requested_fault, [0 1 2 3 4])
 
                 current_fault = requested_fault;
 
@@ -121,28 +126,33 @@ while next_time <= simulation_time
                     current_fault, ...
                     next_time - publish_interval);
 
+            else
+
+                fprintf( ...
+                    "\n>>> INVALID FAULT ID: %g <<<\n", ...
+                    requested_fault);
+
+                fprintf( ...
+                    ">>> Allowed values: 0, 1, 2, 3, 4 <<<\n\n");
+
             end
         end
     end
 
-    %% Advance SAME simulation by 1 second
+    %% Advance simulation
 
     finished = step( ...
         sm, ...
         PauseTime=next_time);
 
-    % Step once more so output at the current
-    % time hit is available
-    step(sm);
-
-    %% Get live simulation output
+    %% Get simulation output
 
     simOut = sm.SimulationOutput;
 
     telemetry_log = ...
         simOut.telemetry_log;
 
-    %% Latest telemetry values
+    %% Extract telemetry
 
     rpm = squeeze( ...
         telemetry_log.signal1.Data);
@@ -167,6 +177,8 @@ while next_time <= simulation_time
 
     vibration = squeeze( ...
         telemetry_log.signal9.Data);
+
+    %% Get latest values
 
     rpm = rpm(end);
     fuel_flow = fuel_flow(end);
@@ -214,7 +226,7 @@ while next_time <= simulation_time
         fuel_flow, ...
         vibration);
 
-    %% MQTT publish
+    %% Publish telemetry
 
     msg = client.publish( ...
         telemetry_topic, ...
@@ -222,6 +234,8 @@ while next_time <= simulation_time
         int32(1));
 
     msg.wait_for_publish();
+
+    %% Console output
 
     fprintf( ...
         "t=%4.0fs | fault=%d | RPM=%7.1f | Torque=%5.2f | CHT=%6.1f | EGT=%7.1f\n", ...
@@ -238,6 +252,8 @@ while next_time <= simulation_time
 
     next_time = ...
         next_time + publish_interval;
+
+    %% Check completion
 
     if finished
         break;
