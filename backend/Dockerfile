@@ -10,6 +10,7 @@ COPY alembic.ini .
 
 COPY telemetry ./telemetry
 COPY twin ./twin
+COPY api ./api
 
 ENV PYTHONPATH=/app:/app/telemetry
 CMD ["python", "-u", "-m", "telemetry.app"]
