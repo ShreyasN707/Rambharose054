@@ -11,6 +11,7 @@ import {
     getMissionReplay,
     startSimulation,
     stopSimulation,
+    getSimulationStatus,
     injectFault,
 } from "./services/api";
 
@@ -452,6 +453,26 @@ function HudSection({
     const [simulationStatus, setSimulationStatus] = useState<
         "stopped" | "starting" | "running" | "stopping"
     >("stopped");
+
+    useEffect(() => {
+    const checkSimulationStatus = async () => {
+        try {
+            const result = await getSimulationStatus(
+                engineData.selectedEngine
+            );
+
+            setSimulationStatus(
+                result.status === "running"
+                    ? "running"
+                    : "stopped"
+            );
+        } catch {
+            setSimulationStatus("stopped");
+        }
+    };
+
+    checkSimulationStatus();
+}, [engineData.selectedEngine]);
 
     const [isInjectingFault, setIsInjectingFault] = useState(false);
     const [controlStatus, setControlStatus] = useState<string | null>(null);

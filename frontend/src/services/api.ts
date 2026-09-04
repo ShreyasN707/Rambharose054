@@ -209,6 +209,18 @@ export async function stopSimulation(
     );
 }
 
+export async function getSimulationStatus(engineId: string): Promise<{
+    status: "running" | "stopped";
+    pid?: number;
+}> {
+    return request(
+        `/engines/${encodeURIComponent(engineId)}/simulation/status`,
+        {
+            method: "GET",
+        }
+    );
+}
+
 export async function injectFault(
     engineId: string,
     faultId: number
