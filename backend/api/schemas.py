@@ -12,6 +12,7 @@ class TelemetryResponse(BaseModel):
     engine_id: str
     mission_id: str
     rpm: float
+    torque: float
     cht: float
     egt: float
     oil_pressure: float

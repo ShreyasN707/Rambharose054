@@ -216,6 +216,7 @@ def latest_telemetry(
         engine_id=row.engine_id,
         mission_id=row.mission_id,
         rpm=row.rpm,
+        torque=row.torque,
         cht=row.cht,
         egt=row.egt,
         oil_pressure=row.oil_pressure,

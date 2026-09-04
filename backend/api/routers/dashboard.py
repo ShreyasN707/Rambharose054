@@ -45,6 +45,7 @@ def dashboard(
         engine_id=latest_row.engine_id,
         mission_id=latest_row.mission_id,
         rpm=latest_row.rpm,
+        torque=latest_row.torque,
         cht=latest_row.cht,
         egt=latest_row.egt,
         oil_pressure=latest_row.oil_pressure,
