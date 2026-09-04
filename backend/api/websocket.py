@@ -18,23 +18,32 @@ _twin_service = create_digital_twin_service(ModelPredictor())
 
 class ConnectionManager:
     def __init__(self):
-        # (engine_id, mission_id) -> set of active websockets
         self.connections: dict[tuple[str, str], set[WebSocket]] = {}
-        # (engine_id, mission_id) -> last payload sent, for diffing
-        self.last_sent: dict[tuple[str, str], dict] = {}
 
-    async def connect(self, websocket: WebSocket, engine_id: str, mission_id: str):
+    async def connect(
+        self,
+        websocket: WebSocket,
+        engine_id: str,
+        mission_id: str,
+    ):
         await websocket.accept()
+
         key = (engine_id, mission_id)
         self.connections.setdefault(key, set()).add(websocket)
 
-    def disconnect(self, websocket: WebSocket, engine_id: str, mission_id: str):
+    def disconnect(
+        self,
+        websocket: WebSocket,
+        engine_id: str,
+        mission_id: str,
+    ):
         key = (engine_id, mission_id)
+
         if key in self.connections:
             self.connections[key].discard(websocket)
+
             if not self.connections[key]:
                 del self.connections[key]
-                self.last_sent.pop(key, None)
 
     async def run(self):
         while True:
@@ -45,38 +54,50 @@ class ConnectionManager:
         for key in list(self.connections.keys()):
             engine_id, mission_id = key
             sockets = self.connections.get(key)
+
             if not sockets:
                 continue
 
             payload = self._build_payload(engine_id, mission_id)
+
             if payload is None:
                 continue
 
-            if self.last_sent.get(key) == payload:
-                continue
-
-            self.last_sent[key] = payload
-
             dead = set()
-            for ws in sockets:
+
+            for websocket in sockets:
                 try:
-                    await ws.send_json(payload)
+                    await websocket.send_json(payload)
                 except Exception:
-                    dead.add(ws)
+                    dead.add(websocket)
 
-            for ws in dead:
-                sockets.discard(ws)
+            for websocket in dead:
+                sockets.discard(websocket)
 
-    def _build_payload(self, engine_id: str, mission_id: str) -> dict | None:
+    def _build_payload(
+        self,
+        engine_id: str,
+        mission_id: str,
+    ) -> dict | None:
+
         session = SessionLocal()
+
         try:
-            latest_row = _telemetry_repo.get_latest(session, engine_id, mission_id)
+            latest_row = _telemetry_repo.get_latest(
+                session,
+                engine_id,
+                mission_id,
+            )
+
             if latest_row is None:
                 return None
 
             telemetry = {
                 "timestamp": latest_row.time.isoformat(),
+                "engine_id": latest_row.engine_id,
+                "mission_id": latest_row.mission_id,
                 "rpm": latest_row.rpm,
+                "torque": latest_row.torque,
                 "cht": latest_row.cht,
                 "egt": latest_row.egt,
                 "oil_pressure": latest_row.oil_pressure,
@@ -85,26 +106,44 @@ class ConnectionManager:
                 "vibration": latest_row.vibration,
             }
 
-            snapshots = _health_repo.get_by_engine(session, engine_id)
-            snapshots = [s for s in snapshots if s.mission_id == mission_id]
+            snapshots = _health_repo.get_by_engine(
+                session,
+                engine_id,
+            )
+
+            snapshots = [
+                s
+                for s in snapshots
+                if s.mission_id == mission_id
+            ]
 
             health = None
-            operating_state = None
+
             if snapshots:
-                s = snapshots[-1]
+                snapshot = snapshots[-1]
+
                 health = {
-                    "overall": s.overall,
-                    "thermal": s.thermal,
-                    "combustion": s.combustion,
-                    "lubrication": s.lubrication,
-                    "mechanical": s.mechanical,
+                    "overall": snapshot.overall,
+                    "thermal": snapshot.thermal,
+                    "combustion": snapshot.combustion,
+                    "lubrication": snapshot.lubrication,
+                    "mechanical": snapshot.mechanical,
                 }
 
-            window = _telemetry_repo.get_latest_window(session, engine_id, mission_id)
+            window = _telemetry_repo.get_latest_window(
+                session,
+                engine_id,
+                mission_id,
+            )
+
             if len(window) < 60:
                 ml_prediction = MLPrediction(
-                    anomaly_score=0.0, fault=None, confidence=0.0, rul_hours=None
+                    anomaly_score=0.0,
+                    fault=None,
+                    confidence=0.0,
+                    rul_hours=None,
                 )
+
             else:
                 telemetry_window = [
                     {
@@ -115,10 +154,16 @@ class ConnectionManager:
                         "oil_temperature": t.oil_temperature,
                         "fuel_flow": t.fuel_flow,
                         "vibration": t.vibration,
+                        "torque": t.torque,
                     }
                     for t in window
                 ]
-                ml_prediction = _twin_service.predictor.predict(telemetry_window)
+
+                ml_prediction = (
+                    _twin_service.predictor.predict(
+                        telemetry_window
+                    )
+                )
 
             prediction = {
                 "anomaly_score": ml_prediction.anomaly_score,
@@ -127,10 +172,14 @@ class ConnectionManager:
                 "rul_hours": ml_prediction.rul_hours,
             }
 
+            operating_state = None
+
             if health is not None:
-                operating_state = _twin_service._determine_operating_state(
-                    health["overall"],
-                    ml_prediction,
+                operating_state = (
+                    _twin_service._determine_operating_state(
+                        health["overall"],
+                        ml_prediction,
+                    )
                 )
 
             return {
@@ -142,6 +191,7 @@ class ConnectionManager:
                 "prediction": prediction,
                 "operating_state": operating_state,
             }
+
         finally:
             session.close()
 
@@ -149,12 +199,31 @@ class ConnectionManager:
 ws_manager = ConnectionManager()
 
 
-async def websocket_endpoint(websocket: WebSocket, engine_id: str, mission_id: str):
-    await ws_manager.connect(websocket, engine_id, mission_id)
+async def websocket_endpoint(
+    websocket: WebSocket,
+    engine_id: str,
+    mission_id: str,
+):
+    await ws_manager.connect(
+        websocket,
+        engine_id,
+        mission_id,
+    )
+
     try:
         while True:
-            # Keep the connection alive; client isn't expected to send anything,
-            # but we still need to await something so disconnects are detected.
-            await websocket.receive_text()
+            await asyncio.sleep(60)
+
     except WebSocketDisconnect:
-        ws_manager.disconnect(websocket, engine_id, mission_id)
+        ws_manager.disconnect(
+            websocket,
+            engine_id,
+            mission_id,
+        )
+
+    except Exception:
+        ws_manager.disconnect(
+            websocket,
+            engine_id,
+            mission_id,
+        )

@@ -552,7 +552,6 @@ function HudSection({
         { name: "COMBUSTION", score: engineData.health.combustion, status: engineData.health.combustion < 80 ? "warn" : "ok" },
         { name: "LUBRICATION", score: engineData.health.lubrication, status: engineData.health.lubrication < 80 ? "warn" : "ok" },
         { name: "MECHANICAL", score: engineData.health.mechanical, status: engineData.health.mechanical < 80 ? "warn" : "ok" },
-        { name: "ELECTRICAL", score: engineData.health.electrical, status: engineData.health.electrical < 80 ? "warn" : "ok" },
     ];
 
     const sparklineData = engineData.healthHistory.length > 0
@@ -591,9 +590,7 @@ function HudSection({
             <div className="relative z-10 px-6 md:px-10 py-16 md:py-20">
                 <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
                     <div>
-                        <div className="text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#777" }}>
-                            /03 &nbsp; ENGINE STATUS &amp; REPLAY DIAGNOSTICS &mdash; BE-3 INTEGRATED
-                        </div>
+
                         <h2 className="mt-2 font-semibold" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}>
                             Live diagnostic readout
                         </h2>
@@ -838,7 +835,7 @@ function HudSection({
                                         {engineData.health.overall > 90 ? "NOMINAL" : engineData.health.overall > 75 ? "GOOD" : "DEGRADED"}
                                     </div>
                                     <div className="text-xs" style={{ color: "#888", fontFamily: "'JetBrains Mono', monospace" }}>
-                                        FAULT: {engineData.prediction.fault ?? "None detected"}
+                                        FAULT: {engineData.prediction.fault ?? "ML anomaly detected — fault classification unavailable"}
                                     </div>
                                     <div className="mt-3 flex items-center gap-2 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                                         <AlertTriangle size={12} color={statusColor[engineData.operatingState === "NOMINAL" ? "ok" : "critical"]} />
@@ -847,7 +844,7 @@ function HudSection({
                                         </span>
                                     </div>
                                     <div className="text-xs mt-1" style={{ color: "#888", fontFamily: "'JetBrains Mono', monospace" }}>
-                                        CONFIDENCE {engineData.prediction.confidence}% &bull; ANOMALY {engineData.prediction.anomaly_score.toFixed(2)}
+                                        MODEL ANOMALY SCORE {engineData.prediction.anomaly_score.toFixed(2)}
                                     </div>
                                 </div>
                             </div>
@@ -855,7 +852,7 @@ function HudSection({
                             <div className="px-5 pb-4 grid grid-cols-2 gap-y-2 text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#999" }}>
                                 <span>EST. RUL</span>
                                 <span style={{ color: "#fff" }}>
-                                    {engineData.prediction.rul_hours !== null ? `${engineData.prediction.rul_hours} hrs` : "N/A (Calibrating)"}
+                                    {engineData.prediction.rul_hours !== null ? `${engineData.prediction.rul_hours} hrs` : "N/A"}
                                 </span>
                                 <span>ENGINE SCOPE</span><span style={{ color: "#fff" }}>{engineData.selectedEngine}</span>
                                 <span>MISSION SCOPE</span><span style={{ color: "#7fd4ff" }}>{engineData.selectedMission}</span>

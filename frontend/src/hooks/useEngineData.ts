@@ -52,8 +52,8 @@ const DEFAULT_ALERTS: AlertData[] = [
 export function useEngineData() {
     const [engines, setEngines] = useState<string[]>(["ENG-TEST"]);
     const [missions, setMissions] = useState<string[]>(["MISSION-1"]);
-    const [selectedEngine, setSelectedEngine] = useState<string>("ENG-TEST");
-    const [selectedMission, setSelectedMission] = useState<string>("MISSION-1");
+    const [selectedEngine, setSelectedEngine] = useState<string>("engine_001");
+    const [selectedMission, setSelectedMission] = useState<string>("mission_001");
 
     const [telemetry, setTelemetry] = useState<TelemetryData>({
         timestamp: new Date().toISOString(),
@@ -166,26 +166,35 @@ export function useEngineData() {
             };
 
             socket.onmessage = (event) => {
+                console.log("[WS RECEIVED]", event.data);
+
                 try {
                     const data: WebSocketUpdateMessage = JSON.parse(event.data);
+
                     if (data.type === "engine_update") {
                         if (data.telemetry) {
-                            setTelemetry(prev => ({ ...prev, ...data.telemetry }));
+                            setTelemetry(prev => ({
+                                ...prev,
+                                ...data.telemetry,
+                            }));
                         }
+
                         if (data.health) {
                             setHealth(data.health);
                             setIsWarmup(false);
-                        } else {
-                            setIsWarmup(true);
                         }
+
                         if (data.prediction) {
                             setPrediction(data.prediction);
                         }
+
                         if (data.operating_state) {
                             setOperatingState(data.operating_state);
                         }
                     }
-                } catch {}
+                } catch (error) {
+                    console.error("[WS ERROR]", error);
+                }
             };
 
             socket.onerror = () => {

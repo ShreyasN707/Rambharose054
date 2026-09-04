@@ -72,6 +72,7 @@ fprintf("Connected to MQTT telemetry.\n");
 %% Create live Simulation object
 
 sm = simulation(model_name);
+assignin('base', 'u', u);
 
 sm = setModelParameter( ...
     sm, ...

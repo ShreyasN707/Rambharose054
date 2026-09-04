@@ -96,6 +96,7 @@ def dashboard(
                 "cht": t.cht,
                 "egt": t.egt,
                 "oil_pressure": t.oil_pressure,
+                "torque": t.torque,
                 "oil_temperature": t.oil_temperature,
                 "fuel_flow": t.fuel_flow,
                 "vibration": t.vibration,

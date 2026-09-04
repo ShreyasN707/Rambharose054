@@ -25,7 +25,7 @@ _SCALER_PATH = _ARTIFACT_DIR / "scaler.pkl"
 # Sigmoid: anomaly_score = 1 / (1 + exp(-K * (mse - MIDPOINT)))
 # MIDPOINT is a guessed "typical healthy MSE" center point; K controls steepness.
 # These need tuning once real healthy/faulty telemetry streams are observed in the demo.
-_SIGMOID_K = 5.0
+_SIGMOID_K = 1.0
 _SIGMOID_MIDPOINT = 1.0
 
 # Scaler was fit on 8 features; model only takes 7 (torque excluded — see handoff doc).
@@ -118,6 +118,7 @@ class ModelPredictor(MLPredictor):
 
         # 7. Sigmoid calibration -> [0, 1].
         anomaly_score = _sigmoid_score(mse)
+        print(f"[ML] MSE={mse:.4f} anomaly_score={anomaly_score:.4f}")
 
         # No classifier head, no RUL head in this state_dict -> honestly None, not faked.
         # confidence also has no basis from this model — flagged, left at 0.0.
