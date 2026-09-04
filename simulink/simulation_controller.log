@@ -1,0 +1,7 @@
+INFO:     Started server process [100479]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
+/home/vedanth/Projects/Rambharose054/simulink/simulation_controller.py:20: DeprecationWarning: Callback API version 1 is deprecated, update to latest version
+  client = mqtt.Client()
+INFO:     172.18.0.4:36318 - "POST /simulation/start HTTP/1.1" 200 OK

@@ -95,8 +95,8 @@ def start_simulation():
         simulation_process = subprocess.Popen(
             START_COMMAND,
             cwd=SIMULINK_DIR,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             start_new_session=True,
         )
 

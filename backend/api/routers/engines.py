@@ -49,7 +49,26 @@ def list_engines(
         ]
     )
 
+@router.get("/engines/{engine_id}/simulation/status")
+def get_simulation_status(
+    engine_id: str,
+    session: Session = Depends(get_session),
+    telemetry_repo: TelemetryRepository = Depends(get_telemetry_repo),
+):
 
+    try:
+        response = requests.get(
+            f"{SIMULATION_CONTROLLER_URL}/simulation/status",
+            timeout=5,
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Failed to get simulation status: {exc}",
+        )
+        
 @router.get(
     "/engines/{engine_id}",
     response_model=EngineSummary,
@@ -59,8 +78,6 @@ def get_engine(
     session: Session = Depends(get_session),
     telemetry_repo: TelemetryRepository = Depends(get_telemetry_repo),
 ):
-    if engine_id not in telemetry_repo.get_distinct_engines(session):
-        raise EngineNotFoundError(engine_id)
 
     return EngineSummary(engine_id=engine_id)
 
@@ -139,8 +156,6 @@ def start_simulation(
         get_telemetry_repo
     ),
 ):
-    if engine_id not in telemetry_repo.get_distinct_engines(session):
-        raise EngineNotFoundError(engine_id)
 
     try:
         response = requests.post(
@@ -167,8 +182,6 @@ def stop_simulation(
         get_telemetry_repo
     ),
 ):
-    if engine_id not in telemetry_repo.get_distinct_engines(session):
-        raise EngineNotFoundError(engine_id)
 
     try:
         response = requests.post(
