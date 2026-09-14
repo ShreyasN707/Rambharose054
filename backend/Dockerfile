@@ -12,5 +12,10 @@ COPY telemetry ./telemetry
 COPY twin ./twin
 COPY api ./api
 COPY ml_artifacts ./ml_artifacts
+COPY entrypoint.sh .
+
 ENV PYTHONPATH=/app:/app/telemetry
+RUN chmod +x entrypoint.sh
+
+ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
 CMD ["python", "-u", "-m", "telemetry.app"]

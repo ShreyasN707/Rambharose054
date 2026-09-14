@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Layers, Monitor, Lock, Zap, RotateCcw, RotateCw, Move3d } from "lucide-react";
+import { useEffect, useRef, useCallback, useState } from "react";
+import { Move3d, RotateCcw, RotateCw } from "lucide-react";
 import type { TelemetryData } from "./types/api";
 
 interface GaugeProps {
@@ -49,17 +49,17 @@ function AnalogGauge({ value, max, label, unit, majorTicks, minorPerMajor, redZo
 
     return (
         <svg viewBox={`0 0 ${S} ${S + 24}`} className="w-full h-full">
-            <circle cx={cx} cy={cy} r={r + 6} stroke="#2a2a2a" strokeWidth="2" fill="none" />
-            <circle cx={cx} cy={cy} r={r} stroke="#1a1a1a" strokeWidth="1" fill="#0d0d0d" />
+            <circle cx={cx} cy={cy} r={r + 6} stroke="#4a4a4a" strokeWidth="2" fill="none" />
+            <circle cx={cx} cy={cy} r={r} stroke="#2a2a2a" strokeWidth="1" fill="#0d0d0d" />
             {ticks}
             <line x1={tail.x} y1={tail.y} x2={tip.x} y2={tip.y} stroke="#e8543f" strokeWidth="2.5" strokeLinecap="round"
                 style={{ transition: "all 0.3s ease-out" }} />
-            <circle cx={cx} cy={cy} r="6" fill="#333" stroke="#555" strokeWidth="1.5" />
+            <circle cx={cx} cy={cy} r="6" fill="#333" stroke="#777" strokeWidth="1.5" />
             <text x={cx} y={cy + 32} textAnchor="middle" fontSize="18" fontWeight="600" fill="#fff"
                 fontFamily="'Space Grotesk', sans-serif">{value}</text>
-            <text x={cx + 24} y={cy + 32} textAnchor="start" fontSize="8" fill="#888"
+            <text x={cx + 24} y={cy + 32} textAnchor="start" fontSize="8" fill="#c0c0c0"
                 fontFamily="'JetBrains Mono', monospace">{unit}</text>
-            <text x={cx} y={S + 14} textAnchor="middle" fontSize="9" fill="#777" letterSpacing="2"
+            <text x={cx} y={S + 14} textAnchor="middle" fontSize="9" fill="#c0c0c0" letterSpacing="2"
                 fontFamily="'JetBrains Mono', monospace">{label}</text>
         </svg>
     );
@@ -469,16 +469,16 @@ function TelemetryCell({ label, value, unit, color = "#fff", warn = false }: {
 }) {
     return (
         <div className="px-3 py-2" style={{
-            border: `1px solid ${warn ? "rgba(232,84,63,0.4)" : "#1a1a1a"}`,
-            borderRadius: 6, background: warn ? "rgba(232,84,63,0.05)" : "#0a0a0a",
+            border: `1px solid ${warn ? "rgba(232,84,63,0.5)" : "#3a3a3a"}`,
+            borderRadius: 6, background: warn ? "rgba(232,84,63,0.07)" : "#0a0a0a",
         }}>
-            <div className="text-[9px] mb-1" style={{
-                color: warn ? "#e8543f" : "#555",
+            <div className="text-[10px] mb-1 font-semibold" style={{
+                color: warn ? "#e8543f" : "#c0c0c0",
                 fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1,
             }}>{label}</div>
             <div className="flex items-baseline gap-1">
                 <span className="text-base font-semibold" style={{ color, fontFamily: "'Space Grotesk', sans-serif" }}>{value}</span>
-                <span className="text-[9px]" style={{ color: "#666", fontFamily: "'JetBrains Mono', monospace" }}>{unit}</span>
+                <span className="text-[10px]" style={{ color: "#b0b0b0", fontFamily: "'JetBrains Mono', monospace" }}>{unit}</span>
             </div>
         </div>
     );
@@ -532,63 +532,54 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
     return (
         <section style={{ background: "#0a0a0a", fontFamily: "'Space Grotesk', sans-serif" }} className="relative overflow-hidden">
             <div className="relative z-10 px-6 md:px-10 py-14">
-                <div className="text-xs mb-8" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#6f6f6f" }}>
+                <div className="text-sm mb-8 font-semibold" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#b0b0b0" }}>
                     /03 &nbsp; ENGINE SIMULATION DASHBOARD
                 </div>
 
                 <div style={{ overflow: "hidden", background: "#111" }}>
-                    <div className="flex items-center justify-between px-3 py-2 flex-wrap gap-2" style={{ background: "#151515", borderBottom: "1px solid #222" }}>
-                        <div className="flex items-center gap-1">
-                            {[Layers, Monitor, Lock, Zap].map((Icon, i) => (
-                                <button key={i} className="p-1.5 rounded hover:bg-white/5 transition" style={{ color: "#888" }}>
-                                    <Icon size={14} />
-                                </button>
-                            ))}
-                            <button className="ml-2 px-3 py-1 text-xs font-bold rounded"
-                                style={{ background: "#ef4444", color: "#fff", fontSize: 10 }}>CRANK</button>
-                        </div>
+                    <div className="flex items-center justify-between px-3 py-2 flex-wrap gap-2" style={{ background: "#151515", borderBottom: "1px solid #333" }}>
                         <div className="flex items-center gap-3">
                             {statusLights.map((s, i) => (
                                 <div key={i} className="flex items-center gap-1">
                                     <span style={{ width: 8, height: 8, borderRadius: "50%", background: s.color, boxShadow: s.color !== "#555" ? `0 0 6px ${s.color}` : "none" }} />
-                                    <span className="text-[9px] hidden sm:inline" style={{ color: "#666", fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</span>
+                                    <span className="text-[10px] hidden sm:inline font-semibold" style={{ color: "#d0d0d0", fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between px-4 py-2 flex-wrap gap-2" style={{ background: "#0f0f0f", borderBottom: "1px solid #1e1e1e" }}>
-                        <div className="text-[10px] flex items-center gap-4" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#777" }}>
+                    <div className="flex items-center justify-between px-4 py-2 flex-wrap gap-2" style={{ background: "#0f0f0f", borderBottom: "1px solid #333" }}>
+                        <div className="text-[11px] flex items-center gap-4 font-semibold" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#c0c0c0" }}>
                             <span>SHIFT LIGHT</span>
                         </div>
                         <ShiftLightBar activeCount={shiftActive} />
-                        <div className="text-[10px] flex items-center gap-4" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#777" }}>
+                        <div className="text-[11px] flex items-center gap-4 font-semibold" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#c0c0c0" }}>
                             <span>RPM <span style={{ color: "#fff" }}>{rpm}</span></span>
                             <span>OPTIMAL <span style={{ color: "#C6FF3D" }}>9000</span></span>
                         </div>
-                        <span className="text-[10px]" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#e8c34a" }}>STANDBY</span>
+                        <span className="text-[11px] font-bold" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#e8c34a" }}>STANDBY</span>
                     </div>
 
                     <div className="flex" style={{ minHeight: 480 }}>
                         <div className="flex-1 p-4" style={{ background: "#0d0d0d" }}>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 h-full" style={{ gridTemplateRows: "auto 1fr auto" }}>
-                                <div className="flex items-center justify-center p-2" style={{ border: "1px solid #1a1a1a", borderRadius: 6, background: "#0a0a0a" }}>
+                                <div className="flex items-center justify-center p-2" style={{ border: "1px solid #3a3a3a", borderRadius: 6, background: "#0a0a0a" }}>
                                     <div className="w-24 h-32">
                                         <PistonGraphic phase={phase * 3} />
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-center p-2" style={{ border: "1px solid #1a1a1a", borderRadius: 6, background: "#0a0a0a" }}>
+                                <div className="flex items-center justify-center p-2" style={{ border: "1px solid #3a3a3a", borderRadius: 6, background: "#0a0a0a" }}>
                                     <div className="w-28 h-28">
                                         <ClutchPlateGraphic rotation={tick * 0.3} />
                                     </div>
                                 </div>
-                                <div className="hidden md:flex items-center justify-center p-2" style={{ border: "1px solid #1a1a1a", borderRadius: 6, background: "#0a0a0a" }}>
+                                <div className="hidden md:flex items-center justify-center p-2" style={{ border: "1px solid #3a3a3a", borderRadius: 6, background: "#0a0a0a" }}>
                                     <div className="w-24 h-32">
                                         <RadiatorGraphic />
                                     </div>
                                 </div>
                                 <div className="col-span-2 md:col-span-3 flex items-center justify-center p-3"
-                                    style={{ border: "1px solid #1a1a1a", borderRadius: 6, background: "#0a0a0a", position: "relative", overflow: "hidden" }}>
+                                    style={{ border: "1px solid #3a3a3a", borderRadius: 6, background: "#0a0a0a", position: "relative", overflow: "hidden" }}>
                                     <div style={{ width: "100%", height: 280 }}>
                                         <Engine360Viewer />
                                     </div>
@@ -611,8 +602,8 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                                     <TelemetryCell label="AMBIENT TEMP" value={ambientTemp} unit="°C" />
                                 </div>
                                 <div className="col-span-2 md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    <div className="px-3 py-2" style={{ border: "1px solid #1a1a1a", borderRadius: 6, background: "#0a0a0a" }}>
-                                        <div className="text-[9px] mb-1 flex justify-between" style={{ color: "#555", fontFamily: "'JetBrains Mono', monospace" }}>
+                                    <div className="px-3 py-2" style={{ border: "1px solid #3a3a3a", borderRadius: 6, background: "#0a0a0a" }}>
+                                        <div className="text-[10px] mb-1 flex justify-between font-semibold" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>
                                             <span>THROTTLE</span>
                                             <span style={{ color: "#eab308" }}>{throttle}%</span>
                                         </div>
@@ -624,8 +615,8 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                                             }} />
                                         </div>
                                     </div>
-                                    <div className="px-3 py-2" style={{ border: "1px solid #1a1a1a", borderRadius: 6, background: "#0a0a0a" }}>
-                                        <div className="text-[9px] mb-1 flex justify-between" style={{ color: "#555", fontFamily: "'JetBrains Mono', monospace" }}>
+                                    <div className="px-3 py-2" style={{ border: "1px solid #3a3a3a", borderRadius: 6, background: "#0a0a0a" }}>
+                                        <div className="text-[10px] mb-1 flex justify-between font-semibold" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>
                                             <span>ENGINE LOAD</span>
                                             <span style={{ color: "#3b82f6" }}>{engineLoad}%</span>
                                         </div>
@@ -641,13 +632,13 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                             </div>
                         </div>
 
-                        <div className="hidden lg:flex flex-col w-56 shrink-0" style={{ background: "#111", borderLeft: "1px solid #1e1e1e" }}>
+                        <div className="hidden lg:flex flex-col w-56 shrink-0" style={{ background: "#111", borderLeft: "1px solid #3a3a3a" }}>
                             <div className="px-2 pt-3">
                                 <AnalogGauge value={rpm} max={12000} label="ENGINE SPEED" unit="rpm"
                                     majorTicks={12} minorPerMajor={5} redZone={9000} />
                             </div>
-                            <div className="flex-1 px-3 py-3 flex flex-col gap-2 overflow-y-auto" style={{ borderTop: "1px solid #1e1e1e" }}>
-                                <div className="text-[9px] font-bold mb-1" style={{ color: "#666", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>
+                            <div className="flex-1 px-3 py-3 flex flex-col gap-2 overflow-y-auto" style={{ borderTop: "1px solid #3a3a3a" }}>
+                                <div className="text-[10px] font-bold mb-1" style={{ color: "#d0d0d0", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>
                                     KEY PARAMETERS
                                 </div>
                                 {[
@@ -665,17 +656,17 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                                     { label: "THROTTLE", val: `${throttle}%`, unit: "", col: "#eab308" },
                                     { label: "ENG LOAD", val: `${engineLoad}%`, unit: "", col: "#3b82f6" },
                                 ].map((p, i) => (
-                                    <div key={i} className="flex items-center justify-between py-1" style={{ borderBottom: "1px solid #1a1a1a" }}>
-                                        <span className="text-[9px]" style={{ color: "#555", fontFamily: "'JetBrains Mono', monospace" }}>{p.label}</span>
-                                        <span className="text-[11px] font-semibold" style={{ color: p.col, fontFamily: "'Space Grotesk', sans-serif" }}>
-                                            {p.val} <span className="text-[8px]" style={{ color: "#666" }}>{p.unit}</span>
+                                    <div key={i} className="flex items-center justify-between py-1" style={{ borderBottom: "1px solid #3a3a3a" }}>
+                                        <span className="text-[10px]" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>{p.label}</span>
+                                        <span className="text-[12px] font-semibold" style={{ color: p.col, fontFamily: "'Space Grotesk', sans-serif" }}>
+                                            {p.val} <span className="text-[9px]" style={{ color: "#b0b0b0" }}>{p.unit}</span>
                                         </span>
                                     </div>
                                 ))}
                             </div>
-                            <div className="px-3 py-3" style={{ borderTop: "1px solid #1e1e1e" }}>
+                            <div className="px-3 py-3" style={{ borderTop: "1px solid #3a3a3a" }}>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[9px]" style={{ color: "#555", fontFamily: "'JetBrains Mono', monospace" }}>ELAPSED</span>
+                                    <span className="text-[10px] font-semibold" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>ELAPSED</span>
                                     <span className="text-sm font-bold" style={{ color: "#3b82f6", fontFamily: "'JetBrains Mono', monospace" }}>{timeStr}</span>
                                 </div>
                             </div>
