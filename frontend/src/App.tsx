@@ -705,6 +705,91 @@ function HudSection({
                     )}
                 </div>
 
+                {/* ── FAULT INJECTION PANEL ── */}
+                <div
+                    className="mb-6 p-5"
+                    style={{ border: "1px solid #5a1a1a", background: "#0e0808" }}
+                >
+                    <div
+                        className="flex items-center justify-between mb-4"
+                        style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                    >
+                        <span className="text-base font-bold flex items-center gap-2" style={{ color: "#e8543f" }}>
+                            <AlertTriangle size={15} />
+                            FAULT INJECTION
+                        </span>
+                        <span
+                            className="text-xs px-2 py-1"
+                            style={{
+                                border: "1px solid #5a1a1a",
+                                color: "#e8543f",
+                                fontFamily: "'JetBrains Mono', monospace",
+                                opacity: 0.8,
+                            }}
+                        >
+                            ⚠ SIMULATION ONLY
+                        </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        {/* Clear / Healthy */}
+                        <button
+                            onClick={() => handleInjectFault(0)}
+                            disabled={isInjectingFault || simulationStatus !== "running"}
+                            className="px-4 py-2 text-xs font-bold transition"
+                            title="Inject fault_id=0 — clears any active fault, sets engine to healthy"
+                            style={{
+                                border: "1px solid #22c55e",
+                                background: isInjectingFault || simulationStatus !== "running" ? "#111" : "rgba(34,197,94,0.12)",
+                                color: isInjectingFault || simulationStatus !== "running" ? "#444" : "#22c55e",
+                                cursor: isInjectingFault || simulationStatus !== "running" ? "not-allowed" : "pointer",
+                                fontFamily: "'JetBrains Mono', monospace",
+                            }}
+                        >
+                            ✓ CLEAR / HEALTHY
+                        </button>
+
+                        {/* Fault buttons 1–5 */}
+                        {[
+                            { id: 1, label: "F1: HIGH TEMP",     desc: "Cylinder head overheat simulation" },
+                            { id: 2, label: "F2: OIL LOSS",      desc: "Oil pressure drop below threshold" },
+                            { id: 3, label: "F3: VIBRATION",     desc: "Abnormal mechanical vibration" },
+                            { id: 4, label: "F4: FUEL ANOMALY",  desc: "Fuel flow irregularity" },
+                            { id: 5, label: "F5: COMBUSTION",    desc: "Combustion misfire / EGT spike" },
+                        ].map(({ id, label, desc }) => (
+                            <button
+                                key={id}
+                                onClick={() => handleInjectFault(id)}
+                                disabled={isInjectingFault || simulationStatus !== "running"}
+                                title={desc}
+                                className="px-4 py-2 text-xs font-bold transition"
+                                style={{
+                                    border: "1px solid rgba(232,84,63,0.6)",
+                                    background: isInjectingFault || simulationStatus !== "running"
+                                        ? "#111"
+                                        : "rgba(232,84,63,0.1)",
+                                    color: isInjectingFault || simulationStatus !== "running"
+                                        ? "#444"
+                                        : "#e8543f",
+                                    cursor: isInjectingFault || simulationStatus !== "running"
+                                        ? "not-allowed"
+                                        : "pointer",
+                                    fontFamily: "'JetBrains Mono', monospace",
+                                }}
+                            >
+                                {isInjectingFault ? "INJECTING…" : label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div
+                        className="mt-3 text-xs"
+                        style={{ color: "#885555", fontFamily: "'JetBrains Mono', monospace" }}
+                    >
+                        Buttons are enabled only while simulation is RUNNING. Hover a button to see the fault description.
+                    </div>
+                </div>
+
                 {replayStatus && (
                     <div className="mb-6 px-4 py-2 text-xs rounded" style={{ background: "rgba(127,212,255,0.1)", border: "1px solid #7fd4ff", color: "#7fd4ff", fontFamily: "'JetBrains Mono', monospace" }}>
                         {replayStatus}
