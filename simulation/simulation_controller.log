@@ -1,18 +1,1721 @@
-INFO:     Started server process [10491]
+INFO:     Started server process [8532]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
-INFO:     172.18.0.4:46346 - "GET /simulation/status HTTP/1.1" 200 OK
-INFO:     172.18.0.4:46350 - "GET /simulation/status HTTP/1.1" 200 OK
-INFO:     172.18.0.4:41264 - "GET /simulation/status HTTP/1.1" 200 OK
-INFO:     172.18.0.4:41268 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.5:54834 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.5:54848 - "GET /simulation/status HTTP/1.1" 200 OK
 /home/vedanth/Projects/Rambharose054/simulation/simulation_controller.py:20: DeprecationWarning: Callback API version 1 is deprecated, update to latest version
   client = mqtt.Client()
-INFO:     172.18.0.4:38888 - "POST /simulation/start HTTP/1.1" 200 OK
-INFO:     172.18.0.4:54726 - "GET /simulation/status HTTP/1.1" 200 OK
-INFO:     172.18.0.4:54730 - "GET /simulation/status HTTP/1.1" 200 OK
-INFO:     172.18.0.4:47884 - "POST /simulation/stop HTTP/1.1" 200 OK
-INFO:     172.18.0.4:41898 - "GET /simulation/status HTTP/1.1" 200 OK
-INFO:     172.18.0.4:41904 - "GET /simulation/status HTTP/1.1" 200 OK
-INFO:     172.18.0.4:41908 - "POST /simulation/start HTTP/1.1" 200 OK
-INFO:     172.18.0.4:41140 - "POST /simulation/stop HTTP/1.1" 200 OK
+INFO:     172.18.0.5:49532 - "POST /simulation/start HTTP/1.1" 200 OK
+/usr/lib64/python3.14/site-packages/numpy/_core/getlimits.py:552: UserWarning: Signature b'\x00\xd0\xcc\xcc\xcc\xcc\xcc\xcc\xfb\xbf\xd2\x1d\x00\x00\x00\x00' for <class 'numpy.longdouble'> does not match any known type: falling back to type probe function.
+This warnings indicates broken support for the dtype!
+  machar = _get_machar(dtype)
+Connected to MQTT telemetry.
+MESA-LOADER: failed to open dri: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so) (search paths /usr/lib64/gbm, suffix _gbm)
+
+========================================
+LIVE SIMULATION STARTED
+========================================
+Fault commands: MQTT
+Fault topic: engine/engine_001/fault
+Allowed fault IDs: 0, 1, 2, 3, 4
+========================================
+
+t=   1s | fault=0 | RPM= 1488.4 | Torque= 6.34 | CHT=   3.6 | EGT=   75.0
+t=   2s | fault=0 | RPM= 2701.6 | Torque= 7.39 | CHT=   8.4 | EGT=  247.7
+t=   3s | fault=0 | RPM= 3390.5 | Torque= 9.52 | CHT=  15.3 | EGT=  425.4
+t=   4s | fault=0 | RPM= 3726.5 | Torque=10.00 | CHT=  18.2 | EGT=  554.0
+t=   5s | fault=0 | RPM= 3878.1 | Torque= 9.74 | CHT=  19.8 | EGT=  631.2
+t=   6s | fault=0 | RPM= 3944.5 | Torque=10.00 | CHT=  21.6 | EGT=  674.9
+t=   7s | fault=0 | RPM= 3972.9 | Torque=10.00 | CHT=  24.0 | EGT=  697.2
+t=   8s | fault=0 | RPM= 3985.2 | Torque=10.00 | CHT=  23.9 | EGT=  709.2
+t=   9s | fault=0 | RPM= 3989.8 | Torque= 8.55 | CHT=  23.8 | EGT=  712.5
+t=  10s | fault=0 | RPM= 3992.5 | Torque=10.00 | CHT=  25.2 | EGT=  718.2
+t=  11s | fault=0 | RPM= 3993.3 | Torque= 9.71 | CHT=  25.1 | EGT=  719.3
+t=  12s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  26.6 | EGT=  722.7
+t=  13s | fault=0 | RPM= 3993.8 | Torque= 9.52 | CHT=  26.6 | EGT=  721.7
+t=  14s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  26.4 | EGT=  723.6
+t=  15s | fault=0 | RPM= 3993.9 | Torque= 9.69 | CHT=  26.8 | EGT=  724.1
+t=  16s | fault=0 | RPM= 3993.4 | Torque= 8.07 | CHT=  28.2 | EGT=  722.8
+t=  17s | fault=0 | RPM= 3993.9 | Torque= 9.68 | CHT=  27.7 | EGT=  726.1
+t=  18s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  28.9 | EGT=  728.7
+t=  19s | fault=0 | RPM= 3993.6 | Torque= 8.43 | CHT=  29.0 | EGT=  726.3
+t=  20s | fault=0 | RPM= 3993.7 | Torque= 8.81 | CHT=  28.4 | EGT=  727.8
+t=  21s | fault=0 | RPM= 3993.9 | Torque= 9.62 | CHT=  29.7 | EGT=  730.0
+t=  22s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  30.9 | EGT=  732.0
+t=  23s | fault=0 | RPM= 3994.0 | Torque= 9.78 | CHT=  30.1 | EGT=  732.2
+t=  24s | fault=0 | RPM= 3993.5 | Torque= 8.23 | CHT=  29.6 | EGT=  731.0
+t=  25s | fault=0 | RPM= 3993.9 | Torque= 9.56 | CHT=  29.0 | EGT=  733.9
+t=  26s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  30.9 | EGT=  736.6
+t=  27s | fault=0 | RPM= 3993.7 | Torque= 9.05 | CHT=  29.4 | EGT=  735.2
+t=  28s | fault=0 | RPM= 3994.0 | Torque= 9.77 | CHT=  31.5 | EGT=  737.2
+t=  29s | fault=0 | RPM= 3993.8 | Torque= 9.29 | CHT=  30.6 | EGT=  737.5
+t=  30s | fault=0 | RPM= 3994.0 | Torque= 9.75 | CHT=  31.6 | EGT=  739.1
+t=  31s | fault=0 | RPM= 3993.9 | Torque= 9.48 | CHT=  32.9 | EGT=  739.8
+t=  32s | fault=0 | RPM= 3993.4 | Torque= 7.82 | CHT=  32.9 | EGT=  738.4
+t=  33s | fault=0 | RPM= 3993.6 | Torque= 8.54 | CHT=  33.3 | EGT=  740.4
+t=  34s | fault=0 | RPM= 3993.7 | Torque= 8.88 | CHT=  32.7 | EGT=  741.9
+t=  35s | fault=0 | RPM= 3993.9 | Torque= 9.43 | CHT=  32.5 | EGT=  743.7
+t=  36s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  33.2 | EGT=  745.5
+t=  37s | fault=0 | RPM= 3993.6 | Torque= 8.64 | CHT=  32.8 | EGT=  744.6
+t=  38s | fault=0 | RPM= 3993.7 | Torque= 9.04 | CHT=  34.5 | EGT=  746.1
+t=  39s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  34.6 | EGT=  748.6
+t=  40s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  34.3 | EGT=  749.8
+t=  41s | fault=0 | RPM= 3994.0 | Torque= 9.99 | CHT=  34.3 | EGT=  750.5
+t=  42s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  34.3 | EGT=  752.9
+t=  43s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  34.7 | EGT=  754.0
+t=  44s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  35.6 | EGT=  755.2
+t=  45s | fault=0 | RPM= 3994.0 | Torque= 9.93 | CHT=  34.5 | EGT=  754.4
+t=  46s | fault=0 | RPM= 3993.6 | Torque= 8.71 | CHT=  36.2 | EGT=  753.7
+t=  47s | fault=0 | RPM= 3993.7 | Torque= 9.05 | CHT=  37.1 | EGT=  755.1
+t=  48s | fault=0 | RPM= 3993.5 | Torque= 8.17 | CHT=  35.7 | EGT=  754.9
+t=  49s | fault=0 | RPM= 3993.9 | Torque= 9.45 | CHT=  37.4 | EGT=  757.7
+t=  50s | fault=0 | RPM= 3993.9 | Torque= 9.44 | CHT=  36.3 | EGT=  758.7
+t=  51s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  38.3 | EGT=  761.2
+t=  52s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  36.2 | EGT=  762.6
+t=  53s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  38.0 | EGT=  763.6
+t=  54s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  37.8 | EGT=  763.8
+t=  55s | fault=0 | RPM= 3993.3 | Torque= 7.76 | CHT=  38.8 | EGT=  761.3
+t=  56s | fault=0 | RPM= 3994.0 | Torque= 9.74 | CHT=  38.1 | EGT=  765.1
+t=  57s | fault=0 | RPM= 3993.5 | Torque= 8.32 | CHT=  36.9 | EGT=  764.1
+t=  58s | fault=0 | RPM= 3993.9 | Torque= 9.42 | CHT=  38.0 | EGT=  766.6
+t=  59s | fault=0 | RPM= 3993.5 | Torque= 8.43 | CHT=  39.8 | EGT=  766.2
+t=  60s | fault=0 | RPM= 3993.4 | Torque= 7.87 | CHT=  38.6 | EGT=  766.5
+t=  61s | fault=0 | RPM= 3993.8 | Torque= 9.40 | CHT=  40.7 | EGT=  769.6
+t=  62s | fault=0 | RPM= 3993.9 | Torque= 9.43 | CHT=  40.3 | EGT=  770.6
+t=  63s | fault=0 | RPM= 3993.9 | Torque= 9.62 | CHT=  39.7 | EGT=  771.9
+t=  64s | fault=0 | RPM= 3993.7 | Torque= 8.91 | CHT=  38.4 | EGT=  771.9
+t=  65s | fault=0 | RPM= 3994.0 | Torque= 9.96 | CHT=  39.0 | EGT=  774.4
+t=  66s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  40.6 | EGT=  775.8
+t=  67s | fault=0 | RPM= 3993.6 | Torque= 8.66 | CHT=  40.8 | EGT=  774.6
+t=  68s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  41.0 | EGT=  778.7
+t=  69s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  40.7 | EGT=  779.2
+t=  70s | fault=0 | RPM= 3993.6 | Torque= 8.62 | CHT=  41.3 | EGT=  777.5
+t=  71s | fault=0 | RPM= 3993.9 | Torque= 9.47 | CHT=  42.3 | EGT=  779.7
+t=  72s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  41.7 | EGT=  782.2
+t=  73s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  42.1 | EGT=  782.8
+t=  74s | fault=0 | RPM= 3994.0 | Torque= 9.93 | CHT=  41.6 | EGT=  783.3
+t=  75s | fault=0 | RPM= 3993.8 | Torque= 9.42 | CHT=  42.8 | EGT=  783.6
+t=  76s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  40.9 | EGT=  787.5
+t=  77s | fault=0 | RPM= 3995.1 | Torque=10.00 | CHT=  42.6 | EGT=  791.4
+t=  78s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  42.7 | EGT=  788.9
+t=  79s | fault=0 | RPM= 3995.2 | Torque=10.00 | CHT=  41.2 | EGT=  793.6
+t=  80s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  43.4 | EGT=  791.2
+t=  81s | fault=0 | RPM= 3993.9 | Torque= 9.50 | CHT=  43.3 | EGT=  789.7
+t=  82s | fault=0 | RPM= 3993.6 | Torque= 8.74 | CHT=  43.0 | EGT=  789.6
+t=  83s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  44.4 | EGT=  793.8
+t=  84s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  43.6 | EGT=  793.4
+t=  85s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  44.1 | EGT=  794.6
+t=  86s | fault=0 | RPM= 3994.0 | Torque= 9.89 | CHT=  44.5 | EGT=  795.3
+t=  87s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  46.0 | EGT=  798.5
+t=  88s | fault=0 | RPM= 3993.7 | Torque= 8.96 | CHT=  43.5 | EGT=  795.9
+t=  89s | fault=0 | RPM= 3994.0 | Torque= 9.90 | CHT=  44.7 | EGT=  798.3
+t=  90s | fault=0 | RPM= 3993.5 | Torque= 8.40 | CHT=  45.6 | EGT=  797.2
+t=  91s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  44.4 | EGT=  802.1
+t=  92s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  45.2 | EGT=  802.3
+t=  93s | fault=0 | RPM= 3993.7 | Torque= 9.12 | CHT=  44.6 | EGT=  801.2
+t=  94s | fault=0 | RPM= 3993.8 | Torque= 9.24 | CHT=  46.5 | EGT=  802.3
+t=  95s | fault=0 | RPM= 3993.8 | Torque= 9.22 | CHT=  46.2 | EGT=  803.3
+t=  96s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  45.2 | EGT=  806.8
+t=  97s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  45.7 | EGT=  808.2
+t=  98s | fault=0 | RPM= 3993.7 | Torque= 8.93 | CHT=  47.3 | EGT=  805.9
+t=  99s | fault=0 | RPM= 3993.2 | Torque= 7.34 | CHT=  46.1 | EGT=  804.6
+t= 100s | fault=0 | RPM= 3993.5 | Torque= 8.27 | CHT=  47.0 | EGT=  807.0
+t= 101s | fault=0 | RPM= 3993.9 | Torque= 9.47 | CHT=  47.4 | EGT=  809.7
+t= 102s | fault=0 | RPM= 3993.8 | Torque= 9.23 | CHT=  47.2 | EGT=  810.3
+t= 103s | fault=0 | RPM= 3993.8 | Torque= 9.34 | CHT=  47.0 | EGT=  811.5
+t= 104s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  47.5 | EGT=  813.5
+t= 105s | fault=0 | RPM= 3993.9 | Torque= 9.74 | CHT=  48.6 | EGT=  814.0
+t= 106s | fault=0 | RPM= 3993.6 | Torque= 8.53 | CHT=  48.0 | EGT=  813.3
+t= 107s | fault=0 | RPM= 3993.9 | Torque= 9.65 | CHT=  46.9 | EGT=  815.9
+t= 108s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  47.7 | EGT=  818.1
+t= 109s | fault=0 | RPM= 3993.9 | Torque= 9.73 | CHT=  48.4 | EGT=  818.0
+t= 110s | fault=0 | RPM= 3993.6 | Torque= 8.72 | CHT=  48.4 | EGT=  817.6
+t= 111s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  49.7 | EGT=  821.4
+t= 112s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  48.8 | EGT=  822.6
+t= 113s | fault=0 | RPM= 3993.4 | Torque= 8.17 | CHT=  49.9 | EGT=  819.8
+t= 114s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  49.2 | EGT=  825.2
+t= 115s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  49.7 | EGT=  826.1
+t= 116s | fault=0 | RPM= 3993.7 | Torque= 8.96 | CHT=  49.1 | EGT=  823.9
+t= 117s | fault=0 | RPM= 3993.7 | Torque= 9.11 | CHT=  50.4 | EGT=  825.1
+t= 118s | fault=0 | RPM= 3993.8 | Torque= 9.32 | CHT=  49.9 | EGT=  826.4
+t= 119s | fault=0 | RPM= 3994.0 | Torque= 9.98 | CHT=  50.6 | EGT=  828.3
+t= 120s | fault=0 | RPM= 3993.6 | Torque= 8.58 | CHT=  49.4 | EGT=  827.4
+t= 121s | fault=0 | RPM= 3993.7 | Torque= 9.03 | CHT=  50.3 | EGT=  829.0
+t= 122s | fault=0 | RPM= 3993.9 | Torque= 9.65 | CHT=  49.6 | EGT=  830.9
+t= 123s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  49.5 | EGT=  833.1
+t= 124s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  51.1 | EGT=  834.3
+t= 125s | fault=0 | RPM= 3993.8 | Torque= 9.32 | CHT=  50.2 | EGT=  833.4
+t= 126s | fault=0 | RPM= 3993.8 | Torque= 9.20 | CHT=  51.4 | EGT=  834.2
+t= 127s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  50.9 | EGT=  837.1
+t= 128s | fault=0 | RPM= 3993.8 | Torque= 9.24 | CHT=  52.0 | EGT=  836.3
+t= 129s | fault=0 | RPM= 3993.7 | Torque= 8.96 | CHT=  51.5 | EGT=  836.9
+t= 130s | fault=0 | RPM= 3993.8 | Torque= 9.37 | CHT=  52.1 | EGT=  838.5
+t= 131s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  52.5 | EGT=  840.9
+t= 132s | fault=0 | RPM= 3993.7 | Torque= 9.09 | CHT=  52.9 | EGT=  840.1
+t= 133s | fault=0 | RPM= 3993.6 | Torque= 8.66 | CHT=  51.8 | EGT=  840.5
+t= 134s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  51.5 | EGT=  844.3
+t= 135s | fault=0 | RPM= 3993.9 | Torque= 9.57 | CHT=  52.4 | EGT=  843.7
+t= 136s | fault=0 | RPM= 3993.7 | Torque= 8.98 | CHT=  52.8 | EGT=  843.9
+t= 137s | fault=0 | RPM= 3993.7 | Torque= 9.06 | CHT=  53.6 | EGT=  845.0
+t= 138s | fault=0 | RPM= 3993.8 | Torque= 9.37 | CHT=  53.0 | EGT=  846.5
+t= 139s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  53.3 | EGT=  849.9
+t= 140s | fault=0 | RPM= 3993.9 | Torque= 9.52 | CHT=  52.7 | EGT=  848.7
+t= 141s | fault=0 | RPM= 3993.6 | Torque= 8.59 | CHT=  53.0 | EGT=  848.4
+t= 142s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  53.9 | EGT=  852.7
+t= 143s | fault=0 | RPM= 3994.0 | Torque= 9.99 | CHT=  54.0 | EGT=  852.3
+t= 144s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  55.0 | EGT=  853.8
+t= 145s | fault=0 | RPM= 3993.3 | Torque= 7.83 | CHT=  53.5 | EGT=  851.3
+t= 146s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  54.4 | EGT=  856.3
+t= 147s | fault=0 | RPM= 3994.0 | Torque= 9.86 | CHT=  53.1 | EGT=  856.1
+t= 148s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  53.7 | EGT=  858.4
+t= 149s | fault=0 | RPM= 3994.0 | Torque= 9.97 | CHT=  54.1 | EGT=  858.3
+t= 150s | fault=0 | RPM= 3993.8 | Torque= 9.48 | CHT=  54.2 | EGT=  858.6
+t= 151s | fault=0 | RPM= 3993.8 | Torque= 9.20 | CHT=  54.1 | EGT=  859.2
+t= 152s | fault=0 | RPM= 3993.8 | Torque= 9.39 | CHT=  55.0 | EGT=  860.5
+t= 153s | fault=0 | RPM= 3994.0 | Torque= 9.89 | CHT=  55.1 | EGT=  862.2
+t= 154s | fault=0 | RPM= 3993.9 | Torque= 9.73 | CHT=  55.5 | EGT=  862.9
+t= 155s | fault=0 | RPM= 3994.0 | Torque= 9.88 | CHT=  54.6 | EGT=  864.2
+t= 156s | fault=0 | RPM= 3993.7 | Torque= 8.94 | CHT=  56.3 | EGT=  863.8
+t= 157s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  55.9 | EGT=  867.7
+t= 158s | fault=0 | RPM= 3993.5 | Torque= 8.49 | CHT=  54.8 | EGT=  865.2
+t= 159s | fault=0 | RPM= 3993.7 | Torque= 8.92 | CHT=  56.0 | EGT=  866.8
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_asahi.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_broadcom.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_dzn.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_freedreno.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_intel_hasvk.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_intel.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_lvp.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_nouveau.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_panfrost.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_powervr_mesa.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_radeon.so. Ignoring this JSON
+Error: Loader Message: setup_loader_term_phys_devs:  Failed to detect any valid GPUs in the current config
+Warning: vkEnumeratePhysicalDevices
+    at GatherPhysicalDevices (../../third_party/dawn/src/dawn/native/vulkan/VulkanInfo.cpp:148)
+
+t= 160s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  56.9 | EGT=  870.9
+t= 161s | fault=0 | RPM= 3993.7 | Torque= 9.14 | CHT=  56.0 | EGT=  869.1
+t= 162s | fault=0 | RPM= 3993.8 | Torque= 9.45 | CHT=  56.4 | EGT=  870.5
+t= 163s | fault=0 | RPM= 3993.9 | Torque= 9.83 | CHT=  55.8 | EGT=  872.1
+t= 164s | fault=0 | RPM= 3993.7 | Torque= 9.08 | CHT=  56.3 | EGT=  872.0
+t= 165s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  57.4 | EGT=  874.9
+t= 166s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  55.7 | EGT=  877.1
+t= 167s | fault=0 | RPM= 3993.8 | Torque= 9.43 | CHT=  56.6 | EGT=  875.5
+t= 168s | fault=0 | RPM= 3993.5 | Torque= 8.48 | CHT=  56.7 | EGT=  875.2
+t= 169s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  56.6 | EGT=  878.6
+t= 170s | fault=0 | RPM= 3993.9 | Torque= 9.68 | CHT=  56.7 | EGT=  878.9
+t= 171s | fault=0 | RPM= 3993.7 | Torque= 8.95 | CHT=  57.7 | EGT=  878.8
+t= 172s | fault=0 | RPM= 3993.9 | Torque= 9.59 | CHT=  57.3 | EGT=  880.7
+t= 173s | fault=0 | RPM= 3993.9 | Torque= 9.63 | CHT=  58.3 | EGT=  881.8
+t= 174s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  57.7 | EGT=  885.3
+t= 175s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  58.3 | EGT=  884.7
+t= 176s | fault=0 | RPM= 3994.6 | Torque=10.00 | CHT=  57.4 | EGT=  887.8
+t= 177s | fault=0 | RPM= 3993.8 | Torque= 9.26 | CHT=  57.3 | EGT=  885.2
+t= 178s | fault=0 | RPM= 3993.8 | Torque= 9.37 | CHT=  58.6 | EGT=  886.4
+t= 179s | fault=0 | RPM= 3993.7 | Torque= 9.08 | CHT=  58.4 | EGT=  887.0
+t= 180s | fault=0 | RPM= 3994.0 | Torque= 9.91 | CHT=  58.8 | EGT=  889.2
+t= 181s | fault=0 | RPM= 3993.9 | Torque= 9.60 | CHT=  59.2 | EGT=  889.7
+t= 182s | fault=0 | RPM= 3993.2 | Torque= 7.47 | CHT=  58.9 | EGT=  887.7
+t= 183s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  58.9 | EGT=  892.5
+t= 184s | fault=0 | RPM= 3993.6 | Torque= 8.87 | CHT=  60.0 | EGT=  891.7
+t= 185s | fault=0 | RPM= 3993.4 | Torque= 8.07 | CHT=  58.5 | EGT=  891.6
+t= 186s | fault=0 | RPM= 3993.7 | Torque= 8.94 | CHT=  57.9 | EGT=  893.8
+t= 187s | fault=0 | RPM= 3993.4 | Torque= 8.08 | CHT=  58.2 | EGT=  893.6
+t= 188s | fault=0 | RPM= 3993.9 | Torque= 9.81 | CHT=  59.0 | EGT=  897.0
+t= 189s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  58.8 | EGT=  898.4
+t= 190s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  59.3 | EGT=  900.4
+t= 191s | fault=0 | RPM= 3993.2 | Torque= 7.63 | CHT=  59.0 | EGT=  896.9
+t= 192s | fault=0 | RPM= 3994.0 | Torque= 9.93 | CHT=  60.2 | EGT=  901.2
+t= 193s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  58.4 | EGT=  903.2
+t= 194s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  59.3 | EGT=  903.6
+t= 195s | fault=0 | RPM= 3993.9 | Torque= 9.81 | CHT=  59.1 | EGT=  904.0
+t= 196s | fault=0 | RPM= 3993.6 | Torque= 8.81 | CHT=  59.1 | EGT=  903.6
+t= 197s | fault=0 | RPM= 3993.2 | Torque= 7.47 | CHT=  60.3 | EGT=  902.7
+t= 198s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  61.0 | EGT=  909.2
+t= 199s | fault=0 | RPM= 3994.0 | Torque= 9.96 | CHT=  61.1 | EGT=  908.2
+t= 200s | fault=0 | RPM= 3993.9 | Torque= 9.62 | CHT=  60.4 | EGT=  908.7
+t= 201s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  60.0 | EGT=  911.0
+t= 202s | fault=0 | RPM= 3993.6 | Torque= 8.66 | CHT=  58.6 | EGT=  909.4
+t= 203s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  62.2 | EGT=  913.3
+t= 204s | fault=0 | RPM= 3993.8 | Torque= 9.26 | CHT=  62.4 | EGT=  912.2
+t= 205s | fault=0 | RPM= 3993.6 | Torque= 8.78 | CHT=  61.2 | EGT=  912.5
+t= 206s | fault=0 | RPM= 3994.0 | Torque= 9.97 | CHT=  62.0 | EGT=  915.2
+t= 207s | fault=0 | RPM= 3993.9 | Torque= 9.61 | CHT=  61.8 | EGT=  915.7
+t= 208s | fault=0 | RPM= 3993.8 | Torque= 9.28 | CHT=  60.7 | EGT=  916.2
+t= 209s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  61.7 | EGT=  919.5
+t= 210s | fault=0 | RPM= 3993.6 | Torque= 8.87 | CHT=  61.6 | EGT=  917.7
+t= 211s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  61.1 | EGT=  920.5
+t= 212s | fault=0 | RPM= 3993.3 | Torque= 7.98 | CHT=  62.4 | EGT=  918.4
+t= 213s | fault=0 | RPM= 3993.5 | Torque= 8.56 | CHT=  61.5 | EGT=  920.2
+t= 214s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  61.5 | EGT=  923.6
+t= 215s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  61.5 | EGT=  924.4
+t= 216s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  63.2 | EGT=  926.6
+t= 217s | fault=0 | RPM= 3994.0 | Torque= 9.91 | CHT=  61.5 | EGT=  926.1
+t= 218s | fault=0 | RPM= 3993.6 | Torque= 8.88 | CHT=  62.2 | EGT=  925.7
+t= 219s | fault=0 | RPM= 3994.0 | Torque= 9.98 | CHT=  62.2 | EGT=  928.2
+t= 220s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  61.9 | EGT=  929.6
+t= 221s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  62.9 | EGT=  931.4
+t= 222s | fault=0 | RPM= 3993.8 | Torque= 9.42 | CHT=  63.3 | EGT=  930.4
+t= 223s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  61.7 | EGT=  932.3
+t= 224s | fault=0 | RPM= 3993.8 | Torque= 9.51 | CHT=  64.0 | EGT=  932.5
+t= 225s | fault=0 | RPM= 3993.4 | Torque= 8.32 | CHT=  62.5 | EGT=  931.8
+t= 226s | fault=0 | RPM= 3993.7 | Torque= 9.19 | CHT=  62.7 | EGT=  934.1
+t= 227s | fault=0 | RPM= 3993.5 | Torque= 8.50 | CHT=  64.1 | EGT=  934.1
+t= 228s | fault=0 | RPM= 3993.9 | Torque= 9.78 | CHT=  62.9 | EGT=  936.9
+t= 229s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  64.0 | EGT=  939.2
+t= 230s | fault=0 | RPM= 3993.7 | Torque= 9.25 | CHT=  63.9 | EGT=  938.2
+t= 231s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  63.4 | EGT=  942.3
+t= 232s | fault=0 | RPM= 3993.8 | Torque= 9.30 | CHT=  64.2 | EGT=  940.2
+t= 233s | fault=0 | RPM= 3993.7 | Torque= 9.25 | CHT=  64.2 | EGT=  941.2
+t= 234s | fault=0 | RPM= 3993.5 | Torque= 8.40 | CHT=  63.0 | EGT=  941.0
+t= 235s | fault=0 | RPM= 3993.9 | Torque= 9.85 | CHT=  63.8 | EGT=  944.0
+t= 236s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  65.5 | EGT=  945.9
+t= 237s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  63.6 | EGT=  946.9
+t= 238s | fault=0 | RPM= 3993.7 | Torque= 8.99 | CHT=  64.3 | EGT=  945.8
+t= 239s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  63.5 | EGT=  950.8
+t= 240s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  63.3 | EGT=  950.4
+t= 241s | fault=0 | RPM= 3993.6 | Torque= 8.86 | CHT=  64.3 | EGT=  948.6
+t= 242s | fault=0 | RPM= 3993.5 | Torque= 8.62 | CHT=  64.1 | EGT=  949.2
+t= 243s | fault=0 | RPM= 3993.7 | Torque= 9.21 | CHT=  64.8 | EGT=  951.1
+t= 244s | fault=0 | RPM= 3993.9 | Torque= 9.78 | CHT=  63.9 | EGT=  952.9
+t= 245s | fault=0 | RPM= 3994.7 | Torque=10.00 | CHT=  65.1 | EGT=  957.3
+t= 246s | fault=0 | RPM= 3993.8 | Torque= 9.29 | CHT=  64.9 | EGT=  954.2
+t= 247s | fault=0 | RPM= 3993.6 | Torque= 8.86 | CHT=  63.9 | EGT=  954.6
+t= 248s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  66.2 | EGT=  959.6
+t= 249s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  66.1 | EGT=  959.3
+t= 250s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  66.6 | EGT=  960.0
+t= 251s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  65.1 | EGT=  960.4
+t= 252s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  65.9 | EGT=  962.6
+t= 253s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  64.7 | EGT=  962.9
+t= 254s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  65.0 | EGT=  964.1
+t= 255s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  65.6 | EGT=  964.9
+t= 256s | fault=0 | RPM= 3993.9 | Torque= 9.71 | CHT=  65.2 | EGT=  964.8
+t= 257s | fault=0 | RPM= 3993.9 | Torque= 9.91 | CHT=  66.1 | EGT=  966.1
+t= 258s | fault=0 | RPM= 3993.9 | Torque= 9.78 | CHT=  66.2 | EGT=  966.9
+t= 259s | fault=0 | RPM= 3994.6 | Torque=10.00 | CHT=  67.1 | EGT=  970.9
+t= 260s | fault=0 | RPM= 3993.8 | Torque= 9.30 | CHT=  63.6 | EGT=  968.2
+t= 261s | fault=0 | RPM= 3993.8 | Torque= 9.43 | CHT=  65.5 | EGT=  969.4
+t= 262s | fault=0 | RPM= 3993.9 | Torque= 9.73 | CHT=  65.9 | EGT=  970.8
+t= 263s | fault=0 | RPM= 3993.9 | Torque= 9.85 | CHT=  66.3 | EGT=  972.0
+t= 264s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  65.6 | EGT=  973.9
+t= 265s | fault=0 | RPM= 3993.9 | Torque= 9.66 | CHT=  65.7 | EGT=  973.7
+t= 266s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  66.6 | EGT=  975.6
+t= 267s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  66.7 | EGT=  977.2
+t= 268s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  66.8 | EGT=  977.5
+t= 269s | fault=0 | RPM= 3993.7 | Torque= 9.12 | CHT=  66.5 | EGT=  976.9
+t= 270s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  65.9 | EGT=  980.6
+t= 271s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  65.9 | EGT=  980.7
+t= 272s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  66.9 | EGT=  981.7
+t= 273s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  66.2 | EGT=  983.4
+t= 274s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  67.7 | EGT=  985.5
+t= 275s | fault=0 | RPM= 3993.5 | Torque= 8.56 | CHT=  66.9 | EGT=  982.1
+t= 276s | fault=0 | RPM= 3993.6 | Torque= 8.94 | CHT=  67.0 | EGT=  983.7
+t= 277s | fault=0 | RPM= 3994.7 | Torque=10.00 | CHT=  68.0 | EGT=  989.6
+t= 278s | fault=0 | RPM= 3993.9 | Torque= 9.77 | CHT=  66.6 | EGT=  986.8
+t= 279s | fault=0 | RPM= 3994.0 | Torque= 9.97 | CHT=  67.8 | EGT=  988.1
+t= 280s | fault=0 | RPM= 3993.3 | Torque= 8.04 | CHT=  68.0 | EGT=  986.4
+t= 281s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  66.7 | EGT=  992.2
+t= 282s | fault=0 | RPM= 3993.9 | Torque= 9.90 | CHT=  68.5 | EGT=  991.0
+t= 283s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  67.5 | EGT=  992.3
+t= 284s | fault=0 | RPM= 3993.6 | Torque= 8.96 | CHT=  67.9 | EGT=  991.7
+t= 285s | fault=0 | RPM= 3993.8 | Torque= 9.45 | CHT=  67.5 | EGT=  993.4
+t= 286s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  66.5 | EGT=  996.1
+t= 287s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  68.0 | EGT=  998.8
+t= 288s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  68.0 | EGT=  999.5
+t= 289s | fault=0 | RPM= 3993.7 | Torque= 9.25 | CHT=  67.1 | EGT=  997.1
+t= 290s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  68.4 | EGT= 1000.0
+t= 291s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  67.9 | EGT= 1000.0
+t= 292s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  69.0 | EGT= 1000.0
+t= 293s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  68.2 | EGT= 1000.0
+t= 294s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  67.9 | EGT= 1000.0
+t= 295s | fault=0 | RPM= 3993.6 | Torque= 8.83 | CHT=  67.7 | EGT= 1000.0
+t= 296s | fault=0 | RPM= 3993.9 | Torque= 9.84 | CHT=  68.7 | EGT= 1000.0
+t= 297s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  68.6 | EGT= 1000.0
+t= 298s | fault=0 | RPM= 3993.6 | Torque= 8.88 | CHT=  68.4 | EGT= 1000.0
+t= 299s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  68.1 | EGT= 1000.0
+t= 300s | fault=0 | RPM= 3993.9 | Torque= 9.77 | CHT=  68.5 | EGT= 1000.0
+t= 301s | fault=0 | RPM= 3993.7 | Torque= 9.14 | CHT=  68.0 | EGT= 1000.0
+t= 302s | fault=0 | RPM= 3993.7 | Torque= 9.04 | CHT=  66.9 | EGT= 1000.0
+t= 303s | fault=0 | RPM= 3994.7 | Torque=10.00 | CHT=  68.4 | EGT= 1000.0
+t= 304s | fault=0 | RPM= 3993.8 | Torque= 9.53 | CHT=  68.2 | EGT= 1000.0
+t= 305s | fault=0 | RPM= 3993.7 | Torque= 9.30 | CHT=  67.6 | EGT= 1000.0
+t= 306s | fault=0 | RPM= 3993.9 | Torque= 9.69 | CHT=  70.0 | EGT= 1000.0
+t= 307s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  69.1 | EGT= 1000.0
+t= 308s | fault=0 | RPM= 3993.6 | Torque= 8.96 | CHT=  69.2 | EGT= 1000.0
+t= 309s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  68.5 | EGT= 1000.0
+t= 310s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  68.6 | EGT= 1000.0
+t= 311s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  68.6 | EGT= 1000.0
+t= 312s | fault=0 | RPM= 3993.6 | Torque= 9.02 | CHT=  69.1 | EGT= 1000.0
+t= 313s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  69.2 | EGT= 1000.0
+t= 314s | fault=0 | RPM= 3994.9 | Torque=10.00 | CHT=  70.0 | EGT= 1000.0
+t= 315s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  69.8 | EGT= 1000.0
+t= 316s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  68.6 | EGT= 1000.0
+t= 317s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  69.1 | EGT= 1000.0
+t= 318s | fault=0 | RPM= 3993.9 | Torque= 9.80 | CHT=  70.0 | EGT= 1000.0
+t= 319s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  68.9 | EGT= 1000.0
+t= 320s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  70.3 | EGT= 1000.0
+t= 321s | fault=0 | RPM= 3993.8 | Torque= 9.37 | CHT=  70.0 | EGT= 1000.0
+t= 322s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  69.1 | EGT= 1000.0
+t= 323s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  69.6 | EGT= 1000.0
+t= 324s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  70.9 | EGT= 1000.0
+t= 325s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  68.6 | EGT= 1000.0
+t= 326s | fault=0 | RPM= 3993.7 | Torque= 9.31 | CHT=  70.0 | EGT= 1000.0
+t= 327s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  70.1 | EGT= 1000.0
+t= 328s | fault=0 | RPM= 3994.8 | Torque=10.00 | CHT=  70.5 | EGT= 1000.0
+t= 329s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  70.2 | EGT= 1000.0
+t= 330s | fault=0 | RPM= 3993.7 | Torque= 9.20 | CHT=  70.3 | EGT= 1000.0
+t= 331s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  69.6 | EGT= 1000.0
+t= 332s | fault=0 | RPM= 3993.6 | Torque= 8.96 | CHT=  72.2 | EGT= 1000.0
+t= 333s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  70.0 | EGT= 1000.0
+t= 334s | fault=0 | RPM= 3993.7 | Torque= 9.22 | CHT=  70.1 | EGT= 1000.0
+t= 335s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  71.1 | EGT= 1000.0
+t= 336s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  69.8 | EGT= 1000.0
+t= 337s | fault=0 | RPM= 3993.9 | Torque= 9.94 | CHT=  69.9 | EGT= 1000.0
+t= 338s | fault=0 | RPM= 3993.7 | Torque= 9.17 | CHT=  72.0 | EGT= 1000.0
+t= 339s | fault=0 | RPM= 3993.4 | Torque= 8.37 | CHT=  70.5 | EGT= 1000.0
+t= 340s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  69.7 | EGT= 1000.0
+t= 341s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  70.0 | EGT= 1000.0
+t= 342s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  69.6 | EGT= 1000.0
+t= 343s | fault=0 | RPM= 3993.5 | Torque= 8.66 | CHT=  70.5 | EGT= 1000.0
+t= 344s | fault=0 | RPM= 3994.8 | Torque=10.00 | CHT=  70.3 | EGT= 1000.0
+t= 345s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  70.5 | EGT= 1000.0
+t= 346s | fault=0 | RPM= 3993.7 | Torque= 9.36 | CHT=  72.6 | EGT= 1000.0
+t= 347s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  71.4 | EGT= 1000.0
+t= 348s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  70.9 | EGT= 1000.0
+t= 349s | fault=0 | RPM= 3993.4 | Torque= 8.28 | CHT=  71.1 | EGT= 1000.0
+t= 350s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  70.7 | EGT= 1000.0
+t= 351s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  71.5 | EGT= 1000.0
+t= 352s | fault=0 | RPM= 3993.6 | Torque= 8.81 | CHT=  71.2 | EGT= 1000.0
+t= 353s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  71.1 | EGT= 1000.0
+t= 354s | fault=0 | RPM= 3993.8 | Torque= 9.41 | CHT=  71.1 | EGT= 1000.0
+t= 355s | fault=0 | RPM= 3993.7 | Torque= 9.36 | CHT=  71.5 | EGT= 1000.0
+t= 356s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  71.3 | EGT= 1000.0
+t= 357s | fault=0 | RPM= 3993.4 | Torque= 8.32 | CHT=  71.7 | EGT= 1000.0
+t= 358s | fault=0 | RPM= 3994.6 | Torque=10.00 | CHT=  72.3 | EGT= 1000.0
+t= 359s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  72.1 | EGT= 1000.0
+t= 360s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  70.4 | EGT= 1000.0
+t= 361s | fault=0 | RPM= 3993.3 | Torque= 7.83 | CHT=  72.3 | EGT= 1000.0
+t= 362s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  72.8 | EGT= 1000.0
+t= 363s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  71.9 | EGT= 1000.0
+t= 364s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  71.4 | EGT= 1000.0
+t= 365s | fault=0 | RPM= 3993.9 | Torque= 9.78 | CHT=  73.1 | EGT= 1000.0
+t= 366s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  71.5 | EGT= 1000.0
+t= 367s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  71.7 | EGT= 1000.0
+t= 368s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  72.7 | EGT= 1000.0
+t= 369s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  71.0 | EGT= 1000.0
+t= 370s | fault=0 | RPM= 3993.8 | Torque= 9.71 | CHT=  71.5 | EGT= 1000.0
+t= 371s | fault=0 | RPM= 3993.4 | Torque= 8.34 | CHT=  72.9 | EGT= 1000.0
+t= 372s | fault=0 | RPM= 3993.9 | Torque= 9.81 | CHT=  72.0 | EGT= 1000.0
+t= 373s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  70.7 | EGT= 1000.0
+t= 374s | fault=0 | RPM= 3993.4 | Torque= 8.35 | CHT=  72.6 | EGT= 1000.0
+t= 375s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  73.5 | EGT= 1000.0
+t= 376s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  72.0 | EGT= 1000.0
+t= 377s | fault=0 | RPM= 3993.9 | Torque= 9.92 | CHT=  72.2 | EGT= 1000.0
+t= 378s | fault=0 | RPM= 3993.7 | Torque= 9.16 | CHT=  72.0 | EGT= 1000.0
+t= 379s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  72.3 | EGT= 1000.0
+t= 380s | fault=0 | RPM= 3993.4 | Torque= 8.40 | CHT=  71.7 | EGT= 1000.0
+t= 381s | fault=0 | RPM= 3993.5 | Torque= 8.62 | CHT=  72.4 | EGT= 1000.0
+t= 382s | fault=0 | RPM= 3993.8 | Torque= 9.55 | CHT=  72.3 | EGT= 1000.0
+t= 383s | fault=0 | RPM= 3993.9 | Torque=10.00 | CHT=  72.8 | EGT= 1000.0
+t= 384s | fault=0 | RPM= 3993.5 | Torque= 8.69 | CHT=  72.3 | EGT= 1000.0
+t= 385s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  72.5 | EGT= 1000.0
+t= 386s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  71.6 | EGT= 1000.0
+t= 387s | fault=0 | RPM= 3993.6 | Torque= 9.00 | CHT=  73.3 | EGT= 1000.0
+t= 388s | fault=0 | RPM= 3993.7 | Torque= 9.38 | CHT=  73.0 | EGT= 1000.0
+t= 389s | fault=0 | RPM= 3993.6 | Torque= 8.91 | CHT=  71.4 | EGT= 1000.0
+t= 390s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  73.6 | EGT= 1000.0
+t= 391s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  72.9 | EGT= 1000.0
+t= 392s | fault=0 | RPM= 3993.2 | Torque= 7.75 | CHT=  72.6 | EGT= 1000.0
+t= 393s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  72.8 | EGT= 1000.0
+t= 394s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  73.3 | EGT= 1000.0
+t= 395s | fault=0 | RPM= 3993.8 | Torque= 9.58 | CHT=  73.8 | EGT= 1000.0
+t= 396s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  72.7 | EGT= 1000.0
+t= 397s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  72.4 | EGT= 1000.0
+t= 398s | fault=0 | RPM= 3993.9 | Torque=10.00 | CHT=  72.0 | EGT= 1000.0
+t= 399s | fault=0 | RPM= 3993.6 | Torque= 8.86 | CHT=  73.6 | EGT= 1000.0
+t= 400s | fault=0 | RPM= 3993.4 | Torque= 8.19 | CHT=  73.8 | EGT= 1000.0
+t= 401s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  73.9 | EGT= 1000.0
+t= 402s | fault=0 | RPM= 3993.9 | Torque= 9.91 | CHT=  74.1 | EGT= 1000.0
+INFO:     172.18.0.5:42908 - "POST /simulation/stop HTTP/1.1" 200 OK
+{Error using client>publish (line 1709)
+Python Error: KeyboardInterrupt
+} 
+INFO:     172.18.0.5:35950 - "POST /simulation/start HTTP/1.1" 200 OK
+/usr/lib64/python3.14/site-packages/numpy/_core/getlimits.py:552: UserWarning: Signature b'\x00\xd0\xcc\xcc\xcc\xcc\xcc\xcc\xfb\xbf\x92L\x00\x00\x00\x00' for <class 'numpy.longdouble'> does not match any known type: falling back to type probe function.
+This warnings indicates broken support for the dtype!
+  machar = _get_machar(dtype)
+Connected to MQTT telemetry.
+MESA-LOADER: failed to open dri: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so) (search paths /usr/lib64/gbm, suffix _gbm)
+
+========================================
+LIVE SIMULATION STARTED
+========================================
+Fault commands: MQTT
+Fault topic: engine/engine_001/fault
+Allowed fault IDs: 0, 1, 2, 3, 4
+========================================
+
+t=   1s | fault=0 | RPM= 1488.4 | Torque= 6.34 | CHT=   3.6 | EGT=   75.0
+t=   2s | fault=0 | RPM= 2701.6 | Torque= 7.39 | CHT=   8.4 | EGT=  247.7
+t=   3s | fault=0 | RPM= 3390.5 | Torque= 9.52 | CHT=  15.3 | EGT=  425.4
+t=   4s | fault=0 | RPM= 3726.5 | Torque=10.00 | CHT=  18.2 | EGT=  554.0
+t=   5s | fault=0 | RPM= 3878.1 | Torque= 9.74 | CHT=  19.8 | EGT=  631.2
+t=   6s | fault=0 | RPM= 3944.5 | Torque=10.00 | CHT=  21.6 | EGT=  674.9
+t=   7s | fault=0 | RPM= 3972.9 | Torque=10.00 | CHT=  24.0 | EGT=  697.2
+t=   8s | fault=0 | RPM= 3985.2 | Torque=10.00 | CHT=  23.9 | EGT=  709.2
+t=   9s | fault=0 | RPM= 3989.8 | Torque= 8.55 | CHT=  23.8 | EGT=  712.5
+t=  10s | fault=0 | RPM= 3992.5 | Torque=10.00 | CHT=  25.2 | EGT=  718.2
+t=  11s | fault=0 | RPM= 3993.3 | Torque= 9.71 | CHT=  25.1 | EGT=  719.3
+t=  12s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  26.6 | EGT=  722.7
+t=  13s | fault=0 | RPM= 3993.8 | Torque= 9.52 | CHT=  26.6 | EGT=  721.7
+t=  14s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  26.4 | EGT=  723.6
+t=  15s | fault=0 | RPM= 3993.9 | Torque= 9.69 | CHT=  26.8 | EGT=  724.1
+t=  16s | fault=0 | RPM= 3993.4 | Torque= 8.07 | CHT=  28.2 | EGT=  722.8
+t=  17s | fault=0 | RPM= 3993.9 | Torque= 9.68 | CHT=  27.7 | EGT=  726.1
+t=  18s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  28.9 | EGT=  728.7
+t=  19s | fault=0 | RPM= 3993.6 | Torque= 8.43 | CHT=  29.0 | EGT=  726.3
+t=  20s | fault=0 | RPM= 3993.7 | Torque= 8.81 | CHT=  28.4 | EGT=  727.8
+t=  21s | fault=0 | RPM= 3993.9 | Torque= 9.62 | CHT=  29.7 | EGT=  730.0
+t=  22s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  30.9 | EGT=  732.0
+t=  23s | fault=0 | RPM= 3994.0 | Torque= 9.78 | CHT=  30.1 | EGT=  732.2
+t=  24s | fault=0 | RPM= 3993.5 | Torque= 8.23 | CHT=  29.6 | EGT=  731.0
+t=  25s | fault=0 | RPM= 3993.9 | Torque= 9.56 | CHT=  29.0 | EGT=  733.9
+t=  26s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  30.9 | EGT=  736.6
+t=  27s | fault=0 | RPM= 3993.7 | Torque= 9.05 | CHT=  29.4 | EGT=  735.2
+t=  28s | fault=0 | RPM= 3994.0 | Torque= 9.77 | CHT=  31.5 | EGT=  737.2
+t=  29s | fault=0 | RPM= 3993.8 | Torque= 9.29 | CHT=  30.6 | EGT=  737.5
+t=  30s | fault=0 | RPM= 3994.0 | Torque= 9.75 | CHT=  31.6 | EGT=  739.1
+t=  31s | fault=0 | RPM= 3993.9 | Torque= 9.48 | CHT=  32.9 | EGT=  739.8
+t=  32s | fault=0 | RPM= 3993.4 | Torque= 7.82 | CHT=  32.9 | EGT=  738.4
+t=  33s | fault=0 | RPM= 3993.6 | Torque= 8.54 | CHT=  33.3 | EGT=  740.4
+t=  34s | fault=0 | RPM= 3993.7 | Torque= 8.88 | CHT=  32.7 | EGT=  741.9
+t=  35s | fault=0 | RPM= 3993.9 | Torque= 9.43 | CHT=  32.5 | EGT=  743.7
+t=  36s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  33.2 | EGT=  745.5
+t=  37s | fault=0 | RPM= 3993.6 | Torque= 8.64 | CHT=  32.8 | EGT=  744.6
+t=  38s | fault=0 | RPM= 3993.7 | Torque= 9.04 | CHT=  34.5 | EGT=  746.1
+t=  39s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  34.6 | EGT=  748.6
+t=  40s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  34.3 | EGT=  749.8
+t=  41s | fault=0 | RPM= 3994.0 | Torque= 9.99 | CHT=  34.3 | EGT=  750.5
+t=  42s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  34.3 | EGT=  752.9
+t=  43s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  34.7 | EGT=  754.0
+t=  44s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  35.6 | EGT=  755.2
+t=  45s | fault=0 | RPM= 3994.0 | Torque= 9.93 | CHT=  34.5 | EGT=  754.4
+t=  46s | fault=0 | RPM= 3993.6 | Torque= 8.71 | CHT=  36.2 | EGT=  753.7
+t=  47s | fault=0 | RPM= 3993.7 | Torque= 9.05 | CHT=  37.1 | EGT=  755.1
+t=  48s | fault=0 | RPM= 3993.5 | Torque= 8.17 | CHT=  35.7 | EGT=  754.9
+t=  49s | fault=0 | RPM= 3993.9 | Torque= 9.45 | CHT=  37.4 | EGT=  757.7
+t=  50s | fault=0 | RPM= 3993.9 | Torque= 9.44 | CHT=  36.3 | EGT=  758.7
+t=  51s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  38.3 | EGT=  761.2
+t=  52s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  36.2 | EGT=  762.6
+t=  53s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  38.0 | EGT=  763.6
+t=  54s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  37.8 | EGT=  763.8
+t=  55s | fault=0 | RPM= 3993.3 | Torque= 7.76 | CHT=  38.8 | EGT=  761.3
+t=  56s | fault=0 | RPM= 3994.0 | Torque= 9.74 | CHT=  38.1 | EGT=  765.1
+t=  57s | fault=0 | RPM= 3993.5 | Torque= 8.32 | CHT=  36.9 | EGT=  764.1
+t=  58s | fault=0 | RPM= 3993.9 | Torque= 9.42 | CHT=  38.0 | EGT=  766.6
+t=  59s | fault=0 | RPM= 3993.5 | Torque= 8.43 | CHT=  39.8 | EGT=  766.2
+t=  60s | fault=0 | RPM= 3993.4 | Torque= 7.87 | CHT=  38.6 | EGT=  766.5
+t=  61s | fault=0 | RPM= 3993.8 | Torque= 9.40 | CHT=  40.7 | EGT=  769.6
+t=  62s | fault=0 | RPM= 3993.9 | Torque= 9.43 | CHT=  40.3 | EGT=  770.6
+t=  63s | fault=0 | RPM= 3993.9 | Torque= 9.62 | CHT=  39.7 | EGT=  771.9
+t=  64s | fault=0 | RPM= 3993.7 | Torque= 8.91 | CHT=  38.4 | EGT=  771.9
+t=  65s | fault=0 | RPM= 3994.0 | Torque= 9.96 | CHT=  39.0 | EGT=  774.4
+t=  66s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  40.6 | EGT=  775.8
+t=  67s | fault=0 | RPM= 3993.6 | Torque= 8.66 | CHT=  40.8 | EGT=  774.6
+t=  68s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  41.0 | EGT=  778.7
+t=  69s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  40.7 | EGT=  779.2
+t=  70s | fault=0 | RPM= 3993.6 | Torque= 8.62 | CHT=  41.3 | EGT=  777.5
+t=  71s | fault=0 | RPM= 3993.9 | Torque= 9.47 | CHT=  42.3 | EGT=  779.7
+t=  72s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  41.7 | EGT=  782.2
+t=  73s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  42.1 | EGT=  782.8
+t=  74s | fault=0 | RPM= 3994.0 | Torque= 9.93 | CHT=  41.6 | EGT=  783.3
+t=  75s | fault=0 | RPM= 3993.8 | Torque= 9.42 | CHT=  42.8 | EGT=  783.6
+t=  76s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  40.9 | EGT=  787.5
+t=  77s | fault=0 | RPM= 3995.1 | Torque=10.00 | CHT=  42.6 | EGT=  791.4
+t=  78s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  42.7 | EGT=  788.9
+t=  79s | fault=0 | RPM= 3995.2 | Torque=10.00 | CHT=  41.2 | EGT=  793.6
+t=  80s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  43.4 | EGT=  791.2
+t=  81s | fault=0 | RPM= 3993.9 | Torque= 9.50 | CHT=  43.3 | EGT=  789.7
+t=  82s | fault=0 | RPM= 3993.6 | Torque= 8.74 | CHT=  43.0 | EGT=  789.6
+t=  83s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  44.4 | EGT=  793.8
+t=  84s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  43.6 | EGT=  793.4
+t=  85s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  44.1 | EGT=  794.6
+t=  86s | fault=0 | RPM= 3994.0 | Torque= 9.89 | CHT=  44.5 | EGT=  795.3
+t=  87s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  46.0 | EGT=  798.5
+t=  88s | fault=0 | RPM= 3993.7 | Torque= 8.96 | CHT=  43.5 | EGT=  795.9
+t=  89s | fault=0 | RPM= 3994.0 | Torque= 9.90 | CHT=  44.7 | EGT=  798.3
+t=  90s | fault=0 | RPM= 3993.5 | Torque= 8.40 | CHT=  45.6 | EGT=  797.2
+t=  91s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  44.4 | EGT=  802.1
+t=  92s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  45.2 | EGT=  802.3
+t=  93s | fault=0 | RPM= 3993.7 | Torque= 9.12 | CHT=  44.6 | EGT=  801.2
+t=  94s | fault=0 | RPM= 3993.8 | Torque= 9.24 | CHT=  46.5 | EGT=  802.3
+t=  95s | fault=0 | RPM= 3993.8 | Torque= 9.22 | CHT=  46.2 | EGT=  803.3
+t=  96s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  45.2 | EGT=  806.8
+t=  97s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  45.7 | EGT=  808.2
+t=  98s | fault=0 | RPM= 3993.7 | Torque= 8.93 | CHT=  47.3 | EGT=  805.9
+t=  99s | fault=0 | RPM= 3993.2 | Torque= 7.34 | CHT=  46.1 | EGT=  804.6
+t= 100s | fault=0 | RPM= 3993.5 | Torque= 8.27 | CHT=  47.0 | EGT=  807.0
+t= 101s | fault=0 | RPM= 3993.9 | Torque= 9.47 | CHT=  47.4 | EGT=  809.7
+t= 102s | fault=0 | RPM= 3993.8 | Torque= 9.23 | CHT=  47.2 | EGT=  810.3
+t= 103s | fault=0 | RPM= 3993.8 | Torque= 9.34 | CHT=  47.0 | EGT=  811.5
+t= 104s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  47.5 | EGT=  813.5
+t= 105s | fault=0 | RPM= 3993.9 | Torque= 9.74 | CHT=  48.6 | EGT=  814.0
+t= 106s | fault=0 | RPM= 3993.6 | Torque= 8.53 | CHT=  48.0 | EGT=  813.3
+t= 107s | fault=0 | RPM= 3993.9 | Torque= 9.65 | CHT=  46.9 | EGT=  815.9
+t= 108s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  47.7 | EGT=  818.1
+t= 109s | fault=0 | RPM= 3993.9 | Torque= 9.73 | CHT=  48.4 | EGT=  818.0
+t= 110s | fault=0 | RPM= 3993.6 | Torque= 8.72 | CHT=  48.4 | EGT=  817.6
+t= 111s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  49.7 | EGT=  821.4
+t= 112s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  48.8 | EGT=  822.6
+t= 113s | fault=0 | RPM= 3993.4 | Torque= 8.17 | CHT=  49.9 | EGT=  819.8
+t= 114s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  49.2 | EGT=  825.2
+t= 115s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  49.7 | EGT=  826.1
+t= 116s | fault=0 | RPM= 3993.7 | Torque= 8.96 | CHT=  49.1 | EGT=  823.9
+t= 117s | fault=0 | RPM= 3993.7 | Torque= 9.11 | CHT=  50.4 | EGT=  825.1
+t= 118s | fault=0 | RPM= 3993.8 | Torque= 9.32 | CHT=  49.9 | EGT=  826.4
+t= 119s | fault=0 | RPM= 3994.0 | Torque= 9.98 | CHT=  50.6 | EGT=  828.3
+t= 120s | fault=0 | RPM= 3993.6 | Torque= 8.58 | CHT=  49.4 | EGT=  827.4
+t= 121s | fault=0 | RPM= 3993.7 | Torque= 9.03 | CHT=  50.3 | EGT=  829.0
+t= 122s | fault=0 | RPM= 3993.9 | Torque= 9.65 | CHT=  49.6 | EGT=  830.9
+t= 123s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  49.5 | EGT=  833.1
+t= 124s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  51.1 | EGT=  834.3
+t= 125s | fault=0 | RPM= 3993.8 | Torque= 9.32 | CHT=  50.2 | EGT=  833.4
+t= 126s | fault=0 | RPM= 3993.8 | Torque= 9.20 | CHT=  51.4 | EGT=  834.2
+t= 127s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  50.9 | EGT=  837.1
+t= 128s | fault=0 | RPM= 3993.8 | Torque= 9.24 | CHT=  52.0 | EGT=  836.3
+t= 129s | fault=0 | RPM= 3993.7 | Torque= 8.96 | CHT=  51.5 | EGT=  836.9
+t= 130s | fault=0 | RPM= 3993.8 | Torque= 9.37 | CHT=  52.1 | EGT=  838.5
+t= 131s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  52.5 | EGT=  840.9
+t= 132s | fault=0 | RPM= 3993.7 | Torque= 9.09 | CHT=  52.9 | EGT=  840.1
+t= 133s | fault=0 | RPM= 3993.6 | Torque= 8.66 | CHT=  51.8 | EGT=  840.5
+t= 134s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  51.5 | EGT=  844.3
+t= 135s | fault=0 | RPM= 3993.9 | Torque= 9.57 | CHT=  52.4 | EGT=  843.7
+t= 136s | fault=0 | RPM= 3993.7 | Torque= 8.98 | CHT=  52.8 | EGT=  843.9
+t= 137s | fault=0 | RPM= 3993.7 | Torque= 9.06 | CHT=  53.6 | EGT=  845.0
+t= 138s | fault=0 | RPM= 3993.8 | Torque= 9.37 | CHT=  53.0 | EGT=  846.5
+t= 139s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  53.3 | EGT=  849.9
+t= 140s | fault=0 | RPM= 3993.9 | Torque= 9.52 | CHT=  52.7 | EGT=  848.7
+t= 141s | fault=0 | RPM= 3993.6 | Torque= 8.59 | CHT=  53.0 | EGT=  848.4
+t= 142s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  53.9 | EGT=  852.7
+t= 143s | fault=0 | RPM= 3994.0 | Torque= 9.99 | CHT=  54.0 | EGT=  852.3
+t= 144s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  55.0 | EGT=  853.8
+t= 145s | fault=0 | RPM= 3993.3 | Torque= 7.83 | CHT=  53.5 | EGT=  851.3
+t= 146s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  54.4 | EGT=  856.3
+t= 147s | fault=0 | RPM= 3994.0 | Torque= 9.86 | CHT=  53.1 | EGT=  856.1
+t= 148s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  53.7 | EGT=  858.4
+t= 149s | fault=0 | RPM= 3994.0 | Torque= 9.97 | CHT=  54.1 | EGT=  858.3
+t= 150s | fault=0 | RPM= 3993.8 | Torque= 9.48 | CHT=  54.2 | EGT=  858.6
+t= 151s | fault=0 | RPM= 3993.8 | Torque= 9.20 | CHT=  54.1 | EGT=  859.2
+t= 152s | fault=0 | RPM= 3993.8 | Torque= 9.39 | CHT=  55.0 | EGT=  860.5
+t= 153s | fault=0 | RPM= 3994.0 | Torque= 9.89 | CHT=  55.1 | EGT=  862.2
+t= 154s | fault=0 | RPM= 3993.9 | Torque= 9.73 | CHT=  55.5 | EGT=  862.9
+t= 155s | fault=0 | RPM= 3994.0 | Torque= 9.88 | CHT=  54.6 | EGT=  864.2
+t= 156s | fault=0 | RPM= 3993.7 | Torque= 8.94 | CHT=  56.3 | EGT=  863.8
+t= 157s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  55.9 | EGT=  867.7
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_asahi.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_broadcom.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_dzn.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_freedreno.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_intel_hasvk.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_intel.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_lvp.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_nouveau.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_panfrost.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_powervr_mesa.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_radeon.so. Ignoring this JSON
+Error: Loader Message: setup_loader_term_phys_devs:  Failed to detect any valid GPUs in the current config
+Warning: vkEnumeratePhysicalDevices
+    at GatherPhysicalDevices (../../third_party/dawn/src/dawn/native/vulkan/VulkanInfo.cpp:148)
+
+t= 158s | fault=0 | RPM= 3993.5 | Torque= 8.49 | CHT=  54.8 | EGT=  865.2
+t= 159s | fault=0 | RPM= 3993.7 | Torque= 8.92 | CHT=  56.0 | EGT=  866.8
+t= 160s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  56.9 | EGT=  870.9
+t= 161s | fault=0 | RPM= 3993.7 | Torque= 9.14 | CHT=  56.0 | EGT=  869.1
+t= 162s | fault=0 | RPM= 3993.8 | Torque= 9.45 | CHT=  56.4 | EGT=  870.5
+t= 163s | fault=0 | RPM= 3993.9 | Torque= 9.83 | CHT=  55.8 | EGT=  872.1
+t= 164s | fault=0 | RPM= 3993.7 | Torque= 9.08 | CHT=  56.3 | EGT=  872.0
+t= 165s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  57.4 | EGT=  874.9
+t= 166s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  55.7 | EGT=  877.1
+t= 167s | fault=0 | RPM= 3993.8 | Torque= 9.43 | CHT=  56.6 | EGT=  875.5
+t= 168s | fault=0 | RPM= 3993.5 | Torque= 8.48 | CHT=  56.7 | EGT=  875.2
+t= 169s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  56.6 | EGT=  878.6
+t= 170s | fault=0 | RPM= 3993.9 | Torque= 9.68 | CHT=  56.7 | EGT=  878.9
+t= 171s | fault=0 | RPM= 3993.7 | Torque= 8.95 | CHT=  57.7 | EGT=  878.8
+t= 172s | fault=0 | RPM= 3993.9 | Torque= 9.59 | CHT=  57.3 | EGT=  880.7
+t= 173s | fault=0 | RPM= 3993.9 | Torque= 9.63 | CHT=  58.3 | EGT=  881.8
+t= 174s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  57.7 | EGT=  885.3
+t= 175s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  58.3 | EGT=  884.7
+t= 176s | fault=0 | RPM= 3994.6 | Torque=10.00 | CHT=  57.4 | EGT=  887.8
+t= 177s | fault=0 | RPM= 3993.8 | Torque= 9.26 | CHT=  57.3 | EGT=  885.2
+t= 178s | fault=0 | RPM= 3993.8 | Torque= 9.37 | CHT=  58.6 | EGT=  886.4
+t= 179s | fault=0 | RPM= 3993.7 | Torque= 9.08 | CHT=  58.4 | EGT=  887.0
+t= 180s | fault=0 | RPM= 3994.0 | Torque= 9.91 | CHT=  58.8 | EGT=  889.2
+t= 181s | fault=0 | RPM= 3993.9 | Torque= 9.60 | CHT=  59.2 | EGT=  889.7
+t= 182s | fault=0 | RPM= 3993.2 | Torque= 7.47 | CHT=  58.9 | EGT=  887.7
+t= 183s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  58.9 | EGT=  892.5
+t= 184s | fault=0 | RPM= 3993.6 | Torque= 8.87 | CHT=  60.0 | EGT=  891.7
+t= 185s | fault=0 | RPM= 3993.4 | Torque= 8.07 | CHT=  58.5 | EGT=  891.6
+t= 186s | fault=0 | RPM= 3993.7 | Torque= 8.94 | CHT=  57.9 | EGT=  893.8
+INFO:     172.18.0.5:58738 - "POST /simulation/stop HTTP/1.1" 200 OK
+{Error using client>publish (line 1709)
+Python Error: KeyboardInterrupt
+} 
+INFO:     172.18.0.5:40198 - "POST /simulation/start HTTP/1.1" 200 OK
+/usr/lib64/python3.14/site-packages/numpy/_core/getlimits.py:552: UserWarning: Signature b'\x00\xd0\xcc\xcc\xcc\xcc\xcc\xcc\xfb\xbf\x92X\x00\x00\x00\x00' for <class 'numpy.longdouble'> does not match any known type: falling back to type probe function.
+This warnings indicates broken support for the dtype!
+  machar = _get_machar(dtype)
+Connected to MQTT telemetry.
+MESA-LOADER: failed to open dri: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so) (search paths /usr/lib64/gbm, suffix _gbm)
+
+========================================
+LIVE SIMULATION STARTED
+========================================
+Fault commands: MQTT
+Fault topic: engine/engine_001/fault
+Allowed fault IDs: 0, 1, 2, 3, 4
+========================================
+
+t=   1s | fault=0 | RPM= 1488.4 | Torque= 6.34 | CHT=   3.6 | EGT=   74.1
+t=   2s | fault=0 | RPM= 2701.6 | Torque= 7.39 | CHT=   8.4 | EGT=  245.8
+t=   3s | fault=0 | RPM= 3390.5 | Torque= 9.52 | CHT=  15.3 | EGT=  422.5
+t=   4s | fault=0 | RPM= 3726.5 | Torque=10.00 | CHT=  18.2 | EGT=  550.1
+t=   5s | fault=0 | RPM= 3878.1 | Torque= 9.74 | CHT=  19.8 | EGT=  626.3
+t=   6s | fault=0 | RPM= 3944.5 | Torque=10.00 | CHT=  21.6 | EGT=  669.0
+t=   7s | fault=0 | RPM= 3972.9 | Torque=10.00 | CHT=  24.0 | EGT=  690.3
+t=   8s | fault=0 | RPM= 3985.2 | Torque=10.00 | CHT=  23.9 | EGT=  701.3
+t=   9s | fault=0 | RPM= 3989.8 | Torque= 8.55 | CHT=  23.8 | EGT=  703.6
+t=  10s | fault=0 | RPM= 3992.5 | Torque=10.00 | CHT=  25.2 | EGT=  708.3
+t=  11s | fault=0 | RPM= 3993.3 | Torque= 9.71 | CHT=  25.1 | EGT=  708.4
+t=  12s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  26.6 | EGT=  710.8
+t=  13s | fault=0 | RPM= 3993.8 | Torque= 9.52 | CHT=  26.6 | EGT=  708.8
+t=  14s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  26.4 | EGT=  709.7
+t=  15s | fault=0 | RPM= 3993.9 | Torque= 9.69 | CHT=  26.8 | EGT=  709.2
+t=  16s | fault=0 | RPM= 3993.4 | Torque= 8.07 | CHT=  28.2 | EGT=  706.9
+t=  17s | fault=0 | RPM= 3993.9 | Torque= 9.68 | CHT=  27.7 | EGT=  709.2
+t=  18s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  28.9 | EGT=  710.8
+t=  19s | fault=0 | RPM= 3993.6 | Torque= 8.43 | CHT=  29.0 | EGT=  707.4
+t=  20s | fault=0 | RPM= 3993.7 | Torque= 8.81 | CHT=  28.4 | EGT=  707.9
+t=  21s | fault=0 | RPM= 3993.9 | Torque= 9.62 | CHT=  29.7 | EGT=  709.1
+t=  22s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  30.9 | EGT=  710.1
+t=  23s | fault=0 | RPM= 3994.0 | Torque= 9.78 | CHT=  30.1 | EGT=  709.3
+t=  24s | fault=0 | RPM= 3993.5 | Torque= 8.23 | CHT=  29.6 | EGT=  707.1
+t=  25s | fault=0 | RPM= 3993.9 | Torque= 9.56 | CHT=  29.0 | EGT=  709.0
+t=  26s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  30.9 | EGT=  710.7
+t=  27s | fault=0 | RPM= 3993.7 | Torque= 9.05 | CHT=  29.4 | EGT=  708.3
+t=  28s | fault=0 | RPM= 3994.0 | Torque= 9.77 | CHT=  31.5 | EGT=  709.3
+t=  29s | fault=0 | RPM= 3993.8 | Torque= 9.29 | CHT=  30.6 | EGT=  708.6
+t=  30s | fault=0 | RPM= 3994.0 | Torque= 9.75 | CHT=  31.6 | EGT=  709.2
+t=  31s | fault=0 | RPM= 3993.9 | Torque= 9.48 | CHT=  32.9 | EGT=  708.9
+t=  32s | fault=0 | RPM= 3993.4 | Torque= 7.82 | CHT=  32.9 | EGT=  706.5
+t=  33s | fault=0 | RPM= 3993.6 | Torque= 8.54 | CHT=  33.3 | EGT=  707.5
+t=  34s | fault=0 | RPM= 3993.7 | Torque= 8.88 | CHT=  32.7 | EGT=  708.0
+t=  35s | fault=0 | RPM= 3993.9 | Torque= 9.43 | CHT=  32.5 | EGT=  708.8
+t=  36s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  33.2 | EGT=  709.6
+t=  37s | fault=0 | RPM= 3993.6 | Torque= 8.64 | CHT=  32.8 | EGT=  707.7
+t=  38s | fault=0 | RPM= 3993.7 | Torque= 9.04 | CHT=  34.5 | EGT=  708.2
+t=  39s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  34.6 | EGT=  709.7
+t=  40s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  34.3 | EGT=  709.9
+t=  41s | fault=0 | RPM= 3994.0 | Torque= 9.99 | CHT=  34.3 | EGT=  709.6
+t=  42s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  34.3 | EGT=  711.0
+t=  43s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  34.7 | EGT=  711.1
+t=  44s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  35.6 | EGT=  711.3
+t=  45s | fault=0 | RPM= 3994.0 | Torque= 9.93 | CHT=  34.5 | EGT=  709.5
+t=  46s | fault=0 | RPM= 3993.6 | Torque= 8.71 | CHT=  36.2 | EGT=  707.8
+t=  47s | fault=0 | RPM= 3993.7 | Torque= 9.05 | CHT=  37.1 | EGT=  708.2
+t=  48s | fault=0 | RPM= 3993.5 | Torque= 8.17 | CHT=  35.7 | EGT=  707.0
+t=  49s | fault=0 | RPM= 3993.9 | Torque= 9.45 | CHT=  37.4 | EGT=  708.8
+t=  50s | fault=0 | RPM= 3993.9 | Torque= 9.44 | CHT=  36.3 | EGT=  708.8
+t=  51s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  38.3 | EGT=  710.3
+t=  52s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  36.2 | EGT=  710.7
+t=  53s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  38.0 | EGT=  710.7
+t=  54s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  37.8 | EGT=  709.9
+t=  55s | fault=0 | RPM= 3993.3 | Torque= 7.76 | CHT=  38.8 | EGT=  706.4
+t=  56s | fault=0 | RPM= 3994.0 | Torque= 9.74 | CHT=  38.1 | EGT=  709.2
+t=  57s | fault=0 | RPM= 3993.5 | Torque= 8.32 | CHT=  36.9 | EGT=  707.2
+t=  58s | fault=0 | RPM= 3993.9 | Torque= 9.42 | CHT=  38.0 | EGT=  708.7
+t=  59s | fault=0 | RPM= 3993.5 | Torque= 8.43 | CHT=  39.8 | EGT=  707.3
+t=  60s | fault=0 | RPM= 3993.4 | Torque= 7.87 | CHT=  38.6 | EGT=  706.6
+t=  61s | fault=0 | RPM= 3993.8 | Torque= 9.40 | CHT=  40.7 | EGT=  708.7
+t=  62s | fault=0 | RPM= 3993.9 | Torque= 9.43 | CHT=  40.3 | EGT=  708.7
+t=  63s | fault=0 | RPM= 3993.9 | Torque= 9.62 | CHT=  39.7 | EGT=  709.0
+t=  64s | fault=0 | RPM= 3993.7 | Torque= 8.91 | CHT=  38.4 | EGT=  708.0
+t=  65s | fault=0 | RPM= 3994.0 | Torque= 9.96 | CHT=  39.0 | EGT=  709.5
+t=  66s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  40.6 | EGT=  709.9
+t=  67s | fault=0 | RPM= 3993.6 | Torque= 8.66 | CHT=  40.8 | EGT=  707.7
+t=  68s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  41.0 | EGT=  710.8
+t=  69s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  40.7 | EGT=  710.3
+t=  70s | fault=0 | RPM= 3993.6 | Torque= 8.62 | CHT=  41.3 | EGT=  707.6
+t=  71s | fault=0 | RPM= 3993.9 | Torque= 9.47 | CHT=  42.3 | EGT=  708.8
+t=  72s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  41.7 | EGT=  710.3
+t=  73s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  42.1 | EGT=  709.9
+t=  74s | fault=0 | RPM= 3994.0 | Torque= 9.93 | CHT=  41.6 | EGT=  709.4
+t=  75s | fault=0 | RPM= 3993.8 | Torque= 9.42 | CHT=  42.8 | EGT=  708.7
+t=  76s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  40.9 | EGT=  711.6
+t=  77s | fault=0 | RPM= 3995.1 | Torque=10.00 | CHT=  42.6 | EGT=  714.5
+t=  78s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  42.7 | EGT=  711.0
+t=  79s | fault=0 | RPM= 3995.2 | Torque=10.00 | CHT=  41.2 | EGT=  714.7
+t=  80s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  43.4 | EGT=  711.3
+t=  81s | fault=0 | RPM= 3993.9 | Torque= 9.50 | CHT=  43.3 | EGT=  708.8
+t=  82s | fault=0 | RPM= 3993.6 | Torque= 8.74 | CHT=  43.0 | EGT=  707.7
+t=  83s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  44.4 | EGT=  710.9
+t=  84s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  43.6 | EGT=  709.5
+t=  85s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  44.1 | EGT=  709.7
+t=  86s | fault=0 | RPM= 3994.0 | Torque= 9.89 | CHT=  44.5 | EGT=  709.4
+t=  87s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  46.0 | EGT=  711.6
+t=  88s | fault=0 | RPM= 3993.7 | Torque= 8.96 | CHT=  43.5 | EGT=  708.0
+t=  89s | fault=0 | RPM= 3994.0 | Torque= 9.90 | CHT=  44.7 | EGT=  709.4
+t=  90s | fault=0 | RPM= 3993.5 | Torque= 8.40 | CHT=  45.6 | EGT=  707.3
+t=  91s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  44.4 | EGT=  711.2
+t=  92s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  45.2 | EGT=  710.4
+t=  93s | fault=0 | RPM= 3993.7 | Torque= 9.12 | CHT=  44.6 | EGT=  708.3
+t=  94s | fault=0 | RPM= 3993.8 | Torque= 9.24 | CHT=  46.5 | EGT=  708.4
+t=  95s | fault=0 | RPM= 3993.8 | Torque= 9.22 | CHT=  46.2 | EGT=  708.4
+t=  96s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  45.2 | EGT=  710.9
+t=  97s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  45.7 | EGT=  711.3
+t=  98s | fault=0 | RPM= 3993.7 | Torque= 8.93 | CHT=  47.3 | EGT=  708.0
+t=  99s | fault=0 | RPM= 3993.2 | Torque= 7.34 | CHT=  46.1 | EGT=  705.7
+t= 100s | fault=0 | RPM= 3993.5 | Torque= 8.27 | CHT=  47.0 | EGT=  707.1
+t= 101s | fault=0 | RPM= 3993.9 | Torque= 9.47 | CHT=  47.4 | EGT=  708.8
+t= 102s | fault=0 | RPM= 3993.8 | Torque= 9.23 | CHT=  47.2 | EGT=  708.4
+t= 103s | fault=0 | RPM= 3993.8 | Torque= 9.34 | CHT=  47.0 | EGT=  708.6
+t= 104s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  47.5 | EGT=  709.6
+t= 105s | fault=0 | RPM= 3993.9 | Torque= 9.74 | CHT=  48.6 | EGT=  709.1
+t= 106s | fault=0 | RPM= 3993.6 | Torque= 8.53 | CHT=  48.0 | EGT=  707.4
+t= 107s | fault=0 | RPM= 3993.9 | Torque= 9.65 | CHT=  46.9 | EGT=  709.0
+t= 108s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  47.7 | EGT=  710.2
+t= 109s | fault=0 | RPM= 3993.9 | Torque= 9.73 | CHT=  48.4 | EGT=  709.1
+t= 110s | fault=0 | RPM= 3993.6 | Torque= 8.72 | CHT=  48.4 | EGT=  707.7
+t= 111s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  49.7 | EGT=  710.5
+t= 112s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  48.8 | EGT=  710.7
+t= 113s | fault=0 | RPM= 3993.4 | Torque= 8.17 | CHT=  49.9 | EGT=  706.9
+t= 114s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  49.2 | EGT=  711.3
+t= 115s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  49.7 | EGT=  711.2
+t= 116s | fault=0 | RPM= 3993.7 | Torque= 8.96 | CHT=  49.1 | EGT=  708.0
+t= 117s | fault=0 | RPM= 3993.7 | Torque= 9.11 | CHT=  50.4 | EGT=  708.2
+t= 118s | fault=0 | RPM= 3993.8 | Torque= 9.32 | CHT=  49.9 | EGT=  708.5
+t= 119s | fault=0 | RPM= 3994.0 | Torque= 9.98 | CHT=  50.6 | EGT=  709.4
+t= 120s | fault=0 | RPM= 3993.6 | Torque= 8.58 | CHT=  49.4 | EGT=  707.5
+t= 121s | fault=0 | RPM= 3993.7 | Torque= 9.03 | CHT=  50.3 | EGT=  708.1
+t= 122s | fault=0 | RPM= 3993.9 | Torque= 9.65 | CHT=  49.6 | EGT=  709.0
+t= 123s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  49.5 | EGT=  710.2
+t= 124s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  51.1 | EGT=  710.4
+t= 125s | fault=0 | RPM= 3993.8 | Torque= 9.32 | CHT=  50.2 | EGT=  708.5
+t= 126s | fault=0 | RPM= 3993.8 | Torque= 9.20 | CHT=  51.4 | EGT=  708.3
+t= 127s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  50.9 | EGT=  710.2
+t= 128s | fault=0 | RPM= 3993.8 | Torque= 9.24 | CHT=  52.0 | EGT=  708.4
+t= 129s | fault=0 | RPM= 3993.7 | Torque= 8.96 | CHT=  51.5 | EGT=  708.0
+t= 130s | fault=0 | RPM= 3993.8 | Torque= 9.37 | CHT=  52.1 | EGT=  708.6
+t= 131s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  52.5 | EGT=  710.0
+t= 132s | fault=0 | RPM= 3993.7 | Torque= 9.09 | CHT=  52.9 | EGT=  708.2
+t= 133s | fault=0 | RPM= 3993.6 | Torque= 8.66 | CHT=  51.8 | EGT=  707.6
+t= 134s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  51.5 | EGT=  710.4
+t= 135s | fault=0 | RPM= 3993.9 | Torque= 9.57 | CHT=  52.4 | EGT=  708.8
+t= 136s | fault=0 | RPM= 3993.7 | Torque= 8.98 | CHT=  52.8 | EGT=  708.0
+t= 137s | fault=0 | RPM= 3993.7 | Torque= 9.06 | CHT=  53.6 | EGT=  708.1
+t= 138s | fault=0 | RPM= 3993.8 | Torque= 9.37 | CHT=  53.0 | EGT=  708.6
+t= 139s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  53.3 | EGT=  711.0
+t= 140s | fault=0 | RPM= 3993.9 | Torque= 9.52 | CHT=  52.7 | EGT=  708.8
+t= 141s | fault=0 | RPM= 3993.6 | Torque= 8.59 | CHT=  53.0 | EGT=  707.5
+t= 142s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  53.9 | EGT=  710.8
+t= 143s | fault=0 | RPM= 3994.0 | Torque= 9.99 | CHT=  54.0 | EGT=  709.4
+t= 144s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  55.0 | EGT=  709.9
+t= 145s | fault=0 | RPM= 3993.3 | Torque= 7.83 | CHT=  53.5 | EGT=  706.4
+t= 146s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  54.4 | EGT=  710.4
+t= 147s | fault=0 | RPM= 3994.0 | Torque= 9.86 | CHT=  53.1 | EGT=  709.2
+t= 148s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  53.7 | EGT=  710.5
+t= 149s | fault=0 | RPM= 3994.0 | Torque= 9.97 | CHT=  54.1 | EGT=  709.4
+t= 150s | fault=0 | RPM= 3993.8 | Torque= 9.48 | CHT=  54.2 | EGT=  708.7
+t= 151s | fault=0 | RPM= 3993.8 | Torque= 9.20 | CHT=  54.1 | EGT=  708.3
+t= 152s | fault=0 | RPM= 3993.8 | Torque= 9.39 | CHT=  55.0 | EGT=  708.6
+t= 153s | fault=0 | RPM= 3994.0 | Torque= 9.89 | CHT=  55.1 | EGT=  709.3
+t= 154s | fault=0 | RPM= 3993.9 | Torque= 9.73 | CHT=  55.5 | EGT=  709.0
+t= 155s | fault=0 | RPM= 3994.0 | Torque= 9.88 | CHT=  54.6 | EGT=  709.3
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_asahi.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_broadcom.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_dzn.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_freedreno.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_intel_hasvk.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_intel.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_lvp.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_nouveau.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_panfrost.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_powervr_mesa.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_radeon.so. Ignoring this JSON
+Error: Loader Message: setup_loader_term_phys_devs:  Failed to detect any valid GPUs in the current config
+Warning: vkEnumeratePhysicalDevices
+    at GatherPhysicalDevices (../../third_party/dawn/src/dawn/native/vulkan/VulkanInfo.cpp:148)
+
+t= 156s | fault=0 | RPM= 3993.7 | Torque= 8.94 | CHT=  56.3 | EGT=  707.9
+t= 157s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  55.9 | EGT=  710.8
+t= 158s | fault=0 | RPM= 3993.5 | Torque= 8.49 | CHT=  54.8 | EGT=  707.3
+t= 159s | fault=0 | RPM= 3993.7 | Torque= 8.92 | CHT=  56.0 | EGT=  707.9
+t= 160s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  56.9 | EGT=  711.0
+t= 161s | fault=0 | RPM= 3993.7 | Torque= 9.14 | CHT=  56.0 | EGT=  708.2
+t= 162s | fault=0 | RPM= 3993.8 | Torque= 9.45 | CHT=  56.4 | EGT=  708.6
+t= 163s | fault=0 | RPM= 3993.9 | Torque= 9.83 | CHT=  55.8 | EGT=  709.2
+INFO:     172.18.0.5:60076 - "POST /simulation/stop HTTP/1.1" 200 OK
+{Error using client>publish (line 1709)
+Python Error: KeyboardInterrupt
+} 
+INFO:     172.18.0.5:46158 - "POST /simulation/start HTTP/1.1" 200 OK
+INFO:     172.18.0.5:40490 - "POST /simulation/stop HTTP/1.1" 200 OK
+INFO:     172.18.0.5:52408 - "POST /simulation/start HTTP/1.1" 200 OK
+/usr/lib64/python3.14/site-packages/numpy/_core/getlimits.py:552: UserWarning: Signature b'\x00\xd0\xcc\xcc\xcc\xcc\xcc\xcc\xfb\xbf\xf2\xc9\x00\x00\x00\x00' for <class 'numpy.longdouble'> does not match any known type: falling back to type probe function.
+This warnings indicates broken support for the dtype!
+  machar = _get_machar(dtype)
+Connected to MQTT telemetry.
+MESA-LOADER: failed to open dri: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so) (search paths /usr/lib64/gbm, suffix _gbm)
+
+========================================
+LIVE SIMULATION STARTED
+========================================
+Fault commands: MQTT
+Fault topic: engine/engine_001/fault
+Allowed fault IDs: 0, 1, 2, 3, 4
+========================================
+
+t=   1s | fault=0 | RPM= 1488.4 | Torque= 6.34 | CHT=   3.6 | EGT=   74.1
+t=   2s | fault=0 | RPM= 2701.6 | Torque= 7.39 | CHT=   8.4 | EGT=  245.8
+t=   3s | fault=0 | RPM= 3390.5 | Torque= 9.52 | CHT=  15.3 | EGT=  422.5
+t=   4s | fault=0 | RPM= 3726.5 | Torque=10.00 | CHT=  18.2 | EGT=  550.1
+t=   5s | fault=0 | RPM= 3878.1 | Torque= 9.74 | CHT=  19.8 | EGT=  626.3
+t=   6s | fault=0 | RPM= 3944.5 | Torque=10.00 | CHT=  21.6 | EGT=  669.0
+t=   7s | fault=0 | RPM= 3972.9 | Torque=10.00 | CHT=  24.0 | EGT=  690.3
+t=   8s | fault=0 | RPM= 3985.2 | Torque=10.00 | CHT=  23.9 | EGT=  701.3
+t=   9s | fault=0 | RPM= 3989.8 | Torque= 8.55 | CHT=  23.8 | EGT=  703.6
+t=  10s | fault=0 | RPM= 3992.5 | Torque=10.00 | CHT=  25.2 | EGT=  708.3
+t=  11s | fault=0 | RPM= 3993.3 | Torque= 9.71 | CHT=  25.1 | EGT=  708.4
+t=  12s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  26.6 | EGT=  710.8
+t=  13s | fault=0 | RPM= 3993.8 | Torque= 9.52 | CHT=  26.6 | EGT=  708.8
+t=  14s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  26.4 | EGT=  709.7
+t=  15s | fault=0 | RPM= 3993.9 | Torque= 9.69 | CHT=  26.8 | EGT=  709.2
+t=  16s | fault=0 | RPM= 3993.4 | Torque= 8.07 | CHT=  28.2 | EGT=  706.9
+t=  17s | fault=0 | RPM= 3993.9 | Torque= 9.68 | CHT=  27.7 | EGT=  709.2
+t=  18s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  28.9 | EGT=  710.8
+t=  19s | fault=0 | RPM= 3993.6 | Torque= 8.43 | CHT=  29.0 | EGT=  707.4
+t=  20s | fault=0 | RPM= 3993.7 | Torque= 8.81 | CHT=  28.4 | EGT=  707.9
+t=  21s | fault=0 | RPM= 3993.9 | Torque= 9.62 | CHT=  29.7 | EGT=  709.1
+t=  22s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  30.9 | EGT=  710.1
+t=  23s | fault=0 | RPM= 3994.0 | Torque= 9.78 | CHT=  30.1 | EGT=  709.3
+t=  24s | fault=0 | RPM= 3993.5 | Torque= 8.23 | CHT=  29.6 | EGT=  707.1
+t=  25s | fault=0 | RPM= 3993.9 | Torque= 9.56 | CHT=  29.0 | EGT=  709.0
+t=  26s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  30.9 | EGT=  710.7
+t=  27s | fault=0 | RPM= 3993.7 | Torque= 9.05 | CHT=  29.4 | EGT=  708.3
+t=  28s | fault=0 | RPM= 3994.0 | Torque= 9.77 | CHT=  31.5 | EGT=  709.3
+t=  29s | fault=0 | RPM= 3993.8 | Torque= 9.29 | CHT=  30.6 | EGT=  708.6
+t=  30s | fault=0 | RPM= 3994.0 | Torque= 9.75 | CHT=  31.6 | EGT=  709.2
+t=  31s | fault=0 | RPM= 3993.9 | Torque= 9.48 | CHT=  32.9 | EGT=  708.9
+t=  32s | fault=0 | RPM= 3993.4 | Torque= 7.82 | CHT=  32.9 | EGT=  706.5
+t=  33s | fault=0 | RPM= 3993.6 | Torque= 8.54 | CHT=  33.3 | EGT=  707.5
+t=  34s | fault=0 | RPM= 3993.7 | Torque= 8.88 | CHT=  32.7 | EGT=  708.0
+t=  35s | fault=0 | RPM= 3993.9 | Torque= 9.43 | CHT=  32.5 | EGT=  708.8
+t=  36s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  33.2 | EGT=  709.6
+t=  37s | fault=0 | RPM= 3993.6 | Torque= 8.64 | CHT=  32.8 | EGT=  707.7
+t=  38s | fault=0 | RPM= 3993.7 | Torque= 9.04 | CHT=  34.5 | EGT=  708.2
+t=  39s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  34.6 | EGT=  709.7
+t=  40s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  34.3 | EGT=  709.9
+t=  41s | fault=0 | RPM= 3994.0 | Torque= 9.99 | CHT=  34.3 | EGT=  709.6
+t=  42s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  34.3 | EGT=  711.0
+t=  43s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  34.7 | EGT=  711.1
+t=  44s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  35.6 | EGT=  711.3
+t=  45s | fault=0 | RPM= 3994.0 | Torque= 9.93 | CHT=  34.5 | EGT=  709.5
+t=  46s | fault=0 | RPM= 3993.6 | Torque= 8.71 | CHT=  36.2 | EGT=  707.8
+t=  47s | fault=0 | RPM= 3993.7 | Torque= 9.05 | CHT=  37.1 | EGT=  708.2
+t=  48s | fault=0 | RPM= 3993.5 | Torque= 8.17 | CHT=  35.7 | EGT=  707.0
+t=  49s | fault=0 | RPM= 3993.9 | Torque= 9.45 | CHT=  37.4 | EGT=  708.8
+t=  50s | fault=0 | RPM= 3993.9 | Torque= 9.44 | CHT=  36.3 | EGT=  708.8
+t=  51s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  38.3 | EGT=  710.3
+t=  52s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  36.2 | EGT=  710.7
+t=  53s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  38.0 | EGT=  710.7
+t=  54s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  37.8 | EGT=  709.9
+t=  55s | fault=0 | RPM= 3993.3 | Torque= 7.76 | CHT=  38.8 | EGT=  706.4
+t=  56s | fault=0 | RPM= 3994.0 | Torque= 9.74 | CHT=  38.1 | EGT=  709.2
+t=  57s | fault=0 | RPM= 3993.5 | Torque= 8.32 | CHT=  36.9 | EGT=  707.2
+t=  58s | fault=0 | RPM= 3993.9 | Torque= 9.42 | CHT=  38.0 | EGT=  708.7
+t=  59s | fault=0 | RPM= 3993.5 | Torque= 8.43 | CHT=  39.8 | EGT=  707.3
+t=  60s | fault=0 | RPM= 3993.4 | Torque= 7.87 | CHT=  38.6 | EGT=  706.6
+t=  61s | fault=0 | RPM= 3993.8 | Torque= 9.40 | CHT=  40.7 | EGT=  708.7
+t=  62s | fault=0 | RPM= 3993.9 | Torque= 9.43 | CHT=  40.3 | EGT=  708.7
+t=  63s | fault=0 | RPM= 3993.9 | Torque= 9.62 | CHT=  39.7 | EGT=  709.0
+t=  64s | fault=0 | RPM= 3993.7 | Torque= 8.91 | CHT=  38.4 | EGT=  708.0
+t=  65s | fault=0 | RPM= 3994.0 | Torque= 9.96 | CHT=  39.0 | EGT=  709.5
+t=  66s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  40.6 | EGT=  709.9
+t=  67s | fault=0 | RPM= 3993.6 | Torque= 8.66 | CHT=  40.8 | EGT=  707.7
+t=  68s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  41.0 | EGT=  710.8
+t=  69s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  40.7 | EGT=  710.3
+t=  70s | fault=0 | RPM= 3993.6 | Torque= 8.62 | CHT=  41.3 | EGT=  707.6
+t=  71s | fault=0 | RPM= 3993.9 | Torque= 9.47 | CHT=  42.3 | EGT=  708.8
+t=  72s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  41.7 | EGT=  710.3
+t=  73s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  42.1 | EGT=  709.9
+t=  74s | fault=0 | RPM= 3994.0 | Torque= 9.93 | CHT=  41.6 | EGT=  709.4
+t=  75s | fault=0 | RPM= 3993.8 | Torque= 9.42 | CHT=  42.8 | EGT=  708.7
+t=  76s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  40.9 | EGT=  711.6
+t=  77s | fault=0 | RPM= 3995.1 | Torque=10.00 | CHT=  42.6 | EGT=  714.5
+t=  78s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  42.7 | EGT=  711.0
+t=  79s | fault=0 | RPM= 3995.2 | Torque=10.00 | CHT=  41.2 | EGT=  714.7
+t=  80s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  43.4 | EGT=  711.3
+t=  81s | fault=0 | RPM= 3993.9 | Torque= 9.50 | CHT=  43.3 | EGT=  708.8
+t=  82s | fault=0 | RPM= 3993.6 | Torque= 8.74 | CHT=  43.0 | EGT=  707.7
+t=  83s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  44.4 | EGT=  710.9
+t=  84s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  43.6 | EGT=  709.5
+t=  85s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  44.1 | EGT=  709.7
+t=  86s | fault=0 | RPM= 3994.0 | Torque= 9.89 | CHT=  44.5 | EGT=  709.4
+t=  87s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  46.0 | EGT=  711.6
+t=  88s | fault=0 | RPM= 3993.7 | Torque= 8.96 | CHT=  43.5 | EGT=  708.0
+t=  89s | fault=0 | RPM= 3994.0 | Torque= 9.90 | CHT=  44.7 | EGT=  709.4
+t=  90s | fault=0 | RPM= 3993.5 | Torque= 8.40 | CHT=  45.6 | EGT=  707.3
+t=  91s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  44.4 | EGT=  711.2
+t=  92s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  45.2 | EGT=  710.4
+t=  93s | fault=0 | RPM= 3993.7 | Torque= 9.12 | CHT=  44.6 | EGT=  708.3
+t=  94s | fault=0 | RPM= 3993.8 | Torque= 9.24 | CHT=  46.5 | EGT=  708.4
+t=  95s | fault=0 | RPM= 3993.8 | Torque= 9.22 | CHT=  46.2 | EGT=  708.4
+t=  96s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  45.2 | EGT=  710.9
+t=  97s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  45.7 | EGT=  711.3
+t=  98s | fault=0 | RPM= 3993.7 | Torque= 8.93 | CHT=  47.3 | EGT=  708.0
+t=  99s | fault=0 | RPM= 3993.2 | Torque= 7.34 | CHT=  46.1 | EGT=  705.7
+t= 100s | fault=0 | RPM= 3993.5 | Torque= 8.27 | CHT=  47.0 | EGT=  707.1
+t= 101s | fault=0 | RPM= 3993.9 | Torque= 9.47 | CHT=  47.4 | EGT=  708.8
+t= 102s | fault=0 | RPM= 3993.8 | Torque= 9.23 | CHT=  47.2 | EGT=  708.4
+t= 103s | fault=0 | RPM= 3993.8 | Torque= 9.34 | CHT=  47.0 | EGT=  708.6
+t= 104s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  47.5 | EGT=  709.6
+t= 105s | fault=0 | RPM= 3993.9 | Torque= 9.74 | CHT=  48.6 | EGT=  709.1
+t= 106s | fault=0 | RPM= 3993.6 | Torque= 8.53 | CHT=  48.0 | EGT=  707.4
+t= 107s | fault=0 | RPM= 3993.9 | Torque= 9.65 | CHT=  46.9 | EGT=  709.0
+t= 108s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  47.7 | EGT=  710.2
+t= 109s | fault=0 | RPM= 3993.9 | Torque= 9.73 | CHT=  48.4 | EGT=  709.1
+t= 110s | fault=0 | RPM= 3993.6 | Torque= 8.72 | CHT=  48.4 | EGT=  707.7
+t= 111s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  49.7 | EGT=  710.5
+t= 112s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  48.8 | EGT=  710.7
+t= 113s | fault=0 | RPM= 3993.4 | Torque= 8.17 | CHT=  49.9 | EGT=  706.9
+t= 114s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  49.2 | EGT=  711.3
+t= 115s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  49.7 | EGT=  711.2
+t= 116s | fault=0 | RPM= 3993.7 | Torque= 8.96 | CHT=  49.1 | EGT=  708.0
+t= 117s | fault=0 | RPM= 3993.7 | Torque= 9.11 | CHT=  50.4 | EGT=  708.2
+t= 118s | fault=0 | RPM= 3993.8 | Torque= 9.32 | CHT=  49.9 | EGT=  708.5
+t= 119s | fault=0 | RPM= 3994.0 | Torque= 9.98 | CHT=  50.6 | EGT=  709.4
+t= 120s | fault=0 | RPM= 3993.6 | Torque= 8.58 | CHT=  49.4 | EGT=  707.5
+t= 121s | fault=0 | RPM= 3993.7 | Torque= 9.03 | CHT=  50.3 | EGT=  708.1
+t= 122s | fault=0 | RPM= 3993.9 | Torque= 9.65 | CHT=  49.6 | EGT=  709.0
+t= 123s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  49.5 | EGT=  710.2
+t= 124s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  51.1 | EGT=  710.4
+t= 125s | fault=0 | RPM= 3993.8 | Torque= 9.32 | CHT=  50.2 | EGT=  708.5
+t= 126s | fault=0 | RPM= 3993.8 | Torque= 9.20 | CHT=  51.4 | EGT=  708.3
+t= 127s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  50.9 | EGT=  710.2
+t= 128s | fault=0 | RPM= 3993.8 | Torque= 9.24 | CHT=  52.0 | EGT=  708.4
+t= 129s | fault=0 | RPM= 3993.7 | Torque= 8.96 | CHT=  51.5 | EGT=  708.0
+t= 130s | fault=0 | RPM= 3993.8 | Torque= 9.37 | CHT=  52.1 | EGT=  708.6
+t= 131s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  52.5 | EGT=  710.0
+t= 132s | fault=0 | RPM= 3993.7 | Torque= 9.09 | CHT=  52.9 | EGT=  708.2
+t= 133s | fault=0 | RPM= 3993.6 | Torque= 8.66 | CHT=  51.8 | EGT=  707.6
+t= 134s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  51.5 | EGT=  710.4
+t= 135s | fault=0 | RPM= 3993.9 | Torque= 9.57 | CHT=  52.4 | EGT=  708.8
+t= 136s | fault=0 | RPM= 3993.7 | Torque= 8.98 | CHT=  52.8 | EGT=  708.0
+t= 137s | fault=0 | RPM= 3993.7 | Torque= 9.06 | CHT=  53.6 | EGT=  708.1
+t= 138s | fault=0 | RPM= 3993.8 | Torque= 9.37 | CHT=  53.0 | EGT=  708.6
+t= 139s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  53.3 | EGT=  711.0
+t= 140s | fault=0 | RPM= 3993.9 | Torque= 9.52 | CHT=  52.7 | EGT=  708.8
+t= 141s | fault=0 | RPM= 3993.6 | Torque= 8.59 | CHT=  53.0 | EGT=  707.5
+t= 142s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  53.9 | EGT=  710.8
+t= 143s | fault=0 | RPM= 3994.0 | Torque= 9.99 | CHT=  54.0 | EGT=  709.4
+t= 144s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  55.0 | EGT=  709.9
+t= 145s | fault=0 | RPM= 3993.3 | Torque= 7.83 | CHT=  53.5 | EGT=  706.4
+t= 146s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  54.4 | EGT=  710.4
+t= 147s | fault=0 | RPM= 3994.0 | Torque= 9.86 | CHT=  53.1 | EGT=  709.2
+t= 148s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  53.7 | EGT=  710.5
+t= 149s | fault=0 | RPM= 3994.0 | Torque= 9.97 | CHT=  54.1 | EGT=  709.4
+t= 150s | fault=0 | RPM= 3993.8 | Torque= 9.48 | CHT=  54.2 | EGT=  708.7
+t= 151s | fault=0 | RPM= 3993.8 | Torque= 9.20 | CHT=  54.1 | EGT=  708.3
+t= 152s | fault=0 | RPM= 3993.8 | Torque= 9.39 | CHT=  55.0 | EGT=  708.6
+t= 153s | fault=0 | RPM= 3994.0 | Torque= 9.89 | CHT=  55.1 | EGT=  709.3
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_asahi.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_broadcom.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_dzn.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_freedreno.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_intel_hasvk.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_intel.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_lvp.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_nouveau.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_panfrost.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_powervr_mesa.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_radeon.so. Ignoring this JSON
+Error: Loader Message: setup_loader_term_phys_devs:  Failed to detect any valid GPUs in the current config
+Warning: vkEnumeratePhysicalDevices
+    at GatherPhysicalDevices (../../third_party/dawn/src/dawn/native/vulkan/VulkanInfo.cpp:148)
+
+t= 154s | fault=0 | RPM= 3993.9 | Torque= 9.73 | CHT=  55.5 | EGT=  709.0
+t= 155s | fault=0 | RPM= 3994.0 | Torque= 9.88 | CHT=  54.6 | EGT=  709.3
+t= 156s | fault=0 | RPM= 3993.7 | Torque= 8.94 | CHT=  56.3 | EGT=  707.9
+t= 157s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  55.9 | EGT=  710.8
+t= 158s | fault=0 | RPM= 3993.5 | Torque= 8.49 | CHT=  54.8 | EGT=  707.3
+t= 159s | fault=0 | RPM= 3993.7 | Torque= 8.92 | CHT=  56.0 | EGT=  707.9
+t= 160s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  56.9 | EGT=  711.0
+t= 161s | fault=0 | RPM= 3993.7 | Torque= 9.14 | CHT=  56.0 | EGT=  708.2
+t= 162s | fault=0 | RPM= 3993.8 | Torque= 9.45 | CHT=  56.4 | EGT=  708.6
+t= 163s | fault=0 | RPM= 3993.9 | Torque= 9.83 | CHT=  55.8 | EGT=  709.2
+t= 164s | fault=0 | RPM= 3993.7 | Torque= 9.08 | CHT=  56.3 | EGT=  708.1
+t= 165s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  57.4 | EGT=  710.0
+
+>>> FAULT CHANGED TO 2 at t=165s <<<
+
+t= 166s | fault=2 | RPM= 3994.4 | Torque=10.00 | CHT=  55.7 | EGT=  804.2
+t= 167s | fault=2 | RPM= 3993.8 | Torque= 9.43 | CHT=  56.9 | EGT=  914.4
+t= 168s | fault=2 | RPM= 3993.5 | Torque= 8.48 | CHT=  57.4 | EGT=  970.3
+t= 169s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT=  57.8 | EGT=  996.3
+t= 170s | fault=2 | RPM= 3993.9 | Torque= 9.68 | CHT=  58.5 | EGT= 1004.3
+t= 171s | fault=2 | RPM= 3993.7 | Torque= 8.95 | CHT=  60.3 | EGT= 1006.3
+t= 172s | fault=2 | RPM= 3993.9 | Torque= 9.59 | CHT=  60.6 | EGT= 1008.3
+t= 173s | fault=2 | RPM= 3993.9 | Torque= 9.63 | CHT=  62.4 | EGT= 1008.7
+t= 174s | fault=2 | RPM= 3994.5 | Torque=10.00 | CHT=  62.5 | EGT= 1011.4
+t= 175s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT=  63.9 | EGT= 1009.8
+t= 176s | fault=2 | RPM= 3994.6 | Torque=10.00 | CHT=  63.9 | EGT= 1011.9
+t= 177s | fault=2 | RPM= 3993.8 | Torque= 9.26 | CHT=  64.5 | EGT= 1008.3
+t= 178s | fault=2 | RPM= 3993.8 | Torque= 9.37 | CHT=  66.7 | EGT= 1008.5
+t= 179s | fault=2 | RPM= 3993.7 | Torque= 9.08 | CHT=  67.3 | EGT= 1008.1
+t= 180s | fault=2 | RPM= 3994.0 | Torque= 9.91 | CHT=  68.5 | EGT= 1009.3
+t= 181s | fault=2 | RPM= 3993.9 | Torque= 9.60 | CHT=  69.7 | EGT= 1008.8
+t= 182s | fault=2 | RPM= 3993.2 | Torque= 7.47 | CHT=  70.2 | EGT= 1005.8
+t= 183s | fault=2 | RPM= 3994.0 | Torque=10.00 | CHT=  71.0 | EGT= 1009.6
+t= 184s | fault=2 | RPM= 3993.6 | Torque= 8.87 | CHT=  72.9 | EGT= 1007.8
+t= 185s | fault=2 | RPM= 3993.4 | Torque= 8.07 | CHT=  72.2 | EGT= 1006.7
+t= 186s | fault=2 | RPM= 3993.7 | Torque= 8.94 | CHT=  72.4 | EGT= 1007.9
+t= 187s | fault=2 | RPM= 3993.4 | Torque= 8.08 | CHT=  73.5 | EGT= 1006.7
+t= 188s | fault=2 | RPM= 3993.9 | Torque= 9.81 | CHT=  75.1 | EGT= 1009.1
+t= 189s | fault=2 | RPM= 3994.0 | Torque=10.00 | CHT=  75.7 | EGT= 1009.5
+t= 190s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT=  76.9 | EGT= 1010.5
+t= 191s | fault=2 | RPM= 3993.2 | Torque= 7.63 | CHT=  77.5 | EGT= 1006.0
+t= 192s | fault=2 | RPM= 3994.0 | Torque= 9.93 | CHT=  79.3 | EGT= 1009.3
+t= 193s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT=  78.3 | EGT= 1010.3
+t= 194s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT=  80.0 | EGT= 1009.7
+t= 195s | fault=2 | RPM= 3993.9 | Torque= 9.81 | CHT=  80.5 | EGT= 1009.1
+t= 196s | fault=2 | RPM= 3993.6 | Torque= 8.81 | CHT=  81.3 | EGT= 1007.7
+t= 197s | fault=2 | RPM= 3993.2 | Torque= 7.47 | CHT=  83.2 | EGT= 1005.8
+t= 198s | fault=2 | RPM= 3994.4 | Torque=10.00 | CHT=  84.7 | EGT= 1011.3
+t= 199s | fault=2 | RPM= 3994.0 | Torque= 9.96 | CHT=  85.5 | EGT= 1009.3
+t= 200s | fault=2 | RPM= 3993.9 | Torque= 9.62 | CHT=  85.5 | EGT= 1008.8
+t= 201s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT=  85.9 | EGT= 1010.1
+t= 202s | fault=2 | RPM= 3993.6 | Torque= 8.66 | CHT=  85.2 | EGT= 1007.5
+t= 203s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT=  89.6 | EGT= 1010.4
+t= 204s | fault=2 | RPM= 3993.8 | Torque= 9.26 | CHT=  90.5 | EGT= 1008.3
+t= 205s | fault=2 | RPM= 3993.6 | Torque= 8.78 | CHT=  90.0 | EGT= 1007.6
+t= 206s | fault=2 | RPM= 3994.0 | Torque= 9.97 | CHT=  91.5 | EGT= 1009.3
+t= 207s | fault=2 | RPM= 3993.9 | Torque= 9.61 | CHT=  92.0 | EGT= 1008.8
+t= 208s | fault=2 | RPM= 3993.8 | Torque= 9.28 | CHT=  91.7 | EGT= 1008.3
+t= 209s | fault=2 | RPM= 3994.3 | Torque=10.00 | CHT=  93.4 | EGT= 1010.6
+t= 210s | fault=2 | RPM= 3993.6 | Torque= 8.87 | CHT=  94.0 | EGT= 1007.8
+t= 211s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT=  94.1 | EGT= 1009.6
+t= 212s | fault=2 | RPM= 3993.3 | Torque= 7.98 | CHT=  96.1 | EGT= 1006.5
+t= 213s | fault=2 | RPM= 3993.5 | Torque= 8.56 | CHT=  95.9 | EGT= 1007.3
+t= 214s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT=  96.6 | EGT= 1009.7
+t= 215s | fault=2 | RPM= 3994.0 | Torque=10.00 | CHT=  97.2 | EGT= 1009.5
+t= 216s | fault=2 | RPM= 3994.3 | Torque=10.00 | CHT=  99.6 | EGT= 1010.7
+t= 217s | fault=2 | RPM= 3994.0 | Torque= 9.91 | CHT=  98.7 | EGT= 1009.2
+t= 218s | fault=2 | RPM= 3993.6 | Torque= 8.88 | CHT= 100.0 | EGT= 1007.8
+t= 219s | fault=2 | RPM= 3994.0 | Torque= 9.98 | CHT= 100.7 | EGT= 1009.3
+t= 220s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT= 101.0 | EGT= 1009.7
+t= 221s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT= 102.7 | EGT= 1010.5
+t= 222s | fault=2 | RPM= 3993.8 | Torque= 9.42 | CHT= 103.8 | EGT= 1008.5
+t= 223s | fault=2 | RPM= 3994.0 | Torque=10.00 | CHT= 102.8 | EGT= 1009.4
+t= 224s | fault=2 | RPM= 3993.8 | Torque= 9.51 | CHT= 105.8 | EGT= 1008.6
+t= 225s | fault=2 | RPM= 3993.4 | Torque= 8.32 | CHT= 104.9 | EGT= 1006.9
+t= 226s | fault=2 | RPM= 3993.7 | Torque= 9.19 | CHT= 105.7 | EGT= 1008.2
+t= 227s | fault=2 | RPM= 3993.5 | Torque= 8.50 | CHT= 107.8 | EGT= 1007.2
+t= 228s | fault=2 | RPM= 3993.9 | Torque= 9.78 | CHT= 107.2 | EGT= 1009.0
+t= 229s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT= 108.9 | EGT= 1010.3
+t= 230s | fault=2 | RPM= 3993.7 | Torque= 9.25 | CHT= 109.4 | EGT= 1008.3
+t= 231s | fault=2 | RPM= 3994.4 | Torque=10.00 | CHT= 109.6 | EGT= 1011.4
+t= 232s | fault=2 | RPM= 3993.8 | Torque= 9.30 | CHT= 111.0 | EGT= 1008.3
+t= 233s | fault=2 | RPM= 3993.7 | Torque= 9.25 | CHT= 111.6 | EGT= 1008.3
+t= 234s | fault=2 | RPM= 3993.5 | Torque= 8.40 | CHT= 111.1 | EGT= 1007.1
+t= 235s | fault=2 | RPM= 3993.9 | Torque= 9.85 | CHT= 112.4 | EGT= 1009.1
+t= 236s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT= 114.8 | EGT= 1010.0
+t= 237s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT= 113.5 | EGT= 1010.0
+t= 238s | fault=2 | RPM= 3993.7 | Torque= 8.99 | CHT= 114.8 | EGT= 1007.9
+t= 239s | fault=2 | RPM= 3994.5 | Torque=10.00 | CHT= 114.5 | EGT= 1011.9
+t= 240s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT= 114.9 | EGT= 1010.5
+t= 241s | fault=2 | RPM= 3993.6 | Torque= 8.86 | CHT= 116.6 | EGT= 1007.7
+t= 242s | fault=2 | RPM= 3993.5 | Torque= 8.62 | CHT= 116.9 | EGT= 1007.3
+t= 243s | fault=2 | RPM= 3993.7 | Torque= 9.21 | CHT= 118.3 | EGT= 1008.2
+t= 244s | fault=2 | RPM= 3993.9 | Torque= 9.78 | CHT= 117.9 | EGT= 1009.0
+t= 245s | fault=2 | RPM= 3994.7 | Torque=10.00 | CHT= 119.7 | EGT= 1012.4
+t= 246s | fault=2 | RPM= 3993.8 | Torque= 9.29 | CHT= 120.1 | EGT= 1008.3
+t= 247s | fault=2 | RPM= 3993.6 | Torque= 8.86 | CHT= 119.7 | EGT= 1007.7
+t= 248s | fault=2 | RPM= 3994.5 | Torque=10.00 | CHT= 122.5 | EGT= 1011.7
+t= 249s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT= 123.0 | EGT= 1010.4
+t= 250s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT= 124.1 | EGT= 1010.1
+t= 251s | fault=2 | RPM= 3994.0 | Torque=10.00 | CHT= 123.1 | EGT= 1009.5
+t= 252s | fault=2 | RPM= 3994.3 | Torque=10.00 | CHT= 124.5 | EGT= 1010.7
+t= 253s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT= 123.9 | EGT= 1010.0
+t= 254s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT= 124.7 | EGT= 1010.2
+t= 255s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT= 125.8 | EGT= 1010.0
+t= 256s | fault=2 | RPM= 3993.9 | Torque= 9.71 | CHT= 126.0 | EGT= 1008.9
+t= 257s | fault=2 | RPM= 3993.9 | Torque= 9.91 | CHT= 127.5 | EGT= 1009.2
+t= 258s | fault=2 | RPM= 3993.9 | Torque= 9.78 | CHT= 128.0 | EGT= 1009.0
+t= 259s | fault=2 | RPM= 3994.6 | Torque=10.00 | CHT= 129.5 | EGT= 1012.0
+t= 260s | fault=2 | RPM= 3993.8 | Torque= 9.30 | CHT= 126.5 | EGT= 1008.3
+t= 261s | fault=2 | RPM= 3993.8 | Torque= 9.43 | CHT= 129.0 | EGT= 1008.5
+t= 262s | fault=2 | RPM= 3993.9 | Torque= 9.73 | CHT= 129.9 | EGT= 1008.9
+t= 263s | fault=2 | RPM= 3993.9 | Torque= 9.85 | CHT= 130.8 | EGT= 1009.1
+t= 264s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT= 130.6 | EGT= 1010.0
+t= 265s | fault=2 | RPM= 3993.9 | Torque= 9.66 | CHT= 131.3 | EGT= 1008.8
+t= 266s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT= 132.7 | EGT= 1009.7
+t= 267s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT= 133.3 | EGT= 1010.3
+t= 268s | fault=2 | RPM= 3994.0 | Torque=10.00 | CHT= 133.9 | EGT= 1009.6
+t= 269s | fault=2 | RPM= 3993.7 | Torque= 9.12 | CHT= 134.1 | EGT= 1008.0
+t= 270s | fault=2 | RPM= 3994.3 | Torque=10.00 | CHT= 134.0 | EGT= 1010.7
+t= 271s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT= 134.5 | EGT= 1009.8
+t= 272s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT= 136.0 | EGT= 1009.8
+t= 273s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT= 135.8 | EGT= 1010.5
+t= 274s | fault=2 | RPM= 3994.5 | Torque=10.00 | CHT= 137.8 | EGT= 1011.6
+t= 275s | fault=2 | RPM= 3993.5 | Torque= 8.56 | CHT= 137.5 | EGT= 1007.2
+t= 276s | fault=2 | RPM= 3993.6 | Torque= 8.94 | CHT= 138.1 | EGT= 1007.8
+t= 277s | fault=2 | RPM= 3994.7 | Torque=10.00 | CHT= 139.6 | EGT= 1012.7
+t= 278s | fault=2 | RPM= 3993.9 | Torque= 9.77 | CHT= 138.7 | EGT= 1008.9
+t= 279s | fault=2 | RPM= 3994.0 | Torque= 9.97 | CHT= 140.4 | EGT= 1009.2
+t= 280s | fault=2 | RPM= 3993.3 | Torque= 8.04 | CHT= 141.0 | EGT= 1006.5
+t= 281s | fault=2 | RPM= 3994.4 | Torque=10.00 | CHT= 140.3 | EGT= 1011.3
+t= 282s | fault=2 | RPM= 3993.9 | Torque= 9.90 | CHT= 142.5 | EGT= 1009.1
+t= 283s | fault=2 | RPM= 3994.0 | Torque=10.00 | CHT= 142.0 | EGT= 1009.4
+t= 284s | fault=2 | RPM= 3993.6 | Torque= 8.96 | CHT= 142.9 | EGT= 1007.8
+t= 285s | fault=2 | RPM= 3993.8 | Torque= 9.45 | CHT= 143.0 | EGT= 1008.5
+t= 286s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT= 142.4 | EGT= 1010.2
+t= 287s | fault=2 | RPM= 3994.5 | Torque=10.00 | CHT= 144.3 | EGT= 1011.9
+t= 288s | fault=2 | RPM= 3994.5 | Torque=10.00 | CHT= 144.9 | EGT= 1011.6
+t= 289s | fault=2 | RPM= 3993.7 | Torque= 9.25 | CHT= 144.4 | EGT= 1008.2
+t= 290s | fault=2 | RPM= 3994.3 | Torque=10.00 | CHT= 146.2 | EGT= 1010.8
+t= 291s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT= 146.1 | EGT= 1009.9
+t= 292s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT= 147.6 | EGT= 1009.9
+t= 293s | fault=2 | RPM= 3994.0 | Torque=10.00 | CHT= 147.2 | EGT= 1009.3
+t= 294s | fault=2 | RPM= 3994.3 | Torque=10.00 | CHT= 147.4 | EGT= 1010.7
+t= 295s | fault=2 | RPM= 3993.6 | Torque= 8.83 | CHT= 147.7 | EGT= 1007.6
+t= 296s | fault=2 | RPM= 3993.9 | Torque= 9.84 | CHT= 149.1 | EGT= 1009.0
+t= 297s | fault=2 | RPM= 3994.0 | Torque=10.00 | CHT= 149.4 | EGT= 1009.4
+t= 298s | fault=2 | RPM= 3993.6 | Torque= 8.88 | CHT= 149.7 | EGT= 1007.6
+t= 299s | fault=2 | RPM= 3994.5 | Torque=10.00 | CHT= 149.8 | EGT= 1011.6
+t= 300s | fault=2 | RPM= 3993.9 | Torque= 9.77 | CHT= 150.6 | EGT= 1008.9
+t= 301s | fault=2 | RPM= 3993.7 | Torque= 9.14 | CHT= 150.6 | EGT= 1008.0
+t= 302s | fault=2 | RPM= 3993.7 | Torque= 9.04 | CHT= 149.9 | EGT= 1007.9
+t= 303s | fault=2 | RPM= 3994.7 | Torque=10.00 | CHT= 151.8 | EGT= 1012.3
+t= 304s | fault=2 | RPM= 3993.8 | Torque= 9.53 | CHT= 152.0 | EGT= 1008.5
+t= 305s | fault=2 | RPM= 3993.7 | Torque= 9.30 | CHT= 151.9 | EGT= 1008.2
+t= 306s | fault=2 | RPM= 3993.9 | Torque= 9.69 | CHT= 154.7 | EGT= 1008.8
+t= 307s | fault=2 | RPM= 3994.4 | Torque=10.00 | CHT= 154.2 | EGT= 1011.2
+t= 308s | fault=2 | RPM= 3993.6 | Torque= 8.96 | CHT= 154.7 | EGT= 1007.7
+t= 309s | fault=2 | RPM= 3994.0 | Torque=10.00 | CHT= 154.4 | EGT= 1009.2
+t= 310s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT= 155.0 | EGT= 1010.3
+t= 311s | fault=2 | RPM= 3994.1 | Torque=10.00 | CHT= 155.3 | EGT= 1009.9
+t= 312s | fault=2 | RPM= 3993.6 | Torque= 9.02 | CHT= 156.2 | EGT= 1007.8
+t= 313s | fault=2 | RPM= 3994.3 | Torque=10.00 | CHT= 156.7 | EGT= 1010.6
+t= 314s | fault=2 | RPM= 3994.9 | Torque=10.00 | CHT= 157.9 | EGT= 1013.5
+t= 315s | fault=2 | RPM= 3994.3 | Torque=10.00 | CHT= 158.2 | EGT= 1010.8
+t= 316s | fault=2 | RPM= 3994.3 | Torque=10.00 | CHT= 157.4 | EGT= 1010.9
+t= 317s | fault=2 | RPM= 3994.3 | Torque=10.00 | CHT= 158.3 | EGT= 1010.7
+t= 318s | fault=2 | RPM= 3993.9 | Torque= 9.80 | CHT= 159.6 | EGT= 1008.9
+t= 319s | fault=2 | RPM= 3994.3 | Torque=10.00 | CHT= 158.9 | EGT= 1010.9
+t= 320s | fault=2 | RPM= 3994.4 | Torque=10.00 | CHT= 160.7 | EGT= 1011.2
+t= 321s | fault=2 | RPM= 3993.8 | Torque= 9.37 | CHT= 160.7 | EGT= 1008.3
+t= 322s | fault=2 | RPM= 3994.3 | Torque=10.00 | CHT= 160.2 | EGT= 1010.6
+t= 323s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT= 161.1 | EGT= 1010.5
+
+>>> FAULT CHANGED TO 4 at t=323s <<<
+
+t= 324s | fault=4 | RPM= 3040.8 | Torque= 5.57 | CHT= 162.7 | EGT=  800.2
+t= 325s | fault=4 | RPM= 2476.2 | Torque= 3.62 | CHT= 160.5 | EGT=  525.0
+t= 326s | fault=4 | RPM= 2149.1 | Torque= 1.97 | CHT= 161.8 | EGT=  364.6
+t= 327s | fault=4 | RPM= 1946.0 | Torque= 2.61 | CHT= 161.8 | EGT=  286.7
+t= 328s | fault=4 | RPM= 1814.5 | Torque= 4.88 | CHT= 161.9 | EGT=  251.0
+t= 329s | fault=4 | RPM= 1725.4 | Torque= 2.96 | CHT= 161.4 | EGT=  228.2
+t= 330s | fault=4 | RPM= 1664.5 | Torque= 1.47 | CHT= 161.3 | EGT=  214.8
+t= 331s | fault=4 | RPM= 1623.2 | Torque= 2.77 | CHT= 160.2 | EGT=  209.8
+t= 332s | fault=4 | RPM= 1593.6 | Torque= 1.23 | CHT= 162.6 | EGT=  203.2
+t= 333s | fault=4 | RPM= 1573.9 | Torque= 3.83 | CHT= 160.0 | EGT=  204.0
+t= 334s | fault=4 | RPM= 1558.8 | Torque= 1.49 | CHT= 159.8 | EGT=  198.7
+t= 335s | fault=4 | RPM= 1549.0 | Torque= 2.68 | CHT= 160.6 | EGT=  199.0
+t= 336s | fault=4 | RPM= 1542.0 | Torque= 3.27 | CHT= 158.9 | EGT=  198.9
+t= 337s | fault=4 | RPM= 1536.5 | Torque= 2.20 | CHT= 158.7 | EGT=  196.7
+t= 338s | fault=4 | RPM= 1532.6 | Torque= 1.44 | CHT= 160.5 | EGT=  195.2
+t= 339s | fault=4 | RPM= 1529.8 | Torque= 0.63 | CHT= 158.8 | EGT=  193.7
+t= 340s | fault=4 | RPM= 1528.9 | Torque= 3.66 | CHT= 157.6 | EGT=  197.7
+t= 341s | fault=4 | RPM= 1527.4 | Torque= 2.94 | CHT= 157.6 | EGT=  196.5
+t= 342s | fault=4 | RPM= 1526.4 | Torque= 2.79 | CHT= 156.9 | EGT=  196.2
+t= 343s | fault=4 | RPM= 1525.1 | Torque= 0.93 | CHT= 157.5 | EGT=  193.5
+t= 344s | fault=4 | RPM= 1525.9 | Torque= 4.92 | CHT= 157.0 | EGT=  199.0
+t= 345s | fault=4 | RPM= 1525.0 | Torque= 3.03 | CHT= 157.0 | EGT=  196.3
+t= 346s | fault=4 | RPM= 1524.3 | Torque= 1.63 | CHT= 158.8 | EGT=  194.3
+t= 347s | fault=4 | RPM= 1524.5 | Torque= 2.93 | CHT= 157.3 | EGT=  196.1
+t= 348s | fault=4 | RPM= 1524.8 | Torque= 4.06 | CHT= 156.6 | EGT=  197.7
+t= 349s | fault=4 | RPM= 1523.6 | Torque= 0.54 | CHT= 156.5 | EGT=  192.7
+t= 350s | fault=4 | RPM= 1524.2 | Torque= 2.57 | CHT= 155.8 | EGT=  195.6
+t= 351s | fault=4 | RPM= 1524.1 | Torque= 2.38 | CHT= 156.3 | EGT=  195.3
+t= 352s | fault=4 | RPM= 1523.6 | Torque= 1.08 | CHT= 155.7 | EGT=  193.5
+t= 353s | fault=4 | RPM= 1524.3 | Torque= 3.46 | CHT= 155.4 | EGT=  196.8
+t= 354s | fault=4 | RPM= 1523.8 | Torque= 1.68 | CHT= 155.0 | EGT=  194.3
+t= 355s | fault=4 | RPM= 1523.7 | Torque= 1.63 | CHT= 155.2 | EGT=  194.2
+t= 356s | fault=4 | RPM= 1524.3 | Torque= 3.37 | CHT= 154.7 | EGT=  196.7
+t= 357s | fault=4 | RPM= 1523.4 | Torque= 0.59 | CHT= 154.8 | EGT=  192.7
+t= 358s | fault=4 | RPM= 1524.6 | Torque= 4.31 | CHT= 155.1 | EGT=  198.0
+t= 359s | fault=4 | RPM= 1524.3 | Torque= 3.54 | CHT= 154.7 | EGT=  196.9
+t= 360s | fault=4 | RPM= 1524.3 | Torque= 3.38 | CHT= 152.7 | EGT=  196.7
+t= 361s | fault=4 | RPM= 1523.2 | Torque= 0.10 | CHT= 154.4 | EGT=  192.0
+t= 362s | fault=4 | RPM= 1524.1 | Torque= 2.98 | CHT= 154.6 | EGT=  196.1
+t= 363s | fault=4 | RPM= 1524.2 | Torque= 3.24 | CHT= 153.3 | EGT=  196.5
+t= 364s | fault=4 | RPM= 1524.0 | Torque= 2.63 | CHT= 152.6 | EGT=  195.6
+t= 365s | fault=4 | RPM= 1523.8 | Torque= 2.05 | CHT= 154.1 | EGT=  194.8
+t= 366s | fault=4 | RPM= 1524.2 | Torque= 3.33 | CHT= 152.1 | EGT=  196.6
+t= 367s | fault=4 | RPM= 1524.2 | Torque= 3.34 | CHT= 152.1 | EGT=  196.6
+t= 368s | fault=4 | RPM= 1524.0 | Torque= 2.53 | CHT= 152.8 | EGT=  195.5
+t= 369s | fault=4 | RPM= 1524.0 | Torque= 2.65 | CHT= 150.8 | EGT=  195.6
+t= 370s | fault=4 | RPM= 1523.8 | Torque= 1.98 | CHT= 151.1 | EGT=  194.7
+t= 371s | fault=4 | RPM= 1523.4 | Torque= 0.61 | CHT= 152.2 | EGT=  192.7
+t= 372s | fault=4 | RPM= 1523.8 | Torque= 2.08 | CHT= 151.0 | EGT=  194.8
+t= 373s | fault=4 | RPM= 1524.1 | Torque= 2.82 | CHT= 149.4 | EGT=  195.9
+t= 374s | fault=4 | RPM= 1523.4 | Torque= 0.62 | CHT= 151.1 | EGT=  192.8
+t= 375s | fault=4 | RPM= 1524.1 | Torque= 2.78 | CHT= 151.7 | EGT=  195.8
+t= 376s | fault=4 | RPM= 1524.4 | Torque= 3.94 | CHT= 150.0 | EGT=  197.5
+t= 377s | fault=4 | RPM= 1523.9 | Torque= 2.19 | CHT= 149.9 | EGT=  195.0
+t= 378s | fault=4 | RPM= 1523.6 | Torque= 1.42 | CHT= 149.4 | EGT=  193.9
+t= 379s | fault=4 | RPM= 1524.0 | Torque= 2.46 | CHT= 149.4 | EGT=  195.4
+t= 380s | fault=4 | RPM= 1523.4 | Torque= 0.66 | CHT= 148.6 | EGT=  192.8
+t= 381s | fault=4 | RPM= 1523.5 | Torque= 0.89 | CHT= 149.0 | EGT=  193.1
+t= 382s | fault=4 | RPM= 1523.8 | Torque= 1.82 | CHT= 148.7 | EGT=  194.4
+t= 383s | fault=4 | RPM= 1523.9 | Torque= 2.32 | CHT= 148.9 | EGT=  195.1
+t= 384s | fault=4 | RPM= 1523.5 | Torque= 0.96 | CHT= 148.1 | EGT=  193.2
+t= 385s | fault=4 | RPM= 1524.3 | Torque= 3.44 | CHT= 148.1 | EGT=  196.7
+t= 386s | fault=4 | RPM= 1524.2 | Torque= 3.29 | CHT= 146.9 | EGT=  196.5
+t= 387s | fault=4 | RPM= 1523.6 | Torque= 1.27 | CHT= 148.4 | EGT=  193.7
+t= 388s | fault=4 | RPM= 1523.7 | Torque= 1.65 | CHT= 147.8 | EGT=  194.2
+t= 389s | fault=4 | RPM= 1523.6 | Torque= 1.18 | CHT= 146.0 | EGT=  193.5
+t= 390s | fault=4 | RPM= 1524.1 | Torque= 2.77 | CHT= 148.0 | EGT=  195.8
+t= 391s | fault=4 | RPM= 1523.9 | Torque= 2.41 | CHT= 146.9 | EGT=  195.3
+t= 392s | fault=4 | RPM= 1523.2 | Torque= 0.02 | CHT= 146.4 | EGT=  191.9
+t= 393s | fault=4 | RPM= 1524.0 | Torque= 2.54 | CHT= 146.4 | EGT=  195.4
+t= 394s | fault=4 | RPM= 1524.1 | Torque= 2.79 | CHT= 146.6 | EGT=  195.8
+t= 395s | fault=4 | RPM= 1523.8 | Torque= 1.84 | CHT= 146.9 | EGT=  194.5
+t= 396s | fault=4 | RPM= 1524.1 | Torque= 2.86 | CHT= 145.5 | EGT=  195.9
+t= 397s | fault=4 | RPM= 1524.0 | Torque= 2.47 | CHT= 145.0 | EGT=  195.3
+t= 398s | fault=4 | RPM= 1523.9 | Torque= 2.32 | CHT= 144.3 | EGT=  195.1
+t= 399s | fault=4 | RPM= 1523.5 | Torque= 1.13 | CHT= 145.7 | EGT=  193.4
+t= 400s | fault=4 | RPM= 1523.3 | Torque= 0.46 | CHT= 145.6 | EGT=  192.5
+t= 401s | fault=4 | RPM= 1524.2 | Torque= 3.13 | CHT= 145.4 | EGT=  196.3
+t= 402s | fault=4 | RPM= 1523.9 | Torque= 2.17 | CHT= 145.4 | EGT=  194.9
+t= 403s | fault=4 | RPM= 1524.3 | Torque= 3.65 | CHT= 144.7 | EGT=  197.0
+t= 404s | fault=4 | RPM= 1523.8 | Torque= 1.86 | CHT= 143.3 | EGT=  194.5
+t= 405s | fault=4 | RPM= 1524.1 | Torque= 2.94 | CHT= 145.6 | EGT=  196.0
+t= 406s | fault=4 | RPM= 1523.9 | Torque= 2.39 | CHT= 142.6 | EGT=  195.2
+t= 407s | fault=4 | RPM= 1523.6 | Torque= 1.20 | CHT= 143.1 | EGT=  193.5
+t= 408s | fault=4 | RPM= 1523.8 | Torque= 1.95 | CHT= 143.3 | EGT=  194.6
+
+>>> FAULT CHANGED TO 0 at t=408s <<<
+
+t= 409s | fault=0 | RPM= 2629.4 | Torque= 7.89 | CHT= 142.0 | EGT=  272.6
+t= 410s | fault=0 | RPM= 3352.9 | Torque= 9.55 | CHT= 141.6 | EGT=  422.0
+t= 411s | fault=0 | RPM= 3709.1 | Torque=10.00 | CHT= 142.8 | EGT=  546.0
+t= 412s | fault=0 | RPM= 3870.8 | Torque=10.00 | CHT= 141.9 | EGT=  624.7
+t= 413s | fault=0 | RPM= 3941.5 | Torque=10.00 | CHT= 142.7 | EGT=  668.5
+t= 414s | fault=0 | RPM= 3970.9 | Torque= 8.57 | CHT= 142.1 | EGT=  686.6
+t= 415s | fault=0 | RPM= 3985.1 | Torque=10.00 | CHT= 142.2 | EGT=  703.0
+t= 416s | fault=0 | RPM= 3990.0 | Torque=10.00 | CHT= 141.4 | EGT=  705.3
+t= 417s | fault=0 | RPM= 3992.0 | Torque= 9.52 | CHT= 143.0 | EGT=  706.5
+t= 418s | fault=0 | RPM= 3993.1 | Torque= 9.78 | CHT= 140.0 | EGT=  707.9
+t= 419s | fault=0 | RPM= 3993.1 | Torque= 8.47 | CHT= 139.0 | EGT=  706.5
+t= 420s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 141.1 | EGT=  709.8
+t= 421s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 139.9 | EGT=  710.6
+t= 422s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT= 138.9 | EGT=  711.8
+t= 423s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT= 139.8 | EGT=  711.3
+t= 424s | fault=0 | RPM= 3993.7 | Torque= 9.32 | CHT= 139.0 | EGT=  708.1
+t= 425s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 137.5 | EGT=  710.7
+t= 426s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 138.0 | EGT=  709.4
+t= 427s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 137.1 | EGT=  710.4
+t= 428s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 137.6 | EGT=  710.3
+t= 429s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT= 136.1 | EGT=  711.1
+t= 430s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 137.6 | EGT=  710.7
+t= 431s | fault=0 | RPM= 3993.3 | Torque= 7.96 | CHT= 137.4 | EGT=  706.1
+t= 432s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 136.7 | EGT=  709.7
+t= 433s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 136.4 | EGT=  710.4
+t= 434s | fault=0 | RPM= 3993.9 | Torque= 9.85 | CHT= 135.4 | EGT=  708.8
+t= 435s | fault=0 | RPM= 3993.9 | Torque=10.00 | CHT= 134.8 | EGT=  709.1
+t= 436s | fault=0 | RPM= 3994.6 | Torque=10.00 | CHT= 135.2 | EGT=  712.0
+t= 437s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 134.7 | EGT=  710.3
+t= 438s | fault=0 | RPM= 3993.8 | Torque= 9.61 | CHT= 134.8 | EGT=  708.5
+t= 439s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 134.5 | EGT=  709.4
+t= 440s | fault=0 | RPM= 3993.8 | Torque= 9.71 | CHT= 134.8 | EGT=  708.6
+t= 441s | fault=0 | RPM= 3993.8 | Torque= 9.79 | CHT= 134.8 | EGT=  708.7
+t= 442s | fault=0 | RPM= 3993.7 | Torque= 9.35 | CHT= 132.2 | EGT=  708.1
+t= 443s | fault=0 | RPM= 3993.5 | Torque= 8.60 | CHT= 133.0 | EGT=  707.0
+t= 444s | fault=0 | RPM= 3993.7 | Torque= 9.44 | CHT= 133.5 | EGT=  708.2
+t= 445s | fault=0 | RPM= 3994.7 | Torque=10.00 | CHT= 131.4 | EGT=  712.4
+t= 446s | fault=0 | RPM= 3993.8 | Torque= 9.69 | CHT= 132.6 | EGT=  708.6
+t= 447s | fault=0 | RPM= 3993.6 | Torque= 9.08 | CHT= 132.5 | EGT=  707.7
+t= 448s | fault=0 | RPM= 3993.7 | Torque= 9.27 | CHT= 131.7 | EGT=  708.0
+t= 449s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 131.0 | EGT=  709.7
+t= 450s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 131.8 | EGT=  709.5
+t= 451s | fault=0 | RPM= 3993.5 | Torque= 8.86 | CHT= 131.2 | EGT=  707.4
+t= 452s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 129.8 | EGT=  709.6
+t= 453s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 131.4 | EGT=  710.9
+t= 454s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 130.6 | EGT=  710.3
+t= 455s | fault=0 | RPM= 3993.9 | Torque= 9.97 | CHT= 130.5 | EGT=  709.0
+t= 456s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 129.3 | EGT=  709.4
+t= 457s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 128.2 | EGT=  710.7
+t= 458s | fault=0 | RPM= 3993.9 | Torque= 9.84 | CHT= 128.9 | EGT=  708.8
+t= 459s | fault=0 | RPM= 3993.7 | Torque= 9.26 | CHT= 128.8 | EGT=  707.9
+t= 460s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT= 129.9 | EGT=  711.2
+t= 461s | fault=0 | RPM= 3993.8 | Torque= 9.55 | CHT= 127.8 | EGT=  708.4
+t= 462s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 128.2 | EGT=  710.3
+t= 463s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 127.1 | EGT=  710.7
+t= 464s | fault=0 | RPM= 3993.7 | Torque= 9.23 | CHT= 127.3 | EGT=  707.9
+t= 465s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 127.7 | EGT=  709.3
+t= 466s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 127.1 | EGT=  709.2
+t= 467s | fault=0 | RPM= 3993.6 | Torque= 9.12 | CHT= 126.5 | EGT=  707.7
+t= 468s | fault=0 | RPM= 3993.8 | Torque= 9.59 | CHT= 125.8 | EGT=  708.4
+t= 469s | fault=0 | RPM= 3993.4 | Torque= 8.32 | CHT= 127.3 | EGT=  706.6
+t= 470s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 126.6 | EGT=  709.9
+t= 471s | fault=0 | RPM= 3993.9 | Torque= 9.97 | CHT= 125.8 | EGT=  708.9
+t= 472s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 125.9 | EGT=  710.9
+t= 473s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 125.8 | EGT=  710.5
+t= 474s | fault=0 | RPM= 3993.6 | Torque= 9.16 | CHT= 126.8 | EGT=  707.8
+t= 475s | fault=0 | RPM= 3994.6 | Torque=10.00 | CHT= 125.5 | EGT=  711.9
+t= 476s | fault=0 | RPM= 3993.6 | Torque= 9.02 | CHT= 124.0 | EGT=  707.6
+t= 477s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT= 124.2 | EGT=  711.6
+t= 478s | fault=0 | RPM= 3994.6 | Torque=10.00 | CHT= 122.5 | EGT=  711.9
+t= 479s | fault=0 | RPM= 3993.4 | Torque= 8.57 | CHT= 124.6 | EGT=  706.9
+t= 480s | fault=0 | RPM= 3993.9 | Torque=10.00 | CHT= 123.7 | EGT=  709.1
+t= 481s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 121.9 | EGT=  709.3
+t= 482s | fault=0 | RPM= 3993.7 | Torque= 9.39 | CHT= 125.0 | EGT=  708.1
+t= 483s | fault=0 | RPM= 3993.9 | Torque= 9.92 | CHT= 122.8 | EGT=  708.8
+t= 484s | fault=0 | RPM= 3993.7 | Torque= 9.52 | CHT= 122.0 | EGT=  708.3
+t= 485s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 122.2 | EGT=  710.8
+t= 486s | fault=0 | RPM= 3993.9 | Torque= 9.90 | CHT= 121.5 | EGT=  708.8
+t= 487s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 122.5 | EGT=  710.0
+t= 488s | fault=0 | RPM= 3993.8 | Torque= 9.71 | CHT= 120.4 | EGT=  708.5
+t= 489s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 121.4 | EGT=  709.2
+t= 490s | fault=0 | RPM= 3993.3 | Torque= 8.08 | CHT= 121.5 | EGT=  706.2
+t= 491s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 121.6 | EGT=  710.9
+t= 492s | fault=0 | RPM= 3993.9 | Torque= 9.97 | CHT= 121.9 | EGT=  708.9
+t= 493s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT= 120.5 | EGT=  711.5
+t= 494s | fault=0 | RPM= 3993.8 | Torque= 9.69 | CHT= 120.8 | EGT=  708.5
+t= 495s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT= 122.0 | EGT=  711.2
+t= 496s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 121.8 | EGT=  710.9
+t= 497s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 120.2 | EGT=  710.9
+t= 498s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 119.0 | EGT=  710.0
+t= 499s | fault=0 | RPM= 3993.7 | Torque= 9.47 | CHT= 120.3 | EGT=  708.2
+t= 500s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 119.3 | EGT=  709.8
+t= 501s | fault=0 | RPM= 3993.5 | Torque= 8.83 | CHT= 118.4 | EGT=  707.3
+t= 502s | fault=0 | RPM= 3993.9 | Torque=10.00 | CHT= 118.4 | EGT=  709.2
+t= 503s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 118.4 | EGT=  709.3
+t= 504s | fault=0 | RPM= 3993.7 | Torque= 9.54 | CHT= 118.8 | EGT=  708.3
+t= 505s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 119.0 | EGT=  709.4
+t= 506s | fault=0 | RPM= 3993.9 | Torque=10.00 | CHT= 118.6 | EGT=  709.1
+t= 507s | fault=0 | RPM= 3993.4 | Torque= 8.40 | CHT= 117.7 | EGT=  706.7
+t= 508s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 118.9 | EGT=  709.7
+t= 509s | fault=0 | RPM= 3993.9 | Torque= 9.89 | CHT= 118.0 | EGT=  708.8
+t= 510s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 118.8 | EGT=  709.3
+t= 511s | fault=0 | RPM= 3993.9 | Torque= 9.97 | CHT= 117.3 | EGT=  708.9
+t= 512s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 116.7 | EGT=  710.8
+t= 513s | fault=0 | RPM= 3993.9 | Torque=10.00 | CHT= 116.8 | EGT=  709.2
+t= 514s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 115.9 | EGT=  710.0
+t= 515s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 114.7 | EGT=  709.5
+t= 516s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 115.9 | EGT=  710.7
+t= 517s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 118.0 | EGT=  710.0
+t= 518s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 115.1 | EGT=  709.5
+t= 519s | fault=0 | RPM= 3993.8 | Torque= 9.76 | CHT= 115.2 | EGT=  708.6
+t= 520s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 114.6 | EGT=  710.6
+t= 521s | fault=0 | RPM= 3993.7 | Torque= 9.50 | CHT= 114.4 | EGT=  708.2
+t= 522s | fault=0 | RPM= 3993.6 | Torque= 9.22 | CHT= 115.5 | EGT=  707.8
+t= 523s | fault=0 | RPM= 3993.6 | Torque= 9.22 | CHT= 114.6 | EGT=  707.8
+t= 524s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 115.4 | EGT=  710.3
+t= 525s | fault=0 | RPM= 3993.8 | Torque= 9.87 | CHT= 114.3 | EGT=  708.7
+t= 526s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT= 113.5 | EGT=  711.8
+t= 527s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 114.0 | EGT=  710.8
+t= 528s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 114.8 | EGT=  709.9
+t= 529s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 113.2 | EGT=  709.9
+t= 530s | fault=0 | RPM= 3993.8 | Torque= 9.59 | CHT= 113.4 | EGT=  708.3
+t= 531s | fault=0 | RPM= 3994.6 | Torque=10.00 | CHT= 114.2 | EGT=  712.0
+t= 532s | fault=0 | RPM= 3993.6 | Torque= 9.21 | CHT= 113.1 | EGT=  707.8
+t= 533s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 113.4 | EGT=  710.1
+t= 534s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 111.6 | EGT=  710.6
+t= 535s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT= 111.9 | EGT=  711.1
+t= 536s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 111.7 | EGT=  710.2
+t= 537s | fault=0 | RPM= 3993.9 | Torque= 9.91 | CHT= 112.0 | EGT=  708.8
+t= 538s | fault=0 | RPM= 3993.8 | Torque= 9.67 | CHT= 113.0 | EGT=  708.4
+t= 539s | fault=0 | RPM= 3993.7 | Torque= 9.46 | CHT= 111.5 | EGT=  708.1
+t= 540s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 112.5 | EGT=  710.5
+t= 541s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 112.1 | EGT=  710.3
+t= 542s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 112.3 | EGT=  709.7
+t= 543s | fault=0 | RPM= 3993.6 | Torque= 9.18 | CHT= 111.1 | EGT=  707.7
+t= 544s | fault=0 | RPM= 3993.8 | Torque= 9.62 | CHT= 111.0 | EGT=  708.3
+t= 545s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT= 111.1 | EGT=  711.7
+t= 546s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 110.9 | EGT=  709.5
+t= 547s | fault=0 | RPM= 3993.8 | Torque= 9.89 | CHT= 110.5 | EGT=  708.7
+t= 548s | fault=0 | RPM= 3993.3 | Torque= 8.31 | CHT= 110.8 | EGT=  706.5
+t= 549s | fault=0 | RPM= 3993.6 | Torque= 8.96 | CHT= 111.7 | EGT=  707.4
+t= 550s | fault=0 | RPM= 3993.6 | Torque= 9.16 | CHT= 110.4 | EGT=  707.7
+t= 551s | fault=0 | RPM= 3993.8 | Torque= 9.65 | CHT= 111.1 | EGT=  708.4
+t= 552s | fault=0 | RPM= 3993.4 | Torque= 8.42 | CHT= 110.0 | EGT=  706.6
+t= 553s | fault=0 | RPM= 3993.9 | Torque= 9.96 | CHT= 110.6 | EGT=  708.8
+t= 554s | fault=0 | RPM= 3993.9 | Torque=10.00 | CHT= 108.8 | EGT=  709.1
+t= 555s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT= 109.9 | EGT=  711.4
+t= 556s | fault=0 | RPM= 3993.6 | Torque= 9.14 | CHT= 109.3 | EGT=  707.6
+t= 557s | fault=0 | RPM= 3993.9 | Torque= 9.99 | CHT= 109.2 | EGT=  708.8
+t= 558s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 108.6 | EGT=  709.8
+t= 559s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 108.9 | EGT=  709.3
+t= 560s | fault=0 | RPM= 3993.5 | Torque= 8.92 | CHT= 108.0 | EGT=  707.3
+t= 561s | fault=0 | RPM= 3993.8 | Torque= 9.83 | CHT= 109.6 | EGT=  708.6
+t= 562s | fault=0 | RPM= 3993.7 | Torque= 9.57 | CHT= 108.5 | EGT=  708.2
+t= 563s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 108.8 | EGT=  709.2
+t= 564s | fault=0 | RPM= 3993.8 | Torque= 9.91 | CHT= 107.6 | EGT=  708.7
+t= 565s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 108.2 | EGT=  710.6
+t= 566s | fault=0 | RPM= 3993.9 | Torque=10.00 | CHT= 108.0 | EGT=  709.2
+t= 567s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 107.5 | EGT=  710.0
+t= 568s | fault=0 | RPM= 3993.8 | Torque= 9.73 | CHT= 107.8 | EGT=  708.5
+t= 569s | fault=0 | RPM= 3993.7 | Torque= 9.33 | CHT= 107.0 | EGT=  707.9
+t= 570s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT= 106.9 | EGT=  711.2
+t= 571s | fault=0 | RPM= 3993.8 | Torque= 9.65 | CHT= 106.0 | EGT=  708.3
+t= 572s | fault=0 | RPM= 3993.5 | Torque= 8.95 | CHT= 105.8 | EGT=  707.3
+t= 573s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 107.6 | EGT=  710.6
+t= 574s | fault=0 | RPM= 3993.8 | Torque= 9.84 | CHT= 106.6 | EGT=  708.6
+t= 575s | fault=0 | RPM= 3993.8 | Torque= 9.86 | CHT= 106.1 | EGT=  708.6
+t= 576s | fault=0 | RPM= 3993.7 | Torque= 9.47 | CHT= 105.2 | EGT=  708.1
+t= 577s | fault=0 | RPM= 3993.8 | Torque= 9.83 | CHT= 105.7 | EGT=  708.6
+t= 578s | fault=0 | RPM= 3993.2 | Torque= 7.90 | CHT= 106.5 | EGT=  705.9
+t= 579s | fault=0 | RPM= 3993.3 | Torque= 8.10 | CHT= 106.8 | EGT=  706.1
+t= 580s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 105.2 | EGT=  710.4
+t= 581s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 105.7 | EGT=  710.3
+t= 582s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT= 105.2 | EGT=  711.6
+t= 583s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 105.2 | EGT=  709.6
+t= 584s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT= 105.9 | EGT=  711.6
+t= 585s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 105.8 | EGT=  709.7
+t= 586s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 105.4 | EGT=  709.4
+t= 587s | fault=0 | RPM= 3993.8 | Torque= 9.67 | CHT= 105.5 | EGT=  708.4
+t= 588s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 103.4 | EGT=  709.6
+t= 589s | fault=0 | RPM= 3993.6 | Torque= 9.24 | CHT= 104.2 | EGT=  707.7
+t= 590s | fault=0 | RPM= 3993.8 | Torque= 9.92 | CHT= 104.4 | EGT=  708.7
+t= 591s | fault=0 | RPM= 3994.6 | Torque=10.00 | CHT= 104.8 | EGT=  712.3
+t= 592s | fault=0 | RPM= 3993.7 | Torque= 9.43 | CHT= 104.5 | EGT=  708.0
+t= 593s | fault=0 | RPM= 3993.2 | Torque= 7.83 | CHT= 104.3 | EGT=  705.7
+t= 594s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 103.7 | EGT=  709.4
+t= 595s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 102.9 | EGT=  709.6
+t= 596s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 103.3 | EGT=  710.8
+t= 597s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 104.6 | EGT=  709.3
+t= 598s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT= 102.5 | EGT=  711.5
+t= 599s | fault=0 | RPM= 3993.6 | Torque= 9.30 | CHT= 101.9 | EGT=  707.8
+t= 600s | fault=0 | RPM= 3993.4 | Torque= 8.42 | CHT= 101.7 | EGT=  706.6
+t= 601s | fault=0 | RPM= 3993.8 | Torque= 9.85 | CHT= 102.5 | EGT=  708.6
+t= 602s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT= 104.4 | EGT=  711.3
+t= 603s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 103.4 | EGT=  710.6
+t= 604s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 103.2 | EGT=  711.0
+t= 605s | fault=0 | RPM= 3993.8 | Torque= 9.79 | CHT= 103.8 | EGT=  708.5
+t= 606s | fault=0 | RPM= 3993.5 | Torque= 8.95 | CHT= 100.8 | EGT=  707.3
+t= 607s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 101.7 | EGT=  710.3
+t= 608s | fault=0 | RPM= 3993.5 | Torque= 8.81 | CHT= 101.5 | EGT=  707.1
+t= 609s | fault=0 | RPM= 3993.7 | Torque= 9.40 | CHT= 102.9 | EGT=  707.9
+
+>>> FAULT CHANGED TO 4 at t=609s <<<
+
+t= 610s | fault=4 | RPM= 3040.8 | Torque= 5.78 | CHT= 102.4 | EGT=  593.1
+t= 611s | fault=4 | RPM= 2475.8 | Torque= 2.74 | CHT= 101.4 | EGT=  429.2
+t= 612s | fault=4 | RPM= 2149.4 | Torque= 3.45 | CHT= 101.9 | EGT=  329.4
+t= 613s | fault=4 | RPM= 1945.6 | Torque= 1.62 | CHT=  99.6 | EGT=  271.4
+t= 614s | fault=4 | RPM= 1814.2 | Torque= 4.25 | CHT= 100.4 | EGT=  245.1
+t= 615s | fault=4 | RPM= 1725.2 | Torque= 2.58 | CHT= 101.8 | EGT=  225.6
+t= 616s | fault=4 | RPM= 1664.4 | Torque= 1.31 | CHT= 101.0 | EGT=  213.6
+t= 617s | fault=4 | RPM= 1623.2 | Torque= 3.23 | CHT= 100.5 | EGT=  209.9
+t= 618s | fault=4 | RPM= 1594.3 | Torque= 3.77 | CHT= 100.2 | EGT=  206.4
+t= 619s | fault=4 | RPM= 1573.1 | Torque= 1.51 | CHT=  99.6 | EGT=  200.3
+t= 620s | fault=4 | RPM= 1558.7 | Torque= 1.35 | CHT=  99.8 | EGT=  198.1
+t= 621s | fault=4 | RPM= 1549.0 | Torque= 3.11 | CHT= 100.0 | EGT=  199.2
+t= 622s | fault=4 | RPM= 1542.3 | Torque= 4.56 | CHT= 101.3 | EGT=  200.3
+t= 623s | fault=4 | RPM= 1536.0 | Torque= 0.94 | CHT=  99.8 | EGT=  194.5
+t= 624s | fault=4 | RPM= 1532.8 | Torque= 2.25 | CHT=  98.2 | EGT=  195.9
+t= 625s | fault=4 | RPM= 1530.3 | Torque= 2.61 | CHT=  98.8 | EGT=  196.1
+t= 626s | fault=4 | RPM= 1528.2 | Torque= 1.71 | CHT=  99.3 | EGT=  194.5
+t= 627s | fault=4 | RPM= 1526.4 | Torque= 0.02 | CHT=  99.0 | EGT=  192.0
+t= 628s | fault=4 | RPM= 1526.6 | Torque= 3.61 | CHT=  99.1 | EGT=  196.9
+t= 629s | fault=4 | RPM= 1525.1 | Torque= 1.19 | CHT= 100.4 | EGT=  193.4
+t= 630s | fault=4 | RPM= 1525.0 | Torque= 2.24 | CHT=  98.3 | EGT=  194.8
+t= 631s | fault=4 | RPM= 1525.0 | Torque= 3.21 | CHT=  98.7 | EGT=  196.2
+t= 632s | fault=4 | RPM= 1524.0 | Torque= 0.88 | CHT=  99.2 | EGT=  192.8
+t= 633s | fault=4 | RPM= 1524.9 | Torque= 4.36 | CHT=  98.5 | EGT=  197.7
+t= 634s | fault=4 | RPM= 1523.7 | Torque= 1.03 | CHT=  99.5 | EGT=  193.0
+t= 635s | fault=4 | RPM= 1524.4 | Torque= 3.50 | CHT=  98.4 | EGT=  196.5
+t= 636s | fault=4 | RPM= 1523.8 | Torque= 1.64 | CHT=  99.3 | EGT=  193.9
+t= 637s | fault=4 | RPM= 1524.1 | Torque= 2.70 | CHT=  99.3 | EGT=  195.3
+t= 638s | fault=4 | RPM= 1523.9 | Torque= 2.26 | CHT=  98.1 | EGT=  194.7
+t= 639s | fault=4 | RPM= 1523.9 | Torque= 2.45 | CHT=  98.0 | EGT=  195.0
+t= 640s | fault=4 | RPM= 1524.2 | Torque= 3.40 | CHT=  98.6 | EGT=  196.3
+t= 641s | fault=4 | RPM= 1523.4 | Torque= 0.92 | CHT=  97.5 | EGT=  192.8
+t= 642s | fault=4 | RPM= 1523.7 | Torque= 1.78 | CHT=  98.6 | EGT=  194.0
+t= 643s | fault=4 | RPM= 1523.7 | Torque= 1.82 | CHT=  97.3 | EGT=  194.1
+t= 644s | fault=4 | RPM= 1524.0 | Torque= 2.84 | CHT=  96.3 | EGT=  195.5
+t= 645s | fault=4 | RPM= 1524.0 | Torque= 2.71 | CHT=  97.0 | EGT=  195.3
+t= 646s | fault=4 | RPM= 1524.3 | Torque= 3.66 | CHT=  98.2 | EGT=  196.7
+t= 647s | fault=4 | RPM= 1523.5 | Torque= 1.25 | CHT=  97.6 | EGT=  193.3
+t= 648s | fault=4 | RPM= 1524.4 | Torque= 4.11 | CHT=  97.9 | EGT=  197.3
+t= 649s | fault=4 | RPM= 1523.9 | Torque= 2.45 | CHT=  95.7 | EGT=  195.0
+t= 650s | fault=4 | RPM= 1523.2 | Torque= 0.47 | CHT=  96.0 | EGT=  192.2
+t= 651s | fault=4 | RPM= 1524.0 | Torque= 2.82 | CHT=  96.9 | EGT=  195.5
+t= 652s | fault=4 | RPM= 1524.2 | Torque= 3.40 | CHT=  96.6 | EGT=  196.3
+t= 653s | fault=4 | RPM= 1523.3 | Torque= 0.72 | CHT=  96.2 | EGT=  192.5
+t= 654s | fault=4 | RPM= 1523.7 | Torque= 1.97 | CHT=  96.4 | EGT=  194.3
+t= 655s | fault=4 | RPM= 1523.8 | Torque= 2.23 | CHT=  96.1 | EGT=  194.6
+t= 656s | fault=4 | RPM= 1523.8 | Torque= 2.26 | CHT=  97.0 | EGT=  194.7
+t= 657s | fault=4 | RPM= 1524.3 | Torque= 3.68 | CHT=  95.7 | EGT=  196.7
+t= 658s | fault=4 | RPM= 1523.7 | Torque= 1.95 | CHT=  95.5 | EGT=  194.2
+t= 659s | fault=4 | RPM= 1523.8 | Torque= 2.14 | CHT=  95.9 | EGT=  194.5
+t= 660s | fault=4 | RPM= 1523.8 | Torque= 2.14 | CHT=  94.9 | EGT=  194.5
+t= 661s | fault=4 | RPM= 1524.1 | Torque= 3.02 | CHT=  96.2 | EGT=  195.8
+t= 662s | fault=4 | RPM= 1523.9 | Torque= 2.39 | CHT=  96.3 | EGT=  194.9
+t= 663s | fault=4 | RPM= 1523.5 | Torque= 1.29 | CHT=  93.9 | EGT=  193.3
+t= 664s | fault=4 | RPM= 1523.8 | Torque= 2.17 | CHT=  94.3 | EGT=  194.5
+t= 665s | fault=4 | RPM= 1523.9 | Torque= 2.54 | CHT=  94.3 | EGT=  195.1
+t= 666s | fault=4 | RPM= 1524.0 | Torque= 2.73 | CHT=  95.8 | EGT=  195.3
+t= 667s | fault=4 | RPM= 1523.6 | Torque= 1.44 | CHT=  94.4 | EGT=  193.5
+t= 668s | fault=4 | RPM= 1523.7 | Torque= 1.99 | CHT=  94.9 | EGT=  194.3
+t= 669s | fault=4 | RPM= 1524.4 | Torque= 4.22 | CHT=  93.5 | EGT=  197.4
+t= 670s | fault=4 | RPM= 1523.8 | Torque= 2.29 | CHT=  94.2 | EGT=  194.7
+t= 671s | fault=4 | RPM= 1523.8 | Torque= 2.18 | CHT=  94.4 | EGT=  194.6
+t= 672s | fault=4 | RPM= 1523.9 | Torque= 2.68 | CHT=  94.3 | EGT=  195.3
+t= 673s | fault=4 | RPM= 1523.9 | Torque= 2.46 | CHT=  93.7 | EGT=  194.9
+t= 674s | fault=4 | RPM= 1524.6 | Torque= 4.65 | CHT=  94.2 | EGT=  198.0
+t= 675s | fault=4 | RPM= 1524.2 | Torque= 3.55 | CHT=  94.0 | EGT=  196.5
+t= 676s | fault=4 | RPM= 1524.3 | Torque= 3.67 | CHT=  94.6 | EGT=  196.7
+t= 677s | fault=4 | RPM= 1523.7 | Torque= 1.95 | CHT=  94.5 | EGT=  194.2
+t= 678s | fault=4 | RPM= 1523.9 | Torque= 2.66 | CHT=  94.2 | EGT=  195.2
+t= 679s | fault=4 | RPM= 1523.0 | Torque=-0.38 | CHT=  93.8 | EGT=  190.9
+t= 680s | fault=4 | RPM= 1524.0 | Torque= 2.78 | CHT=  93.4 | EGT=  195.4
+t= 681s | fault=4 | RPM= 1524.1 | Torque= 3.28 | CHT=  92.2 | EGT=  196.1
+t= 682s | fault=4 | RPM= 1524.1 | Torque= 3.17 | CHT=  92.2 | EGT=  195.9
+t= 683s | fault=4 | RPM= 1524.0 | Torque= 3.04 | CHT=  93.6 | EGT=  195.7
+t= 684s | fault=4 | RPM= 1523.8 | Torque= 2.21 | CHT=  92.8 | EGT=  194.6
+t= 685s | fault=4 | RPM= 1523.6 | Torque= 1.58 | CHT=  93.7 | EGT=  193.7
+t= 686s | fault=4 | RPM= 1524.1 | Torque= 3.25 | CHT=  91.9 | EGT=  196.0
+t= 687s | fault=4 | RPM= 1523.6 | Torque= 1.53 | CHT=  91.9 | EGT=  193.6
+t= 688s | fault=4 | RPM= 1524.0 | Torque= 2.92 | CHT=  93.4 | EGT=  195.6
+t= 689s | fault=4 | RPM= 1523.8 | Torque= 2.36 | CHT=  93.3 | EGT=  194.8
+t= 690s | fault=4 | RPM= 1524.4 | Torque= 4.01 | CHT=  93.2 | EGT=  197.1
+t= 691s | fault=4 | RPM= 1523.7 | Torque= 2.10 | CHT=  91.9 | EGT=  194.4
+t= 692s | fault=4 | RPM= 1524.2 | Torque= 3.38 | CHT=  92.1 | EGT=  196.2
+t= 693s | fault=4 | RPM= 1524.4 | Torque= 4.17 | CHT=  91.4 | EGT=  197.3
+t= 694s | fault=4 | RPM= 1524.1 | Torque= 3.29 | CHT=  92.3 | EGT=  196.1
+t= 695s | fault=4 | RPM= 1524.0 | Torque= 2.83 | CHT=  91.2 | EGT=  195.4
+t= 696s | fault=4 | RPM= 1523.9 | Torque= 2.54 | CHT=  91.0 | EGT=  195.0
+t= 697s | fault=4 | RPM= 1523.9 | Torque= 2.44 | CHT=  90.3 | EGT=  194.9
+t= 698s | fault=4 | RPM= 1524.2 | Torque= 3.58 | CHT=  92.0 | EGT=  196.5
+t= 699s | fault=4 | RPM= 1523.5 | Torque= 1.46 | CHT=  91.9 | EGT=  193.5
+t= 700s | fault=4 | RPM= 1523.7 | Torque= 2.11 | CHT=  91.1 | EGT=  194.4
+t= 701s | fault=4 | RPM= 1524.1 | Torque= 3.12 | CHT=  91.4 | EGT=  195.8
+t= 702s | fault=4 | RPM= 1524.8 | Torque= 5.32 | CHT=  91.5 | EGT=  198.9
+t= 703s | fault=4 | RPM= 1524.1 | Torque= 3.21 | CHT=  90.7 | EGT=  196.0
+t= 704s | fault=4 | RPM= 1524.2 | Torque= 3.49 | CHT=  89.8 | EGT=  196.3
+t= 705s | fault=4 | RPM= 1524.4 | Torque= 4.29 | CHT=  90.0 | EGT=  197.5
+t= 706s | fault=4 | RPM= 1524.2 | Torque= 3.49 | CHT=  90.3 | EGT=  196.3
+t= 707s | fault=4 | RPM= 1523.9 | Torque= 2.71 | CHT=  91.8 | EGT=  195.2
+t= 708s | fault=4 | RPM= 1523.9 | Torque= 2.69 | CHT=  90.6 | EGT=  195.2
+t= 709s | fault=4 | RPM= 1524.4 | Torque= 4.10 | CHT=  90.6 | EGT=  197.2
+t= 710s | fault=4 | RPM= 1523.9 | Torque= 2.51 | CHT=  89.7 | EGT=  195.0
+t= 711s | fault=4 | RPM= 1523.4 | Torque= 1.13 | CHT=  90.2 | EGT=  193.0
+t= 712s | fault=4 | RPM= 1523.7 | Torque= 1.84 | CHT=  91.1 | EGT=  194.0
+t= 713s | fault=4 | RPM= 1523.5 | Torque= 1.39 | CHT=  91.2 | EGT=  193.4
+t= 714s | fault=4 | RPM= 1523.7 | Torque= 2.10 | CHT=  89.3 | EGT=  194.4
+t= 715s | fault=4 | RPM= 1523.9 | Torque= 2.56 | CHT=  89.0 | EGT=  195.0
+t= 716s | fault=4 | RPM= 1523.9 | Torque= 2.74 | CHT=  89.2 | EGT=  195.3
+t= 717s | fault=4 | RPM= 1524.1 | Torque= 3.31 | CHT=  89.2 | EGT=  196.1
+t= 718s | fault=4 | RPM= 1523.9 | Torque= 2.67 | CHT=  91.2 | EGT=  195.2
+t= 719s | fault=4 | RPM= 1523.9 | Torque= 2.57 | CHT=  88.9 | EGT=  195.0
+t= 720s | fault=4 | RPM= 1524.0 | Torque= 2.94 | CHT=  89.0 | EGT=  195.6
+t= 721s | fault=4 | RPM= 1524.1 | Torque= 3.21 | CHT=  89.5 | EGT=  195.9
+t= 722s | fault=4 | RPM= 1524.0 | Torque= 2.84 | CHT=  87.6 | EGT=  195.4
+t= 723s | fault=4 | RPM= 1524.6 | Torque= 4.74 | CHT=  88.6 | EGT=  198.1
+t= 724s | fault=4 | RPM= 1523.9 | Torque= 2.72 | CHT=  88.6 | EGT=  195.2
+t= 725s | fault=4 | RPM= 1523.4 | Torque= 1.15 | CHT=  89.6 | EGT=  193.0
+t= 726s | fault=4 | RPM= 1524.4 | Torque= 4.13 | CHT=  88.5 | EGT=  197.2
+t= 727s | fault=4 | RPM= 1523.9 | Torque= 2.54 | CHT=  89.2 | EGT=  195.0
+t= 728s | fault=4 | RPM= 1524.2 | Torque= 3.66 | CHT=  88.9 | EGT=  196.6
+t= 729s | fault=4 | RPM= 1524.0 | Torque= 2.78 | CHT=  88.6 | EGT=  195.3
+t= 730s | fault=4 | RPM= 1524.4 | Torque= 4.06 | CHT=  88.4 | EGT=  197.1
+t= 731s | fault=4 | RPM= 1523.7 | Torque= 2.07 | CHT=  87.2 | EGT=  194.3
+t= 732s | fault=4 | RPM= 1523.9 | Torque= 2.75 | CHT=  88.6 | EGT=  195.3
+t= 733s | fault=4 | RPM= 1524.0 | Torque= 2.80 | CHT=  88.3 | EGT=  195.3
+t= 734s | fault=4 | RPM= 1524.2 | Torque= 3.49 | CHT=  87.7 | EGT=  196.3
+t= 735s | fault=4 | RPM= 1523.6 | Torque= 1.61 | CHT=  87.8 | EGT=  193.7
+t= 736s | fault=4 | RPM= 1523.9 | Torque= 2.57 | CHT=  88.3 | EGT=  195.0
+t= 737s | fault=4 | RPM= 1524.0 | Torque= 2.91 | CHT=  88.1 | EGT=  195.5
+t= 738s | fault=4 | RPM= 1524.2 | Torque= 3.65 | CHT=  86.6 | EGT=  196.5
+t= 739s | fault=4 | RPM= 1524.2 | Torque= 3.50 | CHT=  87.4 | EGT=  196.3
+t= 740s | fault=4 | RPM= 1523.7 | Torque= 2.01 | CHT=  87.4 | EGT=  194.2
+t= 741s | fault=4 | RPM= 1523.9 | Torque= 2.64 | CHT=  87.0 | EGT=  195.1
+t= 742s | fault=4 | RPM= 1524.2 | Torque= 3.56 | CHT=  86.6 | EGT=  196.4
+t= 743s | fault=4 | RPM= 1523.9 | Torque= 2.47 | CHT=  87.0 | EGT=  194.9
+t= 744s | fault=4 | RPM= 1523.9 | Torque= 2.71 | CHT=  87.2 | EGT=  195.2
+t= 745s | fault=4 | RPM= 1524.1 | Torque= 3.33 | CHT=  85.6 | EGT=  196.1
+t= 746s | fault=4 | RPM= 1523.7 | Torque= 2.11 | CHT=  85.8 | EGT=  194.3
+t= 747s | fault=4 | RPM= 1524.0 | Torque= 3.05 | CHT=  86.4 | EGT=  195.7
+t= 748s | fault=4 | RPM= 1524.1 | Torque= 3.35 | CHT=  86.4 | EGT=  196.1
+t= 749s | fault=4 | RPM= 1524.0 | Torque= 2.98 | CHT=  85.7 | EGT=  195.6
+t= 750s | fault=4 | RPM= 1524.1 | Torque= 3.36 | CHT=  85.9 | EGT=  196.1
+t= 751s | fault=4 | RPM= 1524.2 | Torque= 3.69 | CHT=  85.9 | EGT=  196.6
+t= 752s | fault=4 | RPM= 1523.5 | Torque= 1.27 | CHT=  86.2 | EGT=  193.2
+t= 753s | fault=4 | RPM= 1523.7 | Torque= 1.87 | CHT=  87.1 | EGT=  194.0
+t= 754s | fault=4 | RPM= 1523.7 | Torque= 2.13 | CHT=  86.9 | EGT=  194.4
+t= 755s | fault=4 | RPM= 1523.8 | Torque= 2.28 | CHT=  86.0 | EGT=  194.6
+t= 756s | fault=4 | RPM= 1524.0 | Torque= 3.06 | CHT=  86.5 | EGT=  195.7
+t= 757s | fault=4 | RPM= 1523.9 | Torque= 2.73 | CHT=  86.4 | EGT=  195.2
+t= 758s | fault=4 | RPM= 1524.0 | Torque= 3.07 | CHT=  85.4 | EGT=  195.7
+t= 759s | fault=4 | RPM= 1523.7 | Torque= 1.92 | CHT=  85.4 | EGT=  194.1
+t= 760s | fault=4 | RPM= 1524.1 | Torque= 3.43 | CHT=  85.3 | EGT=  196.2
+t= 761s | fault=4 | RPM= 1523.5 | Torque= 1.36 | CHT=  85.8 | EGT=  193.3
+t= 762s | fault=4 | RPM= 1524.0 | Torque= 2.92 | CHT=  84.3 | EGT=  195.5
+t= 763s | fault=4 | RPM= 1524.1 | Torque= 3.32 | CHT=  84.6 | EGT=  196.0
+t= 764s | fault=4 | RPM= 1524.2 | Torque= 3.53 | CHT=  86.5 | EGT=  196.3
+t= 765s | fault=4 | RPM= 1523.6 | Torque= 1.59 | CHT=  85.0 | EGT=  193.6
+t= 766s | fault=4 | RPM= 1524.1 | Torque= 3.38 | CHT=  84.9 | EGT=  196.1
+t= 767s | fault=4 | RPM= 1523.5 | Torque= 1.47 | CHT=  85.1 | EGT=  193.4
+t= 768s | fault=4 | RPM= 1523.9 | Torque= 2.56 | CHT=  85.0 | EGT=  194.9
+INFO:     172.18.0.5:52046 - "POST /simulation/stop HTTP/1.1" 200 OK
+{Error using client>publish (line 1709)
+Python Error: KeyboardInterrupt
+} 

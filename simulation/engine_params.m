@@ -37,7 +37,7 @@ fuel_min     = 0.2;      % Minimum idle fuel flow limit (kg/hr)
 % Cylinder Head Temperature (CHT)
 CHT_capacity = 500;      % Cylinder thermal mass/capacity (J/°C)
 k_h          = 100;     % Heat generation scaling factor
-k_c          = 0.5;      % Air cooling efficiency scaling factor
+k_c          = 5;      % Air cooling efficiency scaling factor
 CHT_init     = 25;       % Initial engine temperature before start (°C)
 
 % Exhaust Gas Temperature (EGT)
