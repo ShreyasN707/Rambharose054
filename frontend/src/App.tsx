@@ -719,12 +719,13 @@ function HudSection({
                             FAULT INJECTION
                         </span>
                         <span
-                            className="text-xs px-2 py-1"
+                            className="text-xs px-2.5 py-1 font-semibold"
                             style={{
-                                border: "1px solid #5a1a1a",
-                                color: "#e8543f",
+                                border: "1px solid #8b1d1d",
+                                background: "rgba(139, 29, 29, 0.4)",
+                                color: "#ff7878",
                                 fontFamily: "'JetBrains Mono', monospace",
-                                opacity: 0.8,
+                                letterSpacing: "0.03em",
                             }}
                         >
                             ⚠ SIMULATION ONLY
@@ -736,14 +737,15 @@ function HudSection({
                         <button
                             onClick={() => handleInjectFault(0)}
                             disabled={isInjectingFault || simulationStatus !== "running"}
-                            className="px-4 py-2 text-xs font-bold transition"
+                            className="px-4 py-2.5 text-sm font-bold transition hover:brightness-110"
                             title="Inject fault_id=0 — clears any active fault, sets engine to healthy"
                             style={{
-                                border: "1px solid #22c55e",
-                                background: isInjectingFault || simulationStatus !== "running" ? "#111" : "rgba(34,197,94,0.12)",
-                                color: isInjectingFault || simulationStatus !== "running" ? "#444" : "#22c55e",
+                                border: "1.5px solid #22c55e",
+                                background: "rgba(34,197,94,0.22)",
+                                color: "#ffffff",
                                 cursor: isInjectingFault || simulationStatus !== "running" ? "not-allowed" : "pointer",
                                 fontFamily: "'JetBrains Mono', monospace",
+                                letterSpacing: "0.02em",
                             }}
                         >
                             ✓ CLEAR / HEALTHY
@@ -762,19 +764,16 @@ function HudSection({
                                 onClick={() => handleInjectFault(id)}
                                 disabled={isInjectingFault || simulationStatus !== "running"}
                                 title={desc}
-                                className="px-4 py-2 text-xs font-bold transition"
+                                className="px-4 py-2.5 text-sm font-bold transition hover:brightness-110"
                                 style={{
-                                    border: "1px solid rgba(232,84,63,0.6)",
-                                    background: isInjectingFault || simulationStatus !== "running"
-                                        ? "#111"
-                                        : "rgba(232,84,63,0.1)",
-                                    color: isInjectingFault || simulationStatus !== "running"
-                                        ? "#444"
-                                        : "#e8543f",
+                                    border: "1.5px solid #e8543f",
+                                    background: "rgba(232,84,63,0.22)",
+                                    color: "#ffffff",
                                     cursor: isInjectingFault || simulationStatus !== "running"
                                         ? "not-allowed"
                                         : "pointer",
                                     fontFamily: "'JetBrains Mono', monospace",
+                                    letterSpacing: "0.02em",
                                 }}
                             >
                                 {isInjectingFault ? "INJECTING…" : label}
@@ -784,7 +783,7 @@ function HudSection({
 
                     <div
                         className="mt-3 text-xs"
-                        style={{ color: "#885555", fontFamily: "'JetBrains Mono', monospace" }}
+                        style={{ color: "#d1d5db", fontFamily: "'JetBrains Mono', monospace" }}
                     >
                         Buttons are enabled only while simulation is RUNNING. Hover a button to see the fault description.
                     </div>
