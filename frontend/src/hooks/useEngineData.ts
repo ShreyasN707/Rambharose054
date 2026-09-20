@@ -97,6 +97,10 @@ export function useEngineData() {
     const [isWarmup, setIsWarmup] = useState<boolean>(false);
     const [simulationRunning, setSimulationRunning] = useState(false);
     const wsRef = useRef<WebSocket | null>(null);
+    const setSimulationRunningState = useCallback((running: boolean) => {
+        simulationRunningRef.current = running;
+        setSimulationRunning(running);
+    }, []);
 
     const resetTelemetry = useCallback(() => {
         simulationRunningRef.current = false;
@@ -182,7 +186,8 @@ export function useEngineData() {
                     const data: WebSocketUpdateMessage = JSON.parse(event.data);
 
                     if (data.type === "engine_update") {
-                        if (data.telemetry) {
+
+                        if (data.telemetry && simulationRunningRef.current) {
                             setTelemetry(prev => ({
                                 ...prev,
                                 ...data.telemetry,
@@ -234,7 +239,7 @@ export function useEngineData() {
         setSelectedMission,
         telemetry,
         resetTelemetry,
-        setSimulationRunning,
+        setSimulationRunning: setSimulationRunningState,
         health,
         prediction,
         operatingState,

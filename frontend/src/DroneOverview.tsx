@@ -10,78 +10,188 @@ interface GaugeProps {
     majorTicks: number;
     minorPerMajor: number;
     redZone?: number;
-}
-
-function AnalogGauge({ value, max, label, unit, majorTicks, minorPerMajor, redZone }: GaugeProps) {
-    const S = 200, cx = 100, cy = 100, r = 78;
-    const startDeg = -135, sweepDeg = 270;
-
-    const polar = (deg: number, rad: number) => ({
-        x: cx + rad * Math.sin((deg * Math.PI) / 180),
-        y: cy - rad * Math.cos((deg * Math.PI) / 180),
-    });
-
-    const needleAngle = startDeg + (Math.min(value, max) / max) * sweepDeg;
-    const ticks: JSX.Element[] = [];
-
-    for (let i = 0; i <= majorTicks; i++) {
-        const a = startDeg + (i / majorTicks) * sweepDeg;
-        const tv = Math.round((i / majorTicks) * max);
-        const red = redZone !== undefined && tv >= redZone;
-        const o = polar(a, r), inn = polar(a, r - 12), lp = polar(a, r - 23);
-
-        ticks.push(<line key={`M${i}`} x1={inn.x} y1={inn.y} x2={o.x} y2={o.y} stroke={red ? "#e8543f" : "#999"} strokeWidth="2" />);
-        ticks.push(
-            <text key={`L${i}`} x={lp.x} y={lp.y} textAnchor="middle" dominantBaseline="middle"
-                fontSize="8" fill={red ? "#e8543f" : "#bbb"} fontFamily="'JetBrains Mono', monospace">{tv}</text>
-        );
-        if (i < majorTicks) {
-            for (let j = 1; j < minorPerMajor; j++) {
-                const ma = startDeg + ((i + j / minorPerMajor) / majorTicks) * sweepDeg;
-                const mo = polar(ma, r), mi = polar(ma, r - 6);
-                ticks.push(<line key={`m${i}_${j}`} x1={mi.x} y1={mi.y} x2={mo.x} y2={mo.y} stroke="#444" strokeWidth="1" />);
-            }
-        }
+    lowerRedZone?: number;
     }
 
-    const tip = polar(needleAngle, r - 18);
-    const tail = polar(needleAngle + 180, 10);
+function AnalogGauge({
+        value,
+        max,
+        label,
+        unit,
+        majorTicks,
+        minorPerMajor,
+        redZone,
+        lowerRedZone,
+    }: GaugeProps) {
+        const S = 200, cx = 100, cy = 100, r = 78;
+        const startDeg = -135, sweepDeg = 270;
 
-    return (
-        <svg viewBox={`0 0 ${S} ${S + 24}`} className="w-full h-full">
-            <circle cx={cx} cy={cy} r={r + 6} stroke="#4a4a4a" strokeWidth="2" fill="none" />
-            <circle cx={cx} cy={cy} r={r} stroke="#2a2a2a" strokeWidth="1" fill="#0d0d0d" />
-            {ticks}
-            <line x1={tail.x} y1={tail.y} x2={tip.x} y2={tip.y} stroke="#e8543f" strokeWidth="2.5" strokeLinecap="round"
-                style={{ transition: "all 0.3s ease-out" }} />
-            <circle cx={cx} cy={cy} r="6" fill="#333" stroke="#777" strokeWidth="1.5" />
-            <text x={cx} y={cy + 32} textAnchor="middle" fontSize="18" fontWeight="600" fill="#fff"
-                fontFamily="'Space Grotesk', sans-serif">{value}</text>
-            <text x={cx + 24} y={cy + 32} textAnchor="start" fontSize="8" fill="#c0c0c0"
-                fontFamily="'JetBrains Mono', monospace">{unit}</text>
-            <text x={cx} y={S + 14} textAnchor="middle" fontSize="15" fill="#c0c0c0" letterSpacing="2"
-                fontFamily="'JetBrains Mono', monospace">{label}</text>
-        </svg>
-    );
-}
+        const polar = (deg: number, rad: number) => ({
+            x: cx + rad * Math.sin((deg * Math.PI) / 180),
+            y: cy - rad * Math.cos((deg * Math.PI) / 180),
+        });
 
-function ShiftLightBar({ activeCount }: { activeCount: number }) {
-    const segments = 24;
-    return (
-        <div className="flex gap-[2px] items-center">
-            {Array.from({ length: segments }, (_, i) => {
-                const pct = i / segments;
-                let color = "#1a3a1a";
-                if (i < activeCount) {
-                    if (pct < 0.4) color = "#22c55e";
-                    else if (pct < 0.7) color = "#eab308";
-                    else color = "#ef4444";
+        const needleAngle =
+            startDeg + (Math.min(value, max) / max) * sweepDeg;
+
+        const ticks: JSX.Element[] = [];
+
+        for (let i = 0; i <= majorTicks; i++) {
+            const a = startDeg + (i / majorTicks) * sweepDeg;
+            const tv = Math.round((i / majorTicks) * max);
+
+            const red =
+                (redZone !== undefined && tv >= redZone) ||
+                (lowerRedZone !== undefined && tv <= lowerRedZone);
+
+            const o = polar(a, r);
+            const inn = polar(a, r - 12);
+            const lp = polar(a, r - 23);
+
+            ticks.push(
+                <line
+                    key={`M${i}`}
+                    x1={inn.x}
+                    y1={inn.y}
+                    x2={o.x}
+                    y2={o.y}
+                    stroke={red ? "#e8543f" : "#999"}
+                    strokeWidth="2"
+                />
+            );
+
+            ticks.push(
+                <text
+                    key={`L${i}`}
+                    x={lp.x}
+                    y={lp.y}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize="8"
+                    fill={red ? "#e8543f" : "#bbb"}
+                    fontFamily="'JetBrains Mono', monospace"
+                >
+                    {tv}
+                </text>
+            );
+
+            if (i < majorTicks) {
+                for (let j = 1; j < minorPerMajor; j++) {
+                    const tickValue =
+                        ((i + j / minorPerMajor) / majorTicks) * max;
+
+                    const ma =
+                        startDeg +
+                        ((i + j / minorPerMajor) / majorTicks) * sweepDeg;
+
+                    const mo = polar(ma, r);
+                    const mi = polar(ma, r - 6);
+
+                    const minorRed =
+                        (redZone !== undefined && tickValue >= redZone) ||
+                        (lowerRedZone !== undefined &&
+                            tickValue <= lowerRedZone);
+
+                    ticks.push(
+                        <line
+                            key={`m${i}_${j}`}
+                            x1={mi.x}
+                            y1={mi.y}
+                            x2={mo.x}
+                            y2={mo.y}
+                            stroke={minorRed ? "#e8543f" : "#444"}
+                            strokeWidth="1"
+                        />
+                    );
                 }
-                return <div key={i} style={{ background: color, width: 14, height: 8, borderRadius: 1 }} />;
-            })}
-        </div>
-    );
-}
+            }
+        }
+
+        const needle = polar(needleAngle, r - 18);
+
+        return (
+            <div
+                style={{
+                    width: 250,
+                    height: 250,
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
+                <svg
+                    width={S}
+                    height={S}
+                    viewBox="0 0 200 200"
+                    style={{ overflow: "visible" }}
+                >
+                    {/* Gauge ticks */}
+                    {ticks}
+
+                    {/* Needle */}
+                    <line
+                        x1={cx}
+                        y1={cy}
+                        x2={needle.x}
+                        y2={needle.y}
+                        stroke="#e8543f"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                    />
+
+                    {/* Center */}
+                    <circle
+                        cx={cx}
+                        cy={cy}
+                        r="5"
+                        fill="#e8543f"
+                    />
+
+                    {/* Value */}
+                    <text
+                        x={cx}
+                        y="145"
+                        textAnchor="middle"
+                        fill="#fff"
+                        fontSize="18"
+                        fontFamily="'JetBrains Mono', monospace"
+                        fontWeight="bold"
+                    >
+                        {Math.round(value)}
+                    </text>
+
+                    {/* Unit */}
+                    <text
+                        x={cx}
+                        y="158"
+                        textAnchor="middle"
+                        fill="#888"
+                        fontSize="8"
+                        fontFamily="'JetBrains Mono', monospace"
+                    >
+                        {unit}
+                    </text>
+                </svg>
+
+                {/* Label */}
+                <div
+                    style={{
+                        position: "absolute",
+                        top: 8,
+                        left: 0,
+                        right: 0,
+                        textAlign: "center",
+                        color: "#bbb",
+                        fontSize: 15,
+                        fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                >
+                    {label}
+                </div>
+            </div>
+        );
+    }
 
 function PistonGraphic({ phase }: { phase: number }) {
     const py = 35 + Math.sin(phase) * 20;
@@ -640,10 +750,11 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                                             value={rpm}
                                             max={5000}
                                             label="RPM"
-                                            unit="rpm"
-                                            majorTicks={12}
+                                            unit="RPM"
+                                            majorTicks={10}
                                             minorPerMajor={5}
-                                            redZone={4500}
+                                            lowerRedZone={3200}
+                                            redZone={4800}
                                         />
                                     </div>
                                 </div>
