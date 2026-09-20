@@ -59,7 +59,7 @@ function AnalogGauge({ value, max, label, unit, majorTicks, minorPerMajor, redZo
                 fontFamily="'Space Grotesk', sans-serif">{value}</text>
             <text x={cx + 24} y={cy + 32} textAnchor="start" fontSize="8" fill="#c0c0c0"
                 fontFamily="'JetBrains Mono', monospace">{unit}</text>
-            <text x={cx} y={S + 14} textAnchor="middle" fontSize="9" fill="#c0c0c0" letterSpacing="2"
+            <text x={cx} y={S + 14} textAnchor="middle" fontSize="15" fill="#c0c0c0" letterSpacing="2"
                 fontFamily="'JetBrains Mono', monospace">{label}</text>
         </svg>
     );
@@ -464,21 +464,59 @@ function RadiatorGraphic() {
     );
 }
 
-function TelemetryCell({ label, value, unit, color = "#fff", warn = false }: {
-    label: string; value: string | number; unit: string; color?: string; warn?: boolean;
-}) {
+function TelemetryCell({
+        label,
+        value,
+        unit,
+        color = "#fff",
+        warn = false
+    }: {
+        label: string;
+        value: string | number;
+        unit: string;
+        color?: string;
+        warn?: boolean;
+    }) {
     return (
-        <div className="px-3 py-2" style={{
-            border: `1px solid ${warn ? "rgba(232,84,63,0.5)" : "#3a3a3a"}`,
-            borderRadius: 6, background: warn ? "rgba(232,84,63,0.07)" : "#0a0a0a",
-        }}>
-            <div className="text-[10px] mb-1 font-semibold" style={{
-                color: warn ? "#e8543f" : "#c0c0c0",
-                fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1,
-            }}>{label}</div>
-            <div className="flex items-baseline gap-1">
-                <span className="text-base font-semibold" style={{ color, fontFamily: "'Space Grotesk', sans-serif" }}>{value}</span>
-                <span className="text-[10px]" style={{ color: "#b0b0b0", fontFamily: "'JetBrains Mono', monospace" }}>{unit}</span>
+        <div
+            className="px-4 py-3"
+            style={{
+                border: `1px solid ${warn ? "rgba(232,84,63,0.5)" : "#3a3a3a"}`,
+                borderRadius: 6,
+                background: warn ? "rgba(232,84,63,0.07)" : "#0a0a0a",
+            }}
+        >
+            <div
+                className="text-xs mb-1.5 font-semibold"
+                style={{
+                    color: warn ? "#e8543f" : "#c0c0c0",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    letterSpacing: 1,
+                }}
+            >
+                {label}
+            </div>
+
+            <div className="flex items-baseline gap-1.5">
+                <span
+                    className="text-lg font-semibold"
+                    style={{
+                        color,
+                        fontFamily: "'Space Grotesk', sans-serif",
+                    }}
+                >
+                    {value}
+                </span>
+
+                <span
+                    className="text-xs"
+                    style={{
+                        color: "#b0b0b0",
+                        fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                >
+                    {unit}
+                </span>
             </div>
         </div>
     );
@@ -499,67 +537,32 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
     }, []);
 
     const phase = tick * 0.08;
-    const idleRPM = 820 + Math.sin(phase * 0.4) * 40 + Math.sin(phase * 1.1) * 15;
-    const rpm = liveTelemetry?.rpm ?? Math.round(idleRPM);
-    const shiftActive = Math.floor((rpm / 9000) * 24);
+    const rpm = liveTelemetry?.rpm ?? 0;
+    const torque = (liveTelemetry?.torque ?? 0).toFixed(1);
+    const fuelFlow = (liveTelemetry?.fuel_flow ?? 0).toFixed(1);
+    const cht = Math.round(liveTelemetry?.cht ?? 0);
+    const egt = Math.round(liveTelemetry?.egt ?? 0);
+    const oilTemp = Math.round(liveTelemetry?.oil_temperature ?? 0);
+    const oilPressure = String(Math.round(liveTelemetry?.oil_pressure ?? 0));
+    const vibration = (liveTelemetry?.vibration ?? 0).toFixed(2);
+    const altitude = Math.round(liveTelemetry?.altitude ?? 0);
+    const ambientTemp = (liveTelemetry?.ambient_temp ?? 0).toFixed(1);
 
-    const torque = (liveTelemetry?.torque ?? (12.4 + Math.sin(phase * 0.3) * 1.8 + Math.sin(phase * 0.9) * 0.6)).toFixed(1);
-    const power = (liveTelemetry?.power ?? (0.18 + Math.sin(phase * 0.35) * 0.03)).toFixed(2);
-    const fuelFlow = (liveTelemetry?.fuel_flow ?? (2.1 + Math.sin(phase * 0.25) * 0.4 + Math.sin(phase * 0.7) * 0.15)).toFixed(1);
-    const cht = Math.round(liveTelemetry?.cht ?? (185 + Math.sin(phase * 0.15) * 12 + Math.sin(phase * 0.5) * 5));
-    const egt = Math.round(liveTelemetry?.egt ?? (620 + Math.sin(phase * 0.2) * 30 + Math.sin(phase * 0.6) * 10));
-    const oilTemp = Math.round(liveTelemetry?.oil_temperature ?? (95 + Math.sin(phase * 0.12) * 8));
-    const oilPressure = String(Math.round(liveTelemetry?.oil_pressure ?? (58 + Math.sin(phase * 0.18) * 6 + Math.sin(phase * 0.55) * 2)));
-    const vibration = (liveTelemetry?.vibration ?? (0.12 + Math.sin(phase * 1.2) * 0.04 + Math.sin(phase * 2.3) * 0.02)).toFixed(2);
-    const altitude = Math.round(liveTelemetry?.altitude ?? (150 + Math.sin(phase * 0.05) * 5));
-    const ambientTemp = (liveTelemetry?.ambient_temp ?? (28 + Math.sin(phase * 0.02) * 2)).toFixed(1);
-    const throttle = String(Math.round(liveTelemetry?.throttle ?? (5 + Math.sin(phase * 0.3) * 3 + Math.sin(phase * 0.8) * 1)));
-    const engineLoad = String(Math.round(liveTelemetry?.engine_load ?? (8 + Math.sin(phase * 0.28) * 4 + Math.sin(phase * 0.7) * 2)));
 
     const hrs = String(Math.floor(elapsedSec / 3600)).padStart(2, "0");
     const mins = String(Math.floor((elapsedSec % 3600) / 60)).padStart(2, "0");
     const secs = String(elapsedSec % 60).padStart(2, "0");
     const timeStr = `${hrs}:${mins}:${secs}`;
 
-    const statusLights = [
-        { label: "ENGINE", color: "#22c55e" },
-        { label: "FUEL", color: "#22c55e" },
-        { label: "OIL", color: "#22c55e" },
-        { label: "TEMP", color: "#22c55e" },
-        { label: "IDLE", color: "#3b82f6" },
-    ];
-
     return (
         <section style={{ background: "#0a0a0a", fontFamily: "'Space Grotesk', sans-serif" }} className="relative overflow-hidden">
             <div className="relative z-10 px-6 md:px-10 py-14">
                 <div className="text-sm mb-8 font-semibold" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#b0b0b0" }}>
-                    /03 &nbsp; ENGINE SIMULATION DASHBOARD
+                    &nbsp; ENGINE SIMULATION DASHBOARD
                 </div>
 
                 <div style={{ overflow: "hidden", background: "#111" }}>
-                    <div className="flex items-center justify-between px-3 py-2 flex-wrap gap-2" style={{ background: "#151515", borderBottom: "1px solid #333" }}>
-                        <div className="flex items-center gap-3">
-                            {statusLights.map((s, i) => (
-                                <div key={i} className="flex items-center gap-1">
-                                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: s.color, boxShadow: s.color !== "#555" ? `0 0 6px ${s.color}` : "none" }} />
-                                    <span className="text-[10px] hidden sm:inline font-semibold" style={{ color: "#d0d0d0", fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-between px-4 py-2 flex-wrap gap-2" style={{ background: "#0f0f0f", borderBottom: "1px solid #333" }}>
-                        <div className="text-[11px] flex items-center gap-4 font-semibold" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#c0c0c0" }}>
-                            <span>SHIFT LIGHT</span>
-                        </div>
-                        <ShiftLightBar activeCount={shiftActive} />
-                        <div className="text-[11px] flex items-center gap-4 font-semibold" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#c0c0c0" }}>
-                            <span>RPM <span style={{ color: "#fff" }}>{rpm}</span></span>
-                            <span>OPTIMAL <span style={{ color: "#C6FF3D" }}>9000</span></span>
-                        </div>
-                        <span className="text-[11px] font-bold" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#e8c34a" }}>STANDBY</span>
-                    </div>
-
+                    
                     <div className="flex" style={{ minHeight: 480 }}>
                         <div className="flex-1 p-4" style={{ background: "#0d0d0d" }}>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 h-full" style={{ gridTemplateRows: "auto 1fr auto" }}>
@@ -584,93 +587,73 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                                         <Engine360Viewer />
                                     </div>
                                 </div>
-                                <div className="col-span-2 md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-2">
-                                    <TelemetryCell label="TIME" value={timeStr} unit="" color="#3b82f6" />
-                                    <TelemetryCell label="TORQUE" value={torque} unit="N·m" />
-                                    <TelemetryCell label="POWER" value={power} unit="kW" />
-                                    <TelemetryCell label="FUEL FLOW" value={fuelFlow} unit="L/h" color="#eab308" />
-                                </div>
-                                <div className="col-span-2 md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-2">
-                                    <TelemetryCell label="CHT" value={cht} unit="°C" warn={cht > 195} />
-                                    <TelemetryCell label="EGT" value={egt} unit="°C" warn={egt > 650} />
-                                    <TelemetryCell label="OIL TEMP" value={oilTemp} unit="°C" />
-                                    <TelemetryCell label="OIL PRESSURE" value={oilPressure} unit="psi" color="#22c55e" />
-                                </div>
-                                <div className="col-span-2 md:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-2">
-                                    <TelemetryCell label="VIBRATION" value={vibration} unit="g" warn={parseFloat(vibration) > 0.15} />
-                                    <TelemetryCell label="ALTITUDE" value={altitude} unit="m" color="#a78bfa" />
-                                    <TelemetryCell label="AMBIENT TEMP" value={ambientTemp} unit="°C" />
-                                </div>
-                                <div className="col-span-2 md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    <div className="px-3 py-2" style={{ border: "1px solid #3a3a3a", borderRadius: 6, background: "#0a0a0a" }}>
-                                        <div className="text-[10px] mb-1 flex justify-between font-semibold" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>
-                                            <span>THROTTLE</span>
-                                            <span style={{ color: "#eab308" }}>{throttle}%</span>
-                                        </div>
-                                        <div className="w-full h-3 rounded" style={{ background: "#3a2a1a" }}>
-                                            <div className="h-full rounded" style={{
-                                                width: `${throttle}%`,
-                                                background: "linear-gradient(90deg, #eab308, #ca8a04)",
-                                                transition: "width 0.3s ease-out",
-                                            }} />
-                                        </div>
+                                <div className="col-span-2 md:col-span-3 grid grid-cols-1 md:grid-cols-4 gap-2">
+
+                                {/* TELEMETRY */}
+                                <div className="md:col-span-3 flex flex-col gap-2">
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                        <TelemetryCell label="TIME" value={timeStr} unit="" color="#3b82f6" />
+                                        <TelemetryCell label="TORQUE" value={torque} unit="N·m"  warn={parseFloat(torque) < 7.0}/>
+                                        <TelemetryCell label="FUEL FLOW" value={fuelFlow} unit="L/h" warn={parseFloat(fuelFlow) < 2.0}/>
+                                        <TelemetryCell label="VIBRATION" value={vibration} unit="g" warn={parseFloat(vibration) > 5}
+                                        />
                                     </div>
-                                    <div className="px-3 py-2" style={{ border: "1px solid #3a3a3a", borderRadius: 6, background: "#0a0a0a" }}>
-                                        <div className="text-[10px] mb-1 flex justify-between font-semibold" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>
-                                            <span>ENGINE LOAD</span>
-                                            <span style={{ color: "#3b82f6" }}>{engineLoad}%</span>
-                                        </div>
-                                        <div className="w-full h-3 rounded" style={{ background: "#1a2a3a" }}>
-                                            <div className="h-full rounded" style={{
-                                                width: `${engineLoad}%`,
-                                                background: "linear-gradient(90deg, #3b82f6, #2563eb)",
-                                                transition: "width 0.3s ease-out",
-                                            }} />
-                                        </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                        <TelemetryCell label="CHT" value={cht} unit="°C" warn={cht > 110} />
+                                        <TelemetryCell label="EGT" value={egt} unit="°C" warn={egt > 850} />
+                                        <TelemetryCell label="OIL TEMP" value={oilTemp} unit="°C" warn={oilTemp > 120}/>
+                                        <TelemetryCell label="OIL PRESSURE" value={oilPressure} unit="psi" warn={parseFloat(oilPressure) < 40}/>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 items-center md:grid-cols-3 gap-2">
+                                        
+                                        <TelemetryCell
+                                            label="ALTITUDE"
+                                            value={altitude}
+                                            unit="m"
+                                            color="#a78bfa"
+                                        />
+                                        <TelemetryCell
+                                            label="AMBIENT TEMP"
+                                            value={ambientTemp}
+                                            unit="°C"
+                                            color="#eab308"
+                                        />
+                                    </div>
+
+                                </div>
+
+                                {/* RPM GAUGE */}
+                                <div
+                                    className="flex items-center justify-center"
+                                    style={{
+                                        border: "1px solid #3a3a3a",
+                                        borderRadius: 6,
+                                        background: "#0a0a0a",
+                                        minHeight: 180,
+                                    }}
+                                >
+                                    <div style={{ width: 250, height: 250 }}>
+                                        <AnalogGauge
+                                            value={rpm}
+                                            max={5000}
+                                            label="RPM"
+                                            unit="rpm"
+                                            majorTicks={12}
+                                            minorPerMajor={5}
+                                            redZone={4500}
+                                        />
                                     </div>
                                 </div>
+
+                            </div>
+                                
                             </div>
                         </div>
 
-                        <div className="hidden lg:flex flex-col w-56 shrink-0" style={{ background: "#111", borderLeft: "1px solid #3a3a3a" }}>
-                            <div className="px-2 pt-3">
-                                <AnalogGauge value={rpm} max={12000} label="ENGINE SPEED" unit="rpm"
-                                    majorTicks={12} minorPerMajor={5} redZone={9000} />
-                            </div>
-                            <div className="flex-1 px-3 py-3 flex flex-col gap-2 overflow-y-auto" style={{ borderTop: "1px solid #3a3a3a" }}>
-                                <div className="text-[10px] font-bold mb-1" style={{ color: "#d0d0d0", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>
-                                    KEY PARAMETERS
-                                </div>
-                                {[
-                                    { label: "RPM", val: rpm, unit: "rpm", col: "#fff" },
-                                    { label: "TORQUE", val: torque, unit: "N·m", col: "#fff" },
-                                    { label: "POWER", val: power, unit: "kW", col: "#fff" },
-                                    { label: "FUEL FLOW", val: fuelFlow, unit: "L/h", col: "#eab308" },
-                                    { label: "CHT", val: cht, unit: "°C", col: cht > 195 ? "#e8543f" : "#fff" },
-                                    { label: "EGT", val: egt, unit: "°C", col: egt > 650 ? "#e8543f" : "#fff" },
-                                    { label: "OIL TEMP", val: oilTemp, unit: "°C", col: "#fff" },
-                                    { label: "OIL PRESS", val: oilPressure, unit: "psi", col: "#22c55e" },
-                                    { label: "VIBRATION", val: vibration, unit: "g", col: parseFloat(vibration) > 0.15 ? "#e8543f" : "#fff" },
-                                    { label: "ALTITUDE", val: altitude, unit: "m", col: "#a78bfa" },
-                                    { label: "AMB TEMP", val: ambientTemp, unit: "°C", col: "#fff" },
-                                    { label: "THROTTLE", val: `${throttle}%`, unit: "", col: "#eab308" },
-                                    { label: "ENG LOAD", val: `${engineLoad}%`, unit: "", col: "#3b82f6" },
-                                ].map((p, i) => (
-                                    <div key={i} className="flex items-center justify-between py-1" style={{ borderBottom: "1px solid #3a3a3a" }}>
-                                        <span className="text-[10px]" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>{p.label}</span>
-                                        <span className="text-[12px] font-semibold" style={{ color: p.col, fontFamily: "'Space Grotesk', sans-serif" }}>
-                                            {p.val} <span className="text-[9px]" style={{ color: "#b0b0b0" }}>{p.unit}</span>
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="px-3 py-3" style={{ borderTop: "1px solid #3a3a3a" }}>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-semibold" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>ELAPSED</span>
-                                    <span className="text-sm font-bold" style={{ color: "#3b82f6", fontFamily: "'JetBrains Mono', monospace" }}>{timeStr}</span>
-                                </div>
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
             </div>

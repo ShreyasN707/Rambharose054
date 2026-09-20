@@ -855,3 +855,477 @@ INFO:     172.18.0.4:58236 - "POST /simulation/stop HTTP/1.1" 200 OK
 {Error using client>publish (line 1709)
 Python Error: KeyboardInterrupt
 } 
+INFO:     172.18.0.4:36232 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:56188 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:34100 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:52530 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:52546 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:47008 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:47012 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:33600 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:39778 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:38090 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:35462 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:59702 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:60936 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:45206 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:45214 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:38582 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:55192 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:44930 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:44938 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:60710 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:60716 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:60730 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:58310 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:58312 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:36692 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:36696 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:58048 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:49084 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:52888 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:51890 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:51896 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:46490 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:46492 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:52408 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:52422 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:44340 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:44350 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:47488 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:55268 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:54584 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:52834 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:52850 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:56408 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:51890 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:51902 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:58958 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:58960 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:57428 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:57442 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:43458 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:43472 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:56154 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:59040 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:41998 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:42010 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:40096 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:53388 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:47214 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:47228 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:60490 - "POST /simulation/start HTTP/1.1" 200 OK
+INFO:     172.18.0.4:58064 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:58076 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:43414 - "GET /simulation/status HTTP/1.1" 200 OK
+/usr/lib64/python3.14/site-packages/numpy/_core/getlimits.py:552: UserWarning: Signature b'\x00\xd0\xcc\xcc\xcc\xcc\xcc\xcc\xfb\xbf\xd2j\x00\x00\x00\x00' for <class 'numpy.longdouble'> does not match any known type: falling back to type probe function.
+This warnings indicates broken support for the dtype!
+  machar = _get_machar(dtype)
+Connected to MQTT telemetry.
+MESA-LOADER: failed to open dri: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so) (search paths /usr/lib64/gbm, suffix _gbm)
+INFO:     172.18.0.4:33330 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:33340 - "GET /simulation/status HTTP/1.1" 200 OK
+
+========================================
+LIVE SIMULATION STARTED
+========================================
+Fault commands: MQTT
+Fault topic: engine/engine_001/fault
+Allowed fault IDs: 0, 1, 2, 3, 4
+========================================
+
+t=   1s | fault=0 | RPM= 1488.4 | Torque= 6.34 | CHT=   3.6 | EGT=   74.1
+t=   2s | fault=0 | RPM= 2701.6 | Torque= 7.39 | CHT=   8.5 | EGT=  245.8
+t=   3s | fault=0 | RPM= 3390.5 | Torque= 9.52 | CHT=  15.7 | EGT=  422.5
+t=   4s | fault=0 | RPM= 3726.5 | Torque=10.00 | CHT=  19.1 | EGT=  550.1
+t=   5s | fault=0 | RPM= 3878.1 | Torque= 9.74 | CHT=  21.3 | EGT=  626.3
+t=   6s | fault=0 | RPM= 3944.5 | Torque=10.00 | CHT=  23.9 | EGT=  669.0
+t=   7s | fault=0 | RPM= 3972.9 | Torque=10.00 | CHT=  27.1 | EGT=  690.3
+t=   8s | fault=0 | RPM= 3985.2 | Torque=10.00 | CHT=  27.9 | EGT=  701.3
+t=   9s | fault=0 | RPM= 3989.8 | Torque= 8.55 | CHT=  28.7 | EGT=  703.6
+INFO:     172.18.0.4:43304 - "GET /simulation/status HTTP/1.1" 200 OK
+t=  10s | fault=0 | RPM= 3992.5 | Torque=10.00 | CHT=  30.9 | EGT=  708.3
+t=  11s | fault=0 | RPM= 3993.3 | Torque= 9.71 | CHT=  31.8 | EGT=  708.4
+t=  12s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  34.1 | EGT=  710.8
+t=  13s | fault=0 | RPM= 3993.8 | Torque= 9.52 | CHT=  34.9 | EGT=  708.8
+t=  14s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  35.6 | EGT=  709.7
+t=  15s | fault=0 | RPM= 3993.9 | Torque= 9.69 | CHT=  36.9 | EGT=  709.2
+t=  16s | fault=0 | RPM= 3993.4 | Torque= 8.07 | CHT=  39.1 | EGT=  706.9
+t=  17s | fault=0 | RPM= 3993.9 | Torque= 9.68 | CHT=  39.3 | EGT=  709.2
+t=  18s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  41.3 | EGT=  710.8
+t=  19s | fault=0 | RPM= 3993.6 | Torque= 8.43 | CHT=  42.1 | EGT=  707.4
+t=  20s | fault=0 | RPM= 3993.7 | Torque= 8.81 | CHT=  42.2 | EGT=  707.9
+t=  21s | fault=0 | RPM= 3993.9 | Torque= 9.62 | CHT=  44.2 | EGT=  709.1
+t=  22s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  46.0 | EGT=  710.1
+t=  23s | fault=0 | RPM= 3994.0 | Torque= 9.78 | CHT=  45.9 | EGT=  709.3
+t=  24s | fault=0 | RPM= 3993.5 | Torque= 8.23 | CHT=  46.0 | EGT=  707.1
+t=  25s | fault=0 | RPM= 3993.9 | Torque= 9.56 | CHT=  46.1 | EGT=  709.0
+t=  26s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  48.5 | EGT=  710.7
+t=  27s | fault=0 | RPM= 3993.7 | Torque= 9.05 | CHT=  47.5 | EGT=  708.3
+t=  28s | fault=0 | RPM= 3994.0 | Torque= 9.77 | CHT=  50.2 | EGT=  709.3
+t=  29s | fault=0 | RPM= 3993.8 | Torque= 9.29 | CHT=  49.8 | EGT=  708.6
+t=  30s | fault=0 | RPM= 3994.0 | Torque= 9.75 | CHT=  51.3 | EGT=  709.2
+t=  31s | fault=0 | RPM= 3993.9 | Torque= 9.48 | CHT=  53.1 | EGT=  708.9
+t=  32s | fault=0 | RPM= 3993.4 | Torque= 7.82 | CHT=  53.5 | EGT=  706.5
+t=  33s | fault=0 | RPM= 3993.6 | Torque= 8.54 | CHT=  54.4 | EGT=  707.5
+t=  34s | fault=0 | RPM= 3993.7 | Torque= 8.88 | CHT=  54.3 | EGT=  708.0
+t=  35s | fault=0 | RPM= 3993.9 | Torque= 9.43 | CHT=  54.4 | EGT=  708.8
+t=  36s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  55.5 | EGT=  709.6
+t=  37s | fault=0 | RPM= 3993.6 | Torque= 8.64 | CHT=  55.5 | EGT=  707.7
+t=  38s | fault=0 | RPM= 3993.7 | Torque= 9.04 | CHT=  57.5 | EGT=  708.2
+INFO:     172.18.0.4:44550 - "GET /simulation/status HTTP/1.1" 200 OK
+t=  39s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  58.1 | EGT=  709.7
+t=  40s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  58.0 | EGT=  709.9
+t=  41s | fault=0 | RPM= 3994.0 | Torque= 9.99 | CHT=  58.3 | EGT=  709.6
+t=  42s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  58.7 | EGT=  711.0
+t=  43s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  59.4 | EGT=  711.1
+t=  44s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  60.5 | EGT=  711.3
+t=  45s | fault=0 | RPM= 3994.0 | Torque= 9.93 | CHT=  59.8 | EGT=  709.5
+t=  46s | fault=0 | RPM= 3993.6 | Torque= 8.71 | CHT=  61.7 | EGT=  707.8
+t=  47s | fault=0 | RPM= 3993.7 | Torque= 9.05 | CHT=  62.8 | EGT=  708.2
+t=  48s | fault=0 | RPM= 3993.5 | Torque= 8.17 | CHT=  61.7 | EGT=  707.0
+t=  49s | fault=0 | RPM= 3993.9 | Torque= 9.45 | CHT=  63.6 | EGT=  708.8
+t=  50s | fault=0 | RPM= 3993.9 | Torque= 9.44 | CHT=  62.7 | EGT=  708.8
+t=  51s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  64.9 | EGT=  710.3
+t=  52s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  63.0 | EGT=  710.7
+t=  53s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  65.0 | EGT=  710.7
+t=  54s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  65.0 | EGT=  709.9
+t=  55s | fault=0 | RPM= 3993.3 | Torque= 7.76 | CHT=  66.1 | EGT=  706.4
+t=  56s | fault=0 | RPM= 3994.0 | Torque= 9.74 | CHT=  65.6 | EGT=  709.2
+t=  57s | fault=0 | RPM= 3993.5 | Torque= 8.32 | CHT=  64.5 | EGT=  707.2
+t=  58s | fault=0 | RPM= 3993.9 | Torque= 9.42 | CHT=  65.8 | EGT=  708.7
+t=  59s | fault=0 | RPM= 3993.5 | Torque= 8.43 | CHT=  67.7 | EGT=  707.3
+t=  60s | fault=0 | RPM= 3993.4 | Torque= 7.87 | CHT=  66.6 | EGT=  706.6
+t=  61s | fault=0 | RPM= 3993.8 | Torque= 9.40 | CHT=  68.8 | EGT=  708.7
+t=  62s | fault=0 | RPM= 3993.9 | Torque= 9.43 | CHT=  68.5 | EGT=  708.7
+t=  63s | fault=0 | RPM= 3993.9 | Torque= 9.62 | CHT=  68.0 | EGT=  709.0
+t=  64s | fault=0 | RPM= 3993.7 | Torque= 8.91 | CHT=  66.8 | EGT=  708.0
+t=  65s | fault=0 | RPM= 3994.0 | Torque= 9.96 | CHT=  67.5 | EGT=  709.5
+t=  66s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  69.1 | EGT=  709.9
+t=  67s | fault=0 | RPM= 3993.6 | Torque= 8.66 | CHT=  69.4 | EGT=  707.7
+t=  68s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  69.7 | EGT=  710.8
+t=  69s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  69.5 | EGT=  710.3
+t=  70s | fault=0 | RPM= 3993.6 | Torque= 8.62 | CHT=  70.1 | EGT=  707.6
+t=  71s | fault=0 | RPM= 3993.9 | Torque= 9.47 | CHT=  71.2 | EGT=  708.8
+t=  72s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  70.6 | EGT=  710.3
+t=  73s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  71.0 | EGT=  709.9
+t=  74s | fault=0 | RPM= 3994.0 | Torque= 9.93 | CHT=  70.6 | EGT=  709.4
+t=  75s | fault=0 | RPM= 3993.8 | Torque= 9.42 | CHT=  71.8 | EGT=  708.7
+t=  76s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  69.9 | EGT=  711.6
+t=  77s | fault=0 | RPM= 3995.1 | Torque=10.00 | CHT=  71.7 | EGT=  714.5
+t=  78s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  71.8 | EGT=  711.0
+t=  79s | fault=0 | RPM= 3995.2 | Torque=10.00 | CHT=  70.2 | EGT=  714.7
+
+>>> FAULT CHANGED TO 1 at t=79s <<<
+
+t=  80s | fault=1 | RPM= 3584.3 | Torque= 9.12 | CHT=  72.4 | EGT=  704.1
+t=  81s | fault=1 | RPM= 3364.3 | Torque= 6.58 | CHT=  72.4 | EGT=  676.5
+t=  82s | fault=1 | RPM= 3258.1 | Torque= 5.53 | CHT=  72.1 | EGT=  649.2
+t=  83s | fault=1 | RPM= 3206.5 | Torque= 7.64 | CHT=  73.6 | EGT=  633.5
+t=  84s | fault=1 | RPM= 3180.0 | Torque= 6.65 | CHT=  72.8 | EGT=  620.6
+t=  85s | fault=1 | RPM= 3166.8 | Torque= 6.77 | CHT=  73.3 | EGT=  614.2
+t=  86s | fault=1 | RPM= 3160.1 | Torque= 6.51 | CHT=  73.7 | EGT=  610.3
+t=  87s | fault=1 | RPM= 3157.2 | Torque= 8.08 | CHT=  75.2 | EGT=  610.6
+t=  88s | fault=1 | RPM= 3154.7 | Torque= 5.58 | CHT=  72.8 | EGT=  606.1
+t=  89s | fault=1 | RPM= 3154.2 | Torque= 6.52 | CHT=  74.0 | EGT=  606.9
+t=  90s | fault=1 | RPM= 3153.3 | Torque= 5.02 | CHT=  74.9 | EGT=  604.5
+
+>>> FAULT CHANGED TO 2 at t=90s <<<
+
+t=  91s | fault=2 | RPM= 3582.6 | Torque= 9.94 | CHT=  73.9 | EGT=  702.9
+t=  92s | fault=2 | RPM= 3814.1 | Torque=10.00 | CHT=  75.7 | EGT=  834.7
+t=  93s | fault=2 | RPM= 3916.3 | Torque= 8.95 | CHT=  76.9 | EGT=  914.8
+t=  94s | fault=2 | RPM= 3960.7 | Torque= 9.18 | CHT=  81.1 | EGT=  958.0
+t=  95s | fault=2 | RPM= 3979.7 | Torque= 9.20 | CHT=  83.6 | EGT=  979.3
+t=  96s | fault=2 | RPM= 3988.4 | Torque=10.00 | CHT=  85.6 | EGT=  992.6
+t=  97s | fault=2 | RPM= 3991.9 | Torque=10.00 | CHT=  89.3 | EGT=  998.9
+t=  98s | fault=2 | RPM= 3992.6 | Torque= 8.93 | CHT=  94.1 | EGT=  999.3
+t=  99s | fault=2 | RPM= 3992.7 | Torque= 7.34 | CHT=  96.2 | EGT=  999.8
+t= 100s | fault=2 | RPM= 3993.3 | Torque= 8.27 | CHT= 100.4 | EGT= 1003.4
+t= 101s | fault=2 | RPM= 3993.8 | Torque= 9.47 | CHT= 104.3 | EGT= 1007.0
+t= 102s | fault=2 | RPM= 3993.7 | Torque= 9.23 | CHT= 107.3 | EGT= 1007.7
+t= 103s | fault=2 | RPM= 3993.8 | Torque= 9.34 | CHT= 110.4 | EGT= 1008.3
+t= 104s | fault=2 | RPM= 3994.0 | Torque=10.00 | CHT= 114.1 | EGT= 1009.6
+t= 105s | fault=2 | RPM= 3993.9 | Torque= 9.74 | CHT= 118.4 | EGT= 1009.1
+t= 106s | fault=2 | RPM= 3993.6 | Torque= 8.53 | CHT= 120.8 | EGT= 1007.4
+t= 107s | fault=2 | RPM= 3993.9 | Torque= 9.65 | CHT= 122.7 | EGT= 1009.0
+t= 108s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT= 126.5 | EGT= 1010.2
+t= 109s | fault=2 | RPM= 3993.9 | Torque= 9.73 | CHT= 130.0 | EGT= 1009.1
+t= 110s | fault=2 | RPM= 3993.6 | Torque= 8.72 | CHT= 132.8 | EGT= 1007.7
+t= 111s | fault=2 | RPM= 3994.3 | Torque=10.00 | CHT= 136.8 | EGT= 1010.5
+t= 112s | fault=2 | RPM= 3994.3 | Torque=10.00 | CHT= 138.6 | EGT= 1010.7
+t= 113s | fault=2 | RPM= 3993.4 | Torque= 8.17 | CHT= 142.2 | EGT= 1006.9
+t= 114s | fault=2 | RPM= 3994.4 | Torque=10.00 | CHT= 144.1 | EGT= 1011.3
+t= 115s | fault=2 | RPM= 3994.4 | Torque=10.00 | CHT= 147.0 | EGT= 1011.2
+t= 116s | fault=2 | RPM= 3993.7 | Torque= 8.96 | CHT= 148.7 | EGT= 1008.0
+t= 117s | fault=2 | RPM= 3993.7 | Torque= 9.11 | CHT= 152.3 | EGT= 1008.2
+t= 118s | fault=2 | RPM= 3993.8 | Torque= 9.32 | CHT= 154.0 | EGT= 1008.5
+t= 119s | fault=2 | RPM= 3994.0 | Torque= 9.98 | CHT= 156.9 | EGT= 1009.4
+t= 120s | fault=2 | RPM= 3993.6 | Torque= 8.58 | CHT= 157.9 | EGT= 1007.5
+t= 121s | fault=2 | RPM= 3993.7 | Torque= 9.03 | CHT= 160.8 | EGT= 1008.1
+t= 122s | fault=2 | RPM= 3993.9 | Torque= 9.65 | CHT= 162.1 | EGT= 1009.0
+t= 123s | fault=2 | RPM= 3994.2 | Torque=10.00 | CHT= 164.0 | EGT= 1010.2
+
+>>> FAULT CHANGED TO 0 at t=123s <<<
+
+t= 124s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 167.3 | EGT=  917.4
+t= 125s | fault=0 | RPM= 3993.8 | Torque= 9.32 | CHT= 167.0 | EGT=  802.7
+t= 126s | fault=0 | RPM= 3993.8 | Torque= 9.20 | CHT= 168.0 | EGT=  745.3
+t= 127s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 166.6 | EGT=  723.7
+t= 128s | fault=0 | RPM= 3993.8 | Torque= 9.24 | CHT= 166.3 | EGT=  713.1
+t= 129s | fault=0 | RPM= 3993.7 | Torque= 8.96 | CHT= 164.3 | EGT=  709.6
+t= 130s | fault=0 | RPM= 3993.8 | Torque= 9.37 | CHT= 163.1 | EGT=  709.1
+t= 131s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 161.6 | EGT=  710.1
+t= 132s | fault=0 | RPM= 3993.7 | Torque= 9.09 | CHT= 159.9 | EGT=  708.2
+t= 133s | fault=0 | RPM= 3993.6 | Torque= 8.66 | CHT= 156.8 | EGT=  707.6
+t= 134s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 154.6 | EGT=  710.4
+t= 135s | fault=0 | RPM= 3993.9 | Torque= 9.57 | CHT= 153.4 | EGT=  708.8
+t= 136s | fault=0 | RPM= 3993.7 | Torque= 8.98 | CHT= 151.8 | EGT=  708.0
+t= 137s | fault=0 | RPM= 3993.7 | Torque= 9.06 | CHT= 150.6 | EGT=  708.1
+t= 138s | fault=0 | RPM= 3993.8 | Torque= 9.37 | CHT= 148.1 | EGT=  708.6
+t= 139s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT= 146.5 | EGT=  711.0
+t= 140s | fault=0 | RPM= 3993.9 | Torque= 9.52 | CHT= 144.0 | EGT=  708.8
+t= 141s | fault=0 | RPM= 3993.6 | Torque= 8.59 | CHT= 142.5 | EGT=  707.5
+t= 142s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 141.5 | EGT=  710.8
+t= 143s | fault=0 | RPM= 3994.0 | Torque= 9.99 | CHT= 139.9 | EGT=  709.4
+t= 144s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 139.2 | EGT=  709.9
+t= 145s | fault=0 | RPM= 3993.3 | Torque= 7.83 | CHT= 136.0 | EGT=  706.4
+t= 146s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 135.3 | EGT=  710.4
+t= 147s | fault=0 | RPM= 3994.0 | Torque= 9.86 | CHT= 132.5 | EGT=  709.2
+t= 148s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT= 131.4 | EGT=  710.5
+t= 149s | fault=0 | RPM= 3994.0 | Torque= 9.97 | CHT= 130.3 | EGT=  709.4
+t= 150s | fault=0 | RPM= 3993.8 | Torque= 9.48 | CHT= 129.0 | EGT=  708.7
+t= 151s | fault=0 | RPM= 3993.8 | Torque= 9.20 | CHT= 127.5 | EGT=  708.3
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_asahi.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_broadcom.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_dzn.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_freedreno.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_intel_hasvk.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_intel.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_lvp.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_nouveau.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_panfrost.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_powervr_mesa.so. Ignoring this JSON
+Warning: /usr/local/MATLAB/R2026a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by /lib64/libSPIRV-Tools.so)
+Warning: loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib64/libvulkan_radeon.so. Ignoring this JSON
+Error: Loader Message: setup_loader_term_phys_devs:  Failed to detect any valid GPUs in the current config
+Warning: vkEnumeratePhysicalDevices
+    at GatherPhysicalDevices (../../third_party/dawn/src/dawn/native/vulkan/VulkanInfo.cpp:148)
+
+t= 152s | fault=0 | RPM= 3993.8 | Torque= 9.39 | CHT= 127.0 | EGT=  708.6
+t= 153s | fault=0 | RPM= 3994.0 | Torque= 9.89 | CHT= 125.7 | EGT=  709.3
+t= 154s | fault=0 | RPM= 3993.9 | Torque= 9.73 | CHT= 124.7 | EGT=  709.0
+t= 155s | fault=0 | RPM= 3994.0 | Torque= 9.88 | CHT= 122.6 | EGT=  709.3
+t= 156s | fault=0 | RPM= 3993.7 | Torque= 8.94 | CHT= 123.0 | EGT=  707.9
+t= 157s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT= 121.4 | EGT=  710.8
+t= 158s | fault=0 | RPM= 3993.5 | Torque= 8.49 | CHT= 119.0 | EGT=  707.3
+t= 159s | fault=0 | RPM= 3993.7 | Torque= 8.92 | CHT= 119.1 | EGT=  707.9
+t= 160s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT= 118.8 | EGT=  711.0
+t= 161s | fault=0 | RPM= 3993.7 | Torque= 9.14 | CHT= 116.7 | EGT=  708.2
+t= 162s | fault=0 | RPM= 3993.8 | Torque= 9.45 | CHT= 116.1 | EGT=  708.6
+t= 163s | fault=0 | RPM= 3993.9 | Torque= 9.83 | CHT= 114.4 | EGT=  709.2
+t= 164s | fault=0 | RPM= 3993.7 | Torque= 9.08 | CHT= 113.8 | EGT=  708.1
+t= 165s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 113.9 | EGT=  710.0
+t= 166s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT= 111.2 | EGT=  711.2
+t= 167s | fault=0 | RPM= 3993.8 | Torque= 9.43 | CHT= 111.1 | EGT=  708.6
+t= 168s | fault=0 | RPM= 3993.5 | Torque= 8.48 | CHT= 110.3 | EGT=  707.3
+t= 169s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT= 109.3 | EGT=  709.7
+
+>>> FAULT CHANGED TO 3 at t=169s <<<
+
+t= 170s | fault=3 | RPM= 3993.9 | Torque= 9.68 | CHT= 108.4 | EGT=  709.0
+t= 171s | fault=3 | RPM= 3993.7 | Torque= 8.95 | CHT= 108.6 | EGT=  707.9
+t= 172s | fault=3 | RPM= 3993.9 | Torque= 9.59 | CHT= 107.3 | EGT=  708.8
+t= 173s | fault=3 | RPM= 3993.9 | Torque= 9.63 | CHT= 107.5 | EGT=  708.9
+t= 174s | fault=3 | RPM= 3994.5 | Torque=10.00 | CHT= 106.0 | EGT=  711.4
+t= 175s | fault=3 | RPM= 3994.1 | Torque=10.00 | CHT= 105.8 | EGT=  709.8
+t= 176s | fault=3 | RPM= 3994.6 | Torque=10.00 | CHT= 104.2 | EGT=  711.9
+t= 177s | fault=3 | RPM= 3993.8 | Torque= 9.26 | CHT= 103.2 | EGT=  708.3
+
+>>> FAULT CHANGED TO 0 at t=177s <<<
+
+t= 178s | fault=0 | RPM= 3993.8 | Torque= 9.37 | CHT= 103.9 | EGT=  708.5
+t= 179s | fault=0 | RPM= 3993.7 | Torque= 9.08 | CHT= 102.8 | EGT=  708.1
+t= 180s | fault=0 | RPM= 3994.0 | Torque= 9.91 | CHT= 102.5 | EGT=  709.3
+t= 181s | fault=0 | RPM= 3993.9 | Torque= 9.60 | CHT= 102.3 | EGT=  708.8
+t= 182s | fault=0 | RPM= 3993.2 | Torque= 7.47 | CHT= 101.3 | EGT=  705.8
+t= 183s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT= 100.6 | EGT=  709.6
+t= 184s | fault=0 | RPM= 3993.6 | Torque= 8.87 | CHT= 101.1 | EGT=  707.8
+t= 185s | fault=0 | RPM= 3993.4 | Torque= 8.07 | CHT=  98.9 | EGT=  706.7
+t= 186s | fault=0 | RPM= 3993.7 | Torque= 8.94 | CHT=  97.6 | EGT=  707.9
+t= 187s | fault=0 | RPM= 3993.4 | Torque= 8.08 | CHT=  97.4 | EGT=  706.7
+t= 188s | fault=0 | RPM= 3993.9 | Torque= 9.81 | CHT=  97.6 | EGT=  709.1
+t= 189s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  96.8 | EGT=  709.5
+t= 190s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  96.7 | EGT=  710.5
+t= 191s | fault=0 | RPM= 3993.2 | Torque= 7.63 | CHT=  95.9 | EGT=  706.0
+t= 192s | fault=0 | RPM= 3994.0 | Torque= 9.93 | CHT=  96.5 | EGT=  709.3
+
+>>> FAULT CHANGED TO 4 at t=192s <<<
+
+t= 193s | fault=4 | RPM= 3040.9 | Torque= 5.79 | CHT=  94.1 | EGT=  593.7
+t= 194s | fault=4 | RPM= 2476.2 | Torque= 3.55 | CHT=  94.3 | EGT=  430.9
+t= 195s | fault=4 | RPM= 2149.3 | Torque= 2.46 | CHT=  93.2 | EGT=  328.6
+t= 196s | fault=4 | RPM= 1945.6 | Torque= 1.22 | CHT=  92.3 | EGT=  271.5
+t= 197s | fault=4 | RPM= 1812.9 | Torque=-0.21 | CHT=  92.7 | EGT=  239.3
+t= 198s | fault=4 | RPM= 1725.6 | Torque= 3.62 | CHT=  92.6 | EGT=  227.7
+t= 199s | fault=4 | RPM= 1664.8 | Torque= 2.24 | CHT=  91.9 | EGT=  215.5
+t= 200s | fault=4 | RPM= 1622.9 | Torque= 1.89 | CHT=  90.4 | EGT=  208.6
+t= 201s | fault=4 | RPM= 1594.1 | Torque= 2.78 | CHT=  89.3 | EGT=  205.6
+t= 202s | fault=4 | RPM= 1573.1 | Torque= 0.92 | CHT=  87.2 | EGT=  200.1
+t= 203s | fault=4 | RPM= 1559.3 | Torque= 3.02 | CHT=  90.1 | EGT=  201.1
+t= 204s | fault=4 | RPM= 1548.7 | Torque= 1.53 | CHT=  89.7 | EGT=  197.6
+t= 205s | fault=4 | RPM= 1541.3 | Torque= 1.05 | CHT=  87.9 | EGT=  195.9
+t= 206s | fault=4 | RPM= 1536.6 | Torque= 2.23 | CHT=  88.1 | EGT=  196.9
+t= 207s | fault=4 | RPM= 1532.8 | Torque= 1.87 | CHT=  87.2 | EGT=  195.9
+t= 208s | fault=4 | RPM= 1530.1 | Torque= 1.55 | CHT=  85.6 | EGT=  195.2
+t= 209s | fault=4 | RPM= 1528.8 | Torque= 3.16 | CHT=  86.0 | EGT=  197.2
+t= 210s | fault=4 | RPM= 1526.8 | Torque= 1.14 | CHT=  85.3 | EGT=  194.2
+t= 211s | fault=4 | RPM= 1526.3 | Torque= 2.48 | CHT=  84.2 | EGT=  195.9
+t= 212s | fault=4 | RPM= 1525.0 | Torque= 0.25 | CHT=  85.0 | EGT=  192.7
+t= 213s | fault=4 | RPM= 1524.7 | Torque= 0.83 | CHT=  83.5 | EGT=  193.4
+t= 214s | fault=4 | RPM= 1524.9 | Torque= 2.52 | CHT=  83.0 | EGT=  195.8
+t= 215s | fault=4 | RPM= 1524.6 | Torque= 2.35 | CHT=  82.4 | EGT=  195.5
+t= 216s | fault=4 | RPM= 1524.7 | Torque= 3.20 | CHT=  83.6 | EGT=  196.7
+t= 217s | fault=4 | RPM= 1524.2 | Torque= 2.18 | CHT=  81.4 | EGT=  195.2
+t= 218s | fault=4 | RPM= 1523.8 | Torque= 1.15 | CHT=  81.5 | EGT=  193.8
+t= 219s | fault=4 | RPM= 1524.1 | Torque= 2.25 | CHT=  81.1 | EGT=  195.3
+t= 220s | fault=4 | RPM= 1524.1 | Torque= 2.52 | CHT=  80.3 | EGT=  195.7
+t= 221s | fault=4 | RPM= 1524.3 | Torque= 3.10 | CHT=  80.8 | EGT=  196.5
+t= 222s | fault=4 | RPM= 1523.8 | Torque= 1.69 | CHT=  80.7 | EGT=  194.5
+t= 223s | fault=4 | RPM= 1524.0 | Torque= 2.29 | CHT=  78.5 | EGT=  195.4
+t= 224s | fault=4 | RPM= 1523.8 | Torque= 1.78 | CHT=  80.4 | EGT=  194.6
+t= 225s | fault=4 | RPM= 1523.4 | Torque= 0.59 | CHT=  78.3 | EGT=  192.9
+t= 226s | fault=4 | RPM= 1523.7 | Torque= 1.46 | CHT=  78.0 | EGT=  194.2
+t= 227s | fault=4 | RPM= 1523.5 | Torque= 0.77 | CHT=  79.0 | EGT=  193.2
+t= 228s | fault=4 | RPM= 1523.9 | Torque= 2.05 | CHT=  77.3 | EGT=  195.0
+t= 229s | fault=4 | RPM= 1524.2 | Torque= 2.99 | CHT=  78.0 | EGT=  196.3
+t= 230s | fault=4 | RPM= 1523.7 | Torque= 1.52 | CHT=  77.4 | EGT=  194.2
+t= 231s | fault=4 | RPM= 1524.4 | Torque= 3.72 | CHT=  76.4 | EGT=  197.4
+t= 232s | fault=4 | RPM= 1523.7 | Torque= 1.57 | CHT=  76.8 | EGT=  194.3
+t= 233s | fault=4 | RPM= 1523.7 | Torque= 1.52 | CHT=  76.3 | EGT=  194.2
+t= 234s | fault=4 | RPM= 1523.4 | Torque= 0.67 | CHT=  74.7 | EGT=  193.0
+t= 235s | fault=4 | RPM= 1523.9 | Torque= 2.12 | CHT=  75.0 | EGT=  195.1
+t= 236s | fault=4 | RPM= 1524.1 | Torque= 2.74 | CHT=  76.3 | EGT=  196.0
+t= 237s | fault=4 | RPM= 1524.1 | Torque= 2.72 | CHT=  74.0 | EGT=  195.9
+t= 238s | fault=4 | RPM= 1523.6 | Torque= 1.26 | CHT=  74.2 | EGT=  193.9
+t= 239s | fault=4 | RPM= 1524.5 | Torque= 4.08 | CHT=  73.0 | EGT=  197.8
+t= 240s | fault=4 | RPM= 1524.2 | Torque= 3.13 | CHT=  72.3 | EGT=  196.5
+t= 241s | fault=4 | RPM= 1523.6 | Torque= 1.13 | CHT=  73.0 | EGT=  193.7
+t= 242s | fault=4 | RPM= 1523.5 | Torque= 0.88 | CHT=  72.3 | EGT=  193.3
+t= 243s | fault=4 | RPM= 1523.7 | Torque= 1.48 | CHT=  72.7 | EGT=  194.2
+t= 244s | fault=4 | RPM= 1523.9 | Torque= 2.05 | CHT=  71.3 | EGT=  195.0
+t= 245s | fault=4 | RPM= 1524.6 | Torque= 4.48 | CHT=  72.1 | EGT=  198.4
+t= 246s | fault=4 | RPM= 1523.7 | Torque= 1.56 | CHT=  71.5 | EGT=  194.3
+t= 247s | fault=4 | RPM= 1523.6 | Torque= 1.12 | CHT=  70.1 | EGT=  193.7
+t= 248s | fault=4 | RPM= 1524.5 | Torque= 3.98 | CHT=  72.0 | EGT=  197.7
+
+>>> FAULT CHANGED TO 0 at t=248s <<<
+
+t= 249s | fault=0 | RPM= 2629.5 | Torque= 7.95 | CHT=  71.6 | EGT=  272.9
+t= 250s | fault=0 | RPM= 3353.0 | Torque= 9.54 | CHT=  71.8 | EGT=  422.2
+t= 251s | fault=0 | RPM= 3708.8 | Torque= 9.74 | CHT=  70.2 | EGT=  544.8
+t= 252s | fault=0 | RPM= 3870.7 | Torque=10.00 | CHT=  71.0 | EGT=  624.1
+t= 253s | fault=0 | RPM= 3941.2 | Torque=10.00 | CHT=  69.9 | EGT=  667.0
+t= 254s | fault=0 | RPM= 3971.6 | Torque=10.00 | CHT=  70.3 | EGT=  689.7
+t= 255s | fault=0 | RPM= 3984.5 | Torque=10.00 | CHT=  70.9 | EGT=  700.6
+t= 256s | fault=0 | RPM= 3989.8 | Torque= 9.71 | CHT=  70.7 | EGT=  704.6
+t= 257s | fault=0 | RPM= 3992.2 | Torque= 9.91 | CHT=  71.7 | EGT=  707.3
+t= 258s | fault=0 | RPM= 3993.2 | Torque= 9.78 | CHT=  71.9 | EGT=  708.1
+t= 259s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  72.9 | EGT=  711.6
+t= 260s | fault=0 | RPM= 3993.6 | Torque= 9.30 | CHT=  69.5 | EGT=  708.1
+t= 261s | fault=0 | RPM= 3993.7 | Torque= 9.43 | CHT=  71.6 | EGT=  708.4
+t= 262s | fault=0 | RPM= 3993.9 | Torque= 9.73 | CHT=  72.1 | EGT=  708.9
+t= 263s | fault=0 | RPM= 3993.9 | Torque= 9.85 | CHT=  72.6 | EGT=  709.1
+t= 264s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  72.0 | EGT=  710.0
+t= 265s | fault=0 | RPM= 3993.9 | Torque= 9.66 | CHT=  72.3 | EGT=  708.8
+t= 266s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  73.3 | EGT=  709.7
+t= 267s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  73.5 | EGT=  710.3
+t= 268s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  73.7 | EGT=  709.6
+t= 269s | fault=0 | RPM= 3993.7 | Torque= 9.12 | CHT=  73.5 | EGT=  708.0
+t= 270s | fault=0 | RPM= 3994.3 | Torque=10.00 | CHT=  73.0 | EGT=  710.7
+t= 271s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  73.1 | EGT=  709.8
+t= 272s | fault=0 | RPM= 3994.1 | Torque=10.00 | CHT=  74.1 | EGT=  709.8
+t= 273s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  73.5 | EGT=  710.5
+t= 274s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  75.1 | EGT=  711.6
+t= 275s | fault=0 | RPM= 3993.5 | Torque= 8.56 | CHT=  74.4 | EGT=  707.2
+t= 276s | fault=0 | RPM= 3993.6 | Torque= 8.94 | CHT=  74.6 | EGT=  707.8
+t= 277s | fault=0 | RPM= 3994.7 | Torque=10.00 | CHT=  75.6 | EGT=  712.7
+t= 278s | fault=0 | RPM= 3993.9 | Torque= 9.77 | CHT=  74.3 | EGT=  708.9
+t= 279s | fault=0 | RPM= 3994.0 | Torque= 9.97 | CHT=  75.6 | EGT=  709.2
+t= 280s | fault=0 | RPM= 3993.3 | Torque= 8.04 | CHT=  75.8 | EGT=  706.5
+t= 281s | fault=0 | RPM= 3994.4 | Torque=10.00 | CHT=  74.6 | EGT=  711.3
+t= 282s | fault=0 | RPM= 3993.9 | Torque= 9.90 | CHT=  76.4 | EGT=  709.1
+t= 283s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  75.5 | EGT=  709.4
+t= 284s | fault=0 | RPM= 3993.6 | Torque= 8.96 | CHT=  75.9 | EGT=  707.8
+t= 285s | fault=0 | RPM= 3993.8 | Torque= 9.45 | CHT=  75.6 | EGT=  708.5
+t= 286s | fault=0 | RPM= 3994.2 | Torque=10.00 | CHT=  74.6 | EGT=  710.2
+t= 287s | fault=0 | RPM= 3994.5 | Torque=10.00 | CHT=  76.1 | EGT=  711.9
+
+>>> FAULT CHANGED TO 4 at t=287s <<<
+
+t= 288s | fault=4 | RPM= 3041.2 | Torque= 6.79 | CHT=  76.2 | EGT=  595.0
+t= 289s | fault=4 | RPM= 2475.8 | Torque= 2.57 | CHT=  75.1 | EGT=  429.4
+t= 290s | fault=4 | RPM= 2149.6 | Torque= 3.77 | CHT=  76.0 | EGT=  330.3
+t= 291s | fault=4 | RPM= 1946.1 | Torque= 2.86 | CHT=  75.0 | EGT=  273.7
+t= 292s | fault=4 | RPM= 1813.9 | Torque= 2.79 | CHT=  75.7 | EGT=  243.5
+t= 293s | fault=4 | RPM= 1725.2 | Torque= 2.35 | CHT=  74.4 | EGT=  225.8
+t= 294s | fault=4 | RPM= 1665.1 | Torque= 3.31 | CHT=  73.6 | EGT=  216.9
+t= 295s | fault=4 | RPM= 1622.6 | Torque= 1.10 | CHT=  73.0 | EGT=  207.3
+t= 296s | fault=4 | RPM= 1593.9 | Torque= 2.11 | CHT=  73.5 | EGT=  204.5
+t= 297s | fault=4 | RPM= 1573.5 | Torque= 2.42 | CHT=  72.9 | EGT=  202.1
+t= 298s | fault=4 | RPM= 1558.7 | Torque= 1.14 | CHT=  72.4 | EGT=  198.3
+t= 299s | fault=4 | RPM= 1549.4 | Torque= 3.92 | CHT=  71.6 | EGT=  200.8
+t= 300s | fault=4 | RPM= 1541.6 | Torque= 2.04 | CHT=  71.6 | EGT=  197.2
+t= 301s | fault=4 | RPM= 1536.3 | Torque= 1.41 | CHT=  70.8 | EGT=  195.6
+t= 302s | fault=4 | RPM= 1532.6 | Torque= 1.31 | CHT=  69.2 | EGT=  195.0
+t= 303s | fault=4 | RPM= 1531.0 | Torque= 4.48 | CHT=  70.3 | EGT=  199.2
+t= 304s | fault=4 | RPM= 1528.3 | Torque= 1.80 | CHT=  69.7 | EGT=  195.1
+t= 305s | fault=4 | RPM= 1526.9 | Torque= 1.57 | CHT=  68.8 | EGT=  194.6
+t= 306s | fault=4 | RPM= 1526.1 | Torque= 1.96 | CHT=  70.8 | EGT=  195.1
+t= 307s | fault=4 | RPM= 1526.0 | Torque= 3.66 | CHT=  69.5 | EGT=  197.4
+t= 308s | fault=4 | RPM= 1524.8 | Torque= 1.22 | CHT=  69.3 | EGT=  193.9
+t= 309s | fault=4 | RPM= 1524.8 | Torque= 2.29 | CHT=  68.2 | EGT=  195.3
+t= 310s | fault=4 | RPM= 1524.8 | Torque= 3.07 | CHT=  68.0 | EGT=  196.4
+t= 311s | fault=4 | RPM= 1524.5 | Torque= 2.74 | CHT=  67.6 | EGT=  195.9
+t= 312s | fault=4 | RPM= 1523.9 | Torque= 1.29 | CHT=  67.8 | EGT=  193.8
+t= 313s | fault=4 | RPM= 1524.4 | Torque= 3.22 | CHT=  67.5 | EGT=  196.6
+t= 314s | fault=4 | RPM= 1525.0 | Torque= 5.29 | CHT=  68.0 | EGT=  199.5
+t= 315s | fault=4 | RPM= 1524.4 | Torque= 3.39 | CHT=  67.5 | EGT=  196.8
+t= 316s | fault=4 | RPM= 1524.4 | Torque= 3.49 | CHT=  66.0 | EGT=  196.9
+t= 317s | fault=4 | RPM= 1524.3 | Torque= 3.30 | CHT=  66.2 | EGT=  196.6
+t= 318s | fault=4 | RPM= 1523.9 | Torque= 2.07 | CHT=  66.8 | EGT=  194.9
+
+>>> FAULT CHANGED TO 0 at t=318s <<<
+
+t= 319s | fault=0 | RPM= 2629.6 | Torque= 8.34 | CHT=  65.4 | EGT=  273.4
+t= 320s | fault=0 | RPM= 3353.2 | Torque=10.00 | CHT=  66.6 | EGT=  423.3
+t= 321s | fault=0 | RPM= 3708.6 | Torque= 8.98 | CHT=  66.2 | EGT=  543.6
+t= 322s | fault=0 | RPM= 3870.7 | Torque=10.00 | CHT=  65.4 | EGT=  624.0
+t= 323s | fault=0 | RPM= 3941.3 | Torque=10.00 | CHT=  66.1 | EGT=  667.5
+t= 324s | fault=0 | RPM= 3971.5 | Torque=10.00 | CHT=  67.6 | EGT=  689.4
+t= 325s | fault=0 | RPM= 3984.4 | Torque=10.00 | CHT=  65.5 | EGT=  700.2
+t= 326s | fault=0 | RPM= 3989.7 | Torque= 9.31 | CHT=  67.1 | EGT=  703.9
+t= 327s | fault=0 | RPM= 3992.3 | Torque=10.00 | CHT=  67.5 | EGT=  707.6
+t= 328s | fault=0 | RPM= 3994.0 | Torque=10.00 | CHT=  68.1 | EGT=  712.0
+t= 329s | fault=0 | RPM= 3993.8 | Torque=10.00 | CHT=  68.0 | EGT=  709.8
+INFO:     172.18.0.4:33614 - "POST /simulation/stop HTTP/1.1" 200 OK
+{Error using client>publish (line 1709)
+Python Error: KeyboardInterrupt
+} 
+INFO:     172.18.0.4:37628 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:41220 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:41234 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:41236 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:41238 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:35514 - "GET /simulation/status HTTP/1.1" 200 OK
+INFO:     172.18.0.4:35516 - "GET /simulation/status HTTP/1.1" 200 OK

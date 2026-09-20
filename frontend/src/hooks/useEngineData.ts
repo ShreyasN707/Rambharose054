@@ -49,33 +49,36 @@ const DEFAULT_ALERTS: AlertData[] = [
     },
 ];
 
+const ZERO_TELEMETRY: TelemetryData = {
+    timestamp: new Date().toISOString(),
+    engine_id: "ENG-TEST",
+    mission_id: "MISSION-1",
+    rpm: 0,
+    cht: 0,
+    egt: 0,
+    oil_pressure: 0,
+    oil_temperature: 0,
+    fuel_flow: 0,
+    vibration: 0,
+    battery_voltage: 0,
+    alternator_current: 0,
+    injection_timing: 0,
+    torque: 0,
+    power: 0,
+    altitude: 0,
+    ambient_temp: 0,
+    throttle: 0,
+    engine_load: 0,
+};
+
 export function useEngineData() {
     const [engines, setEngines] = useState<string[]>(["ENG-TEST"]);
     const [missions, setMissions] = useState<string[]>(["MISSION-1"]);
     const [selectedEngine, setSelectedEngine] = useState<string>("engine_001");
     const [selectedMission, setSelectedMission] = useState<string>("mission_001");
+    const simulationRunningRef = useRef(false);
 
-    const [telemetry, setTelemetry] = useState<TelemetryData>({
-        timestamp: new Date().toISOString(),
-        engine_id: "ENG-TEST",
-        mission_id: "MISSION-1",
-        rpm: 2340,
-        cht: 218,
-        egt: 812,
-        oil_pressure: 54,
-        oil_temperature: 97,
-        fuel_flow: 11.2,
-        vibration: 4.8,
-        battery_voltage: 24.6,
-        alternator_current: 38,
-        injection_timing: 18.5,
-        torque: 12.4,
-        power: 0.18,
-        altitude: 150,
-        ambient_temp: 28.0,
-        throttle: 5,
-        engine_load: 8,
-    });
+    const [telemetry, setTelemetry] = useState<TelemetryData>(ZERO_TELEMETRY);
 
     const [health, setHealth] = useState<SubsystemHealth>(DEFAULT_HEALTH);
     const [prediction, setPrediction] = useState<PredictionData>(DEFAULT_PREDICTION);
@@ -92,7 +95,19 @@ export function useEngineData() {
 
     const [isConnected, setIsConnected] = useState<boolean>(false);
     const [isWarmup, setIsWarmup] = useState<boolean>(false);
+    const [simulationRunning, setSimulationRunning] = useState(false);
     const wsRef = useRef<WebSocket | null>(null);
+
+    const resetTelemetry = useCallback(() => {
+        simulationRunningRef.current = false;
+
+        setTelemetry({
+            ...ZERO_TELEMETRY,
+            timestamp: new Date().toISOString(),
+            engine_id: selectedEngine,
+            mission_id: selectedMission,
+        });
+    }, [selectedEngine, selectedMission]);
 
     useEffect(() => {
         let mounted = true;
@@ -122,12 +137,7 @@ export function useEngineData() {
     const fetchInitialDashboard = useCallback(async () => {
         try {
             const data = await getDashboard(selectedEngine, selectedMission);
-            if (data.latest_telemetry) {
-                setTelemetry(prev => ({
-                    ...prev,
-                    ...data.latest_telemetry,
-                }));
-            }
+            
             if (data.health) {
                 setHealth(data.health);
                 setIsWarmup(false);
@@ -147,7 +157,7 @@ export function useEngineData() {
                 setHealthHistory(data.recent_health_history);
             }
         } catch {}
-    }, [selectedEngine, selectedMission]);
+    }, [selectedEngine, selectedMission, simulationRunning]);
 
     useEffect(() => {
         fetchInitialDashboard();
@@ -223,6 +233,8 @@ export function useEngineData() {
         setSelectedEngine,
         setSelectedMission,
         telemetry,
+        resetTelemetry,
+        setSimulationRunning,
         health,
         prediction,
         operatingState,

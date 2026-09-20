@@ -2,13 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import type { LucideIcon } from "lucide-react";
 import DroneOverviewSection from "./DroneOverview";
 import {
-    Radio, Activity, GitBranch, ArrowUpRight, Circle, Wifi,
+    Radio, Activity, GitBranch, Wifi,
     Gauge, Thermometer, Droplet, Timer,
     ArrowUp, ArrowDown, Minus, AlertTriangle, RefreshCw,
 } from "lucide-react";
 import { useEngineData } from "./hooks/useEngineData";
 import {
-    getMissionReplay,
     startSimulation,
     stopSimulation,
     getSimulationStatus,
@@ -234,28 +233,10 @@ function DroneRadarGraphic() {
     );
 }
 
-interface FeatureItem {
-    icon: LucideIcon;
-    title: string;
-    body: string;
-}
-
 function CyberBrutalSection({ onViewTwin, onScrollToDrone, onScrollToHud }: { onViewTwin: () => void; onScrollToDrone: () => void; onScrollToHud: () => void }) {
     const time = useClock();
     const [glitch, setGlitch] = useState(false);
 
-    const stats = [
-        { label: "MODEL SYNC RATE", value: "50Hz" },
-        { label: "INFERENCE LATENCY", value: "22ms" },
-        { label: "TWIN FIDELITY", value: "98.4%" },
-    ];
-
-    const features: FeatureItem[] = [
-        { icon: Activity, title: "LIVE SENSOR FUSION", body: "Ten channels of engine telemetry streamed into the twin in real time, no batching." },
-        { icon: GitBranch, title: "PHYSICS-INFORMED MODEL", body: "The twin runs a physical engine model alongside the data, not just a black box." },
-        { icon: AlertTriangle, title: "FAULT DETECTION", body: "Deviations between twin and reality are scored and classified as they emerge." },
-        { icon: Timer, title: "RUL PREDICTION", body: "Remaining useful life is re-estimated continuously as new fault evidence arrives." },
-    ];
 
     return (
         <section style={{ background: "#050505", color: "#e8e8e8", fontFamily: "'Space Grotesk', sans-serif" }} className="relative overflow-hidden">
@@ -276,22 +257,18 @@ function CyberBrutalSection({ onViewTwin, onScrollToDrone, onScrollToHud }: { on
                     <span className="hover:text-white cursor-pointer transition" onClick={onScrollToDrone}>overview</span>
                     <span className="hover:text-white cursor-pointer transition" onClick={onScrollToHud}>telemetry</span>
                     <span className="hover:text-white cursor-pointer transition" onClick={onScrollToHud}>diagnostics</span>
-                    <span className="hover:text-white cursor-pointer transition">docs</span>
                 </div>
                 <div className="flex items-center gap-4">
                     <span className="hidden sm:inline text-sm" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#b0b0b0" }}>
                         {pad(time.getHours())}:{pad(time.getMinutes())}:{pad(time.getSeconds())} UTC
                     </span>
-                    <button style={{ background: "#C6FF3D", color: "#050505" }} className="text-base font-bold px-6 py-2.5 flex items-center gap-1.5 hover:brightness-95 transition">
-                        OPEN DASHBOARD <ArrowUpRight size={16} />
-                    </button>
                 </div>
             </div>
 
             <div className="relative z-10 grid md:grid-cols-2 gap-10 px-6 md:px-10 py-16 md:py-24 items-center">
                 <div>
                     <div className="inline-block text-xs mb-6 px-2 py-1" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#C6FF3D", border: "1px solid #4a6a10" }}>
-                        /01 &nbsp; DIGITAL TWIN PLATFORM
+                        &nbsp; DIGITAL TWIN PLATFORM
                     </div>
                     <h1
                         onMouseEnter={() => setGlitch(true)}
@@ -311,7 +288,7 @@ function CyberBrutalSection({ onViewTwin, onScrollToDrone, onScrollToHud }: { on
                         BEFORE IT HAPPENS.
                     </h1>
                     <p className="max-w-md mb-8" style={{ color: "#d0d0d0", fontSize: "1.125rem", lineHeight: 1.7 }}>
-                        A live physics-informed twin of the engine, fed by ten sensor channels,
+                        A live physics-informed twin of the engine, fed by nine sensor channels,
                         scoring faults and re-estimating remaining useful life every cycle.
                     </p>
                     <div className="flex items-center gap-4">
@@ -321,9 +298,6 @@ function CyberBrutalSection({ onViewTwin, onScrollToDrone, onScrollToHud }: { on
                             className="font-bold px-8 py-4 text-base hover:brightness-110 transition"
                         >
                             VIEW LIVE TWIN
-                        </button>
-                        <button style={{ border: "1px solid #888" }} className="px-8 py-4 text-base font-semibold text-white hover:border-white transition">
-                            MODEL DETAILS
                         </button>
                     </div>
                 </div>
@@ -336,45 +310,9 @@ function CyberBrutalSection({ onViewTwin, onScrollToDrone, onScrollToHud }: { on
                     <div className="h-64 md:h-80">
                         <DroneRadarGraphic />
                     </div>
-                    <div className="px-4 py-2 text-sm flex justify-between" style={{ borderTop: "1px solid #3a3a3a", fontFamily: "'JetBrains Mono', monospace", color: "#c0c0c0" }}>
-                        <span>MODE: PATROL</span>
-                        <span>NODE: UAV_CORE</span>
-                    </div>
                 </div>
             </div>
 
-            <div className="relative z-10 px-6 md:px-10 py-14" style={{ borderTop: "1px solid #3a3a3a" }}>
-                <div className="text-sm mb-8" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#b0b0b0" }}>
-                    /02 &nbsp; HOW THE TWIN WORKS
-                </div>
-                <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-px" style={{ background: "#3a3a3a" }}>
-                    {features.map((f, i) => {
-                        const Icon = f.icon;
-                        return (
-                            <div key={i} style={{ background: "#050505" }} className="p-6">
-                                <Icon size={22} color="#C6FF3D" />
-                                <div className="mt-4 font-bold text-base tracking-tight" style={{ color: "#fff" }}>{f.title}</div>
-                                <p className="mt-2 text-sm" style={{ color: "#c0c0c0", lineHeight: 1.6 }}>{f.body}</p>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-
-            <div className="relative z-10 px-6 md:px-10 py-6 flex flex-wrap gap-8 items-center justify-between" style={{ borderTop: "1px solid #3a3a3a", fontFamily: "'JetBrains Mono', monospace" }}>
-                <div className="flex items-center gap-2 text-sm">
-                    <Circle size={10} fill="#C6FF3D" color="#C6FF3D" />
-                    <span style={{ color: "#C6FF3D", fontWeight: 700 }}>TWIN SYNCED &mdash; LIVE</span>
-                </div>
-                <div className="flex flex-wrap gap-8">
-                    {stats.map((s, i) => (
-                        <div key={i} className="text-sm">
-                            <div style={{ color: "#b0b0b0" }}>{s.label}</div>
-                            <div style={{ color: "#fff", fontWeight: 700, fontSize: "1rem" }} className="mt-1">{s.value}</div>
-                        </div>
-                    ))}
-                </div>
-            </div>
         </section>
     );
 }
@@ -422,8 +360,6 @@ function HudSection({
     engineData: ReturnType<typeof useEngineData>;
 }) {
     const time = useClock();
-    const [replayStatus, setReplayStatus] = useState<string | null>(null);
-    const [isFetchingReplay, setIsFetchingReplay] = useState<boolean>(false);
     const [simulationStatus, setSimulationStatus] = useState<
         "stopped" | "starting" | "running" | "stopping"
     >("stopped");
@@ -451,26 +387,13 @@ function HudSection({
     const [isInjectingFault, setIsInjectingFault] = useState(false);
     const [controlStatus, setControlStatus] = useState<string | null>(null);
 
-    const handleFetchReplay = async () => {
-        setIsFetchingReplay(true);
-        setReplayStatus(null);
-        try {
-            const data = await getMissionReplay(engineData.selectedMission);
-            setReplayStatus(`REPLAY: ${data.points?.length ?? 0} FRAMES FETCHED`);
-        } catch (err: any) {
-            setReplayStatus(`REPLAY: ${err.message}`);
-        } finally {
-            setIsFetchingReplay(false);
-        }
-    };
-
     const handleStartSimulation = async () => {
         setSimulationStatus("starting");
         setControlStatus(null);
 
         try {
             const result = await startSimulation(engineData.selectedEngine);
-
+            engineData.setSimulationRunning(true);
             setSimulationStatus("running");
             setControlStatus(
                 result.fault_id === 0
@@ -489,6 +412,8 @@ function HudSection({
 
         try {
             await stopSimulation(engineData.selectedEngine);
+
+            engineData.resetTelemetry();
 
             setSimulationStatus("stopped");
             setControlStatus("SIMULATION STOPPED");
@@ -538,16 +463,6 @@ function HudSection({
         { icon: Activity, label: "VIBRATION", value: String(engineData.telemetry.vibration), unit: "mm/s", status: engineData.telemetry.vibration > 4.0 ? "warn" : "ok", trend: "up" },
     ];
 
-    if (engineData.telemetry.battery_voltage !== undefined) {
-        sensors.push({ icon: Activity, label: "BATTERY V", value: String(engineData.telemetry.battery_voltage), unit: "V", status: "ok", trend: "flat" });
-    }
-    if (engineData.telemetry.alternator_current !== undefined) {
-        sensors.push({ icon: Activity, label: "ALTERNATOR I", value: String(engineData.telemetry.alternator_current), unit: "A", status: "ok", trend: "flat" });
-    }
-    if (engineData.telemetry.injection_timing !== undefined) {
-        sensors.push({ icon: Timer, label: "INJECTION TIMING", value: String(engineData.telemetry.injection_timing), unit: "°BTDC", status: "warn", trend: "down" });
-    }
-
     const statusColor: Record<string, string> = { ok: "#7fe0a0", warn: "#e8c34a", critical: "#e8543f" };
 
     return (
@@ -561,7 +476,7 @@ function HudSection({
                 <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
                     <div>
                         <h2 className="mt-2 font-bold" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", color: "#fff" }}>
-                            Live diagnostic readout
+                            TEST AND FAULT CONTROL
                         </h2>
                     </div>
 
@@ -584,7 +499,7 @@ function HudSection({
                         <button
                             onClick={() => engineData.refreshDashboard()}
                             className="px-3 py-2 rounded hover:bg-white/10 transition"
-                            title="Refresh Dashboard (/api/dashboard)"
+                            title="Refresh live telemetry"
                             style={{ border: "1px solid #555", color: "#ddd" }}
                         >
                             <RefreshCw size={15} />
@@ -602,9 +517,7 @@ function HudSection({
                             {engineData.isConnected ? "WS LIVE" : "POLLING"}
                         </span>
 
-                        <span className="px-3 py-2 rounded font-semibold" style={{ border: "1px solid #e8c34a", background: "rgba(232,195,74,0.15)", color: "#e8c34a" }}>
-                            STATE: {engineData.operatingState}
-                        </span>
+                       
                     </div>
                 </div>
 
@@ -705,7 +618,6 @@ function HudSection({
                     )}
                 </div>
 
-                {/* ── FAULT INJECTION PANEL ── */}
                 <div
                     className="mb-6 p-5"
                     style={{ border: "1px solid #5a1a1a", background: "#0e0808" }}
@@ -714,21 +626,9 @@ function HudSection({
                         className="flex items-center justify-between mb-4"
                         style={{ fontFamily: "'JetBrains Mono', monospace" }}
                     >
-                        <span className="text-base font-bold flex items-center gap-2" style={{ color: "#e8543f" }}>
-                            <AlertTriangle size={15} />
+                        <span className="text-sm font-bold flex items-center gap-2" style={{ color: "#e8543f" }}>
+                            <AlertTriangle size={14} />
                             FAULT INJECTION
-                        </span>
-                        <span
-                            className="text-xs px-2.5 py-1 font-semibold"
-                            style={{
-                                border: "1px solid #8b1d1d",
-                                background: "rgba(139, 29, 29, 0.4)",
-                                color: "#ff7878",
-                                fontFamily: "'JetBrains Mono', monospace",
-                                letterSpacing: "0.03em",
-                            }}
-                        >
-                            ⚠ SIMULATION ONLY
                         </span>
                     </div>
 
@@ -740,7 +640,7 @@ function HudSection({
                             className="px-4 py-2.5 text-sm font-bold transition hover:brightness-110"
                             title="Inject fault_id=0 — clears any active fault, sets engine to healthy"
                             style={{
-                                border: "1.5px solid #22c55e",
+                                border: "1.5px solid #358452",
                                 background: "rgba(34,197,94,0.22)",
                                 color: "#ffffff",
                                 cursor: isInjectingFault || simulationStatus !== "running" ? "not-allowed" : "pointer",
@@ -748,16 +648,15 @@ function HudSection({
                                 letterSpacing: "0.02em",
                             }}
                         >
-                            ✓ CLEAR / HEALTHY
+                             HEALTHY
                         </button>
 
-                        {/* Fault buttons 1–5 */}
+                        {/* Fault buttons */}
                         {[
-                            { id: 1, label: "F1: HIGH TEMP",     desc: "Cylinder head overheat simulation" },
-                            { id: 2, label: "F2: OIL LOSS",      desc: "Oil pressure drop below threshold" },
-                            { id: 3, label: "F3: VIBRATION",     desc: "Abnormal mechanical vibration" },
-                            { id: 4, label: "F4: FUEL ANOMALY",  desc: "Fuel flow irregularity" },
-                            { id: 5, label: "F5: COMBUSTION",    desc: "Combustion misfire / EGT spike" },
+                            { id: 1, label: "MISFIRE",          desc: "Reduced combustion performance" },
+                            { id: 2, label: "OVERHEATING",       desc: "Elevated CHT, EGT and oil temperature" },
+                            { id: 3, label: "OIL PRESSURE",      desc: "Progressive lubrication pressure loss" },
+                            { id: 4, label: "FUEL STARVATION",   desc: "Reduced fuel supply causing engine power loss" },
                         ].map(({ id, label, desc }) => (
                             <button
                                 key={id}
@@ -767,11 +666,12 @@ function HudSection({
                                 className="px-4 py-2.5 text-sm font-bold transition hover:brightness-110"
                                 style={{
                                     border: "1.5px solid #e8543f",
-                                    background: "rgba(232,84,63,0.22)",
+                                    background: "rgba(168, 59, 44, 0.22)",
                                     color: "#ffffff",
-                                    cursor: isInjectingFault || simulationStatus !== "running"
-                                        ? "not-allowed"
-                                        : "pointer",
+                                    cursor:
+                                        isInjectingFault || simulationStatus !== "running"
+                                            ? "not-allowed"
+                                            : "pointer",
                                     fontFamily: "'JetBrains Mono', monospace",
                                     letterSpacing: "0.02em",
                                 }}
@@ -781,19 +681,8 @@ function HudSection({
                         ))}
                     </div>
 
-                    <div
-                        className="mt-3 text-xs"
-                        style={{ color: "#d1d5db", fontFamily: "'JetBrains Mono', monospace" }}
-                    >
-                        Buttons are enabled only while simulation is RUNNING. Hover a button to see the fault description.
-                    </div>
                 </div>
 
-                {replayStatus && (
-                    <div className="mb-6 px-4 py-2 text-xs rounded" style={{ background: "rgba(127,212,255,0.1)", border: "1px solid #7fd4ff", color: "#7fd4ff", fontFamily: "'JetBrains Mono', monospace" }}>
-                        {replayStatus}
-                    </div>
-                )}
 
                 {engineData.isWarmup && (
                     <div className="mb-6 px-4 py-2 text-xs rounded" style={{ background: "rgba(234,179,8,0.1)", border: "1px solid #eab308", color: "#eab308", fontFamily: "'JetBrains Mono', monospace" }}>
@@ -817,17 +706,11 @@ function HudSection({
                                     <div className="font-bold text-base tracking-tight" style={{ color: "#fff" }}>
                                         {engineData.health.overall > 90 ? "NOMINAL" : engineData.health.overall > 75 ? "GOOD" : "DEGRADED"}
                                     </div>
-                                    <div className="text-sm mt-1" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>
-                                        FAULT: {engineData.prediction.fault ?? "ML anomaly detected — fault classification unavailable"}
+                                    <div className="text-sm mt-2" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>
+                                        FAULT: <span style={{ color: "#fff" }}>{engineData.prediction.fault ?? "NONE DETECTED"}</span>
                                     </div>
-                                    <div className="mt-3 flex items-center gap-2 text-sm" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                        <AlertTriangle size={14} color={statusColor[engineData.operatingState === "NOMINAL" ? "ok" : "critical"]} />
-                                        <span style={{ color: "#fff", fontWeight: 600 }}>
-                                            {engineData.prediction.fault ? engineData.prediction.fault : "Operating within tolerance"}
-                                        </span>
-                                    </div>
-                                    <div className="text-sm mt-1" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>
-                                        MODEL ANOMALY SCORE {engineData.prediction.anomaly_score.toFixed(2)}
+                                    <div className="text-xs mt-2" style={{ color: "#888", fontFamily: "'JetBrains Mono', monospace" }}>
+                                        ANOMALY SCORE {engineData.prediction.anomaly_score.toFixed(2)}
                                     </div>
                                 </div>
                             </div>
@@ -836,11 +719,6 @@ function HudSection({
                                 <span>EST. RUL</span>
                                 <span style={{ color: "#fff", fontWeight: 700 }}>
                                     {engineData.prediction.rul_hours !== null ? `${engineData.prediction.rul_hours} hrs` : "N/A"}
-                                </span>
-                                <span>ENGINE SCOPE</span><span style={{ color: "#fff", fontWeight: 600 }}>{engineData.selectedEngine}</span>
-                                <span>PIPELINE</span>
-                                <span style={{ color: engineData.isWarmup ? "#eab308" : "#7fe0a0", fontWeight: 600 }}>
-                                    {engineData.isWarmup ? "WARMING UP (<60)" : "LIVE STREAMING"}
                                 </span>
                             </div>
 
@@ -853,7 +731,6 @@ function HudSection({
                         <div style={{ border: "1px solid #3a3a3a", background: "#0e0e0e" }} className="p-4">
                             <div className="mb-3 flex items-center justify-between" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                                 <span className="text-base font-bold" style={{ color: "#fff" }}>SUBSYSTEM HEALTH SCORES</span>
-                                <span className="text-xs" style={{ color: "#b0b0b0" }}>/api/engines/{engineData.selectedEngine}/health</span>
                             </div>
                             <div className="flex flex-col gap-3">
                                 {subsystems.map((sub, idx) => (
@@ -878,52 +755,20 @@ function HudSection({
                     </div>
 
                     <div className="md:col-span-3 flex flex-col gap-6">
-                        <div style={{ border: "1px solid #3a3a3a", background: "#0e0e0e" }}>
-                            <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid #3a3a3a", fontFamily: "'JetBrains Mono', monospace" }}>
-                                <div className="flex items-center gap-2 text-base font-bold" style={{ color: "#fff" }}>
-                                    <Activity size={15} /> TELEMETRY_CHANNELS
-                                </div>
-                                <span className="text-xs" style={{ color: "#b0b0b0" }}>/api/engines/{engineData.selectedEngine}/telemetry/latest</span>
-                            </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-2">
-                                {sensors.map((s, i) => {
-                                    const SensorIcon = s.icon;
-                                    return (
-                                        <div
-                                            key={i}
-                                            className="flex items-center gap-3 px-4 py-3.5"
-                                            style={{
-                                                borderBottom: i < sensors.length - 2 ? "1px solid #2e2e2e" : "none",
-                                                borderRight: i % 2 === 0 ? "1px solid #2e2e2e" : "none",
-                                            }}
-                                        >
-                                            <SensorIcon size={16} color="#c0c0c0" className="shrink-0" />
-                                            <div className="flex-1 min-w-0">
-                                                <div className="text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#c0c0c0" }}>{s.label}</div>
-                                                <div className="text-base font-bold" style={{ color: "#fff" }}>
-                                                    {s.value} <span className="text-sm font-normal" style={{ color: "#c0c0c0" }}>{s.unit}</span>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col items-center gap-1 shrink-0">
-                                                <TrendArrow trend={s.trend} />
-                                                <span style={{ width: 8, height: 8, borderRadius: "50%", background: statusColor[s.status] }} />
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                            <div className="px-4 py-3 flex items-center justify-between text-sm" style={{ borderTop: "1px solid #3a3a3a", fontFamily: "'JetBrains Mono', monospace", color: "#c0c0c0" }}>
-                                <span className="flex items-center gap-1.5"><GitBranch size={13} /> {sensors.length} channels, 50Hz sample rate</span>
-                                <span>{engineData.selectedEngine}_STREAM</span>
-                            </div>
-                        </div>
+                        
 
                         <div style={{ border: "1px solid #3a3a3a", background: "#0e0e0e" }} className="p-4">
                             <div className="flex items-center justify-between mb-3" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                                 <span className="text-base font-bold" style={{ color: "#fff" }}>ACTIVE ALERTS</span>
                                 <span className="text-sm font-semibold" style={{ color: "#e8c34a" }}>{engineData.alerts.length} DETECTED</span>
                             </div>
-                            <div className="flex flex-col gap-2">
+                            <div
+                                className="flex flex-col gap-2 overflow-y-auto"
+                                style={{
+                                    maxHeight: "468px",
+                                    scrollbarWidth: "thin",
+                                }}
+                            >
                                 {engineData.alerts.map((al, idx) => {
                                     const isEngine = al.source === "operating_state";
                                     return (
@@ -945,9 +790,6 @@ function HudSection({
                                                     <div className="font-bold text-sm" style={{ color: isEngine ? "#fff" : "#7fd4ff" }}>
                                                         {al.message}
                                                     </div>
-                                                    <div className="text-xs mt-0.5" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#c0c0c0" }}>
-                                                        SOURCE: <span style={{ color: isEngine ? "#e8c34a" : "#7fd4ff" }}>{al.source.toUpperCase()}</span> &bull; SEVERITY: {al.severity}
-                                                    </div>
                                                 </div>
                                             </div>
                                             <span className="text-xs shrink-0" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#b0b0b0" }}>
@@ -964,7 +806,7 @@ function HudSection({
 
             <div className="relative z-10 px-6 md:px-10 py-6 flex items-center justify-between text-sm" style={{ borderTop: "1px solid #3a3a3a", fontFamily: "'JetBrains Mono', monospace", color: "#c0c0c0" }}>
                 <span>ENGINE_TWIN &copy; 2026</span>
-                <span>MODEL: PHYSICS-INFORMED HYBRID &bull; API CONTRACT: BE-3</span>
+                <span>PHYSICS-INFORMED DIGITAL TWIN &bull; LIVE DIAGNOSTICS</span>
             </div>
         </section>
     );
