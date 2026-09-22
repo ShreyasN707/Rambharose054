@@ -1,2 +1,0 @@
-/home/vedanth/Projects/Rambharose054/simulation/mqtt_fault_bridge.py:33: DeprecationWarning: Callback API version 1 is deprecated, update to latest version
-  client = mqtt.Client()
