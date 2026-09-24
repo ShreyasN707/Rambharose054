@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
+import { Move3d, RotateCcw, RotateCw } from "lucide-react";
 import type { TelemetryData } from "./types/api";
-import Drone3DViewer from "./Drone3DViewer";
 
 interface GaugeProps {
     value: number;
@@ -244,7 +244,311 @@ function ClutchPlateGraphic({ rotation }: { rotation: number }) {
     );
 }
 
+function EngineTopFace() {
+    return (
+        <svg viewBox="0 0 260 160" style={{ width: "100%", height: "100%", display: "block" }}>
+            <rect width="260" height="160" fill="#151515" />
+            <rect x="10" y="10" width="240" height="140" fill="#1a1a1a" stroke="#444" strokeWidth="1.5" rx="4" />
+            <rect x="30" y="20" width="200" height="120" fill="none" stroke="#333" strokeWidth="1" rx="2" />
+            {[0,1,2,3,4].map(i => (
+                <g key={`tb${i}`}>
+                    <circle cx={50+i*42} cy={50} r="14" fill="#0d0d0d" stroke="#C6FF3D" strokeWidth="0.8" opacity="0.7" />
+                    <circle cx={50+i*42} cy={50} r="5" fill="none" stroke="#444" strokeWidth="0.5" />
+                    <circle cx={50+i*42} cy={110} r="14" fill="#0d0d0d" stroke="#C6FF3D" strokeWidth="0.8" opacity="0.7" />
+                    <circle cx={50+i*42} cy={110} r="5" fill="none" stroke="#444" strokeWidth="0.5" />
+                </g>
+            ))}
+            {[0,1,2,3,4,5].map(i => (
+                <circle key={`bolt${i}`} cx={35+i*40} cy={80} r="2.5" fill="#333" stroke="#555" strokeWidth="0.5" />
+            ))}
+            <text x="130" y="155" textAnchor="middle" fontSize="7" fill="#555" fontFamily="'JetBrains Mono', monospace">TOP VIEW — CYLINDER BORES</text>
+        </svg>
+    );
+}
 
+function EngineBottomFace() {
+    return (
+        <svg viewBox="0 0 260 160" style={{ width: "100%", height: "100%", display: "block" }}>
+            <rect width="260" height="160" fill="#111" />
+            <rect x="20" y="15" width="220" height="130" fill="#151515" stroke="#444" strokeWidth="1.5" rx="3" />
+            {[0,1,2,3,4,5,6].map(i => (
+                <line key={`r${i}`} x1="30" y1={25+i*18} x2="230" y2={25+i*18} stroke="#2a2a2a" strokeWidth="1" />
+            ))}
+            <circle cx="130" cy="80" r="8" fill="#222" stroke="#666" strokeWidth="1.5" />
+            <circle cx="130" cy="80" r="3" fill="#333" />
+            {[0,1,2,3,4,5,6,7,8,9].map(i => (
+                <circle key={`sb${i}`} cx={35+i*20} cy={20} r="1.5" fill="#444" />
+            ))}
+            {[0,1,2,3,4,5,6,7,8,9].map(i => (
+                <circle key={`sb2${i}`} cx={35+i*20} cy={140} r="1.5" fill="#444" />
+            ))}
+            <text x="130" y="155" textAnchor="middle" fontSize="7" fill="#555" fontFamily="'JetBrains Mono', monospace">BOTTOM VIEW — OIL PAN</text>
+        </svg>
+    );
+}
+
+function EngineFrontFace() {
+    return (
+        <svg viewBox="0 0 260 160" style={{ width: "100%", height: "100%", display: "block" }}>
+            <rect width="260" height="160" fill="#131313" />
+            <rect x="30" y="10" width="200" height="130" fill="#1a1a1a" stroke="#444" strokeWidth="1.5" rx="3" />
+            <rect x="50" y="15" width="160" height="80" fill="#161616" stroke="#555" strokeWidth="1" rx="2" />
+            <circle cx="100" cy="50" r="22" fill="none" stroke="#555" strokeWidth="1.5" />
+            <circle cx="100" cy="50" r="8" fill="#222" stroke="#666" strokeWidth="1" />
+            <circle cx="160" cy="50" r="22" fill="none" stroke="#555" strokeWidth="1.5" />
+            <circle cx="160" cy="50" r="8" fill="#222" stroke="#666" strokeWidth="1" />
+            <circle cx="130" cy="110" r="18" fill="none" stroke="#C6FF3D" strokeWidth="1" opacity="0.5" />
+            <circle cx="130" cy="110" r="6" fill="#333" stroke="#666" strokeWidth="1" />
+            <path d="M100,72 Q100,90 112,110" fill="none" stroke="#888" strokeWidth="1.5" />
+            <path d="M160,72 Q160,90 148,110" fill="none" stroke="#888" strokeWidth="1.5" />
+            <path d="M100,28 L160,28" fill="none" stroke="#888" strokeWidth="1.5" />
+            <circle cx="80" cy="120" r="10" fill="#181818" stroke="#555" strokeWidth="1" />
+            <circle cx="80" cy="120" r="3" fill="#3a6a8a" />
+            <text x="130" y="155" textAnchor="middle" fontSize="7" fill="#555" fontFamily="'JetBrains Mono', monospace">FRONT VIEW — TIMING / PULLEYS</text>
+        </svg>
+    );
+}
+
+function EngineBackFace() {
+    return (
+        <svg viewBox="0 0 260 160" style={{ width: "100%", height: "100%", display: "block" }}>
+            <rect width="260" height="160" fill="#131313" />
+            <rect x="40" y="10" width="180" height="130" fill="#1a1a1a" stroke="#444" strokeWidth="1.5" rx="3" />
+            <circle cx="130" cy="75" r="55" fill="none" stroke="#444" strokeWidth="1.5" />
+            <circle cx="130" cy="75" r="48" fill="#151515" stroke="#333" strokeWidth="1" />
+            <circle cx="130" cy="75" r="38" fill="none" stroke="#C6FF3D" strokeWidth="1" opacity="0.4" />
+            <circle cx="130" cy="75" r="30" fill="#111" stroke="#555" strokeWidth="1" />
+            {[0,1,2,3,4,5].map(i => {
+                const a = (i * 60 * Math.PI) / 180;
+                return <circle key={`fb${i}`} cx={130 + 24 * Math.cos(a)} cy={75 + 24 * Math.sin(a)} r="2.5" fill="#333" stroke="#555" strokeWidth="0.5" />;
+            })}
+            <circle cx="130" cy="75" r="8" fill="#222" stroke="#666" strokeWidth="1.5" />
+            <circle cx="130" cy="75" r="3" fill="#444" />
+            <circle cx="130" cy="75" r="5" fill="none" stroke="#777" strokeWidth="0.5" />
+            <text x="130" y="155" textAnchor="middle" fontSize="7" fill="#555" fontFamily="'JetBrains Mono', monospace">REAR VIEW — FLYWHEEL</text>
+        </svg>
+    );
+}
+
+function EngineLeftFace() {
+    return (
+        <svg viewBox="0 0 160 160" style={{ width: "100%", height: "100%", display: "block" }}>
+            <rect width="160" height="160" fill="#131313" />
+            <rect x="10" y="10" width="140" height="110" fill="#1a1a1a" stroke="#444" strokeWidth="1.5" rx="3" />
+            <line x1="10" y1="35" x2="150" y2="35" stroke="#555" strokeWidth="1" strokeDasharray="4 2" />
+            {[0,1,2,3,4].map(i => (
+                <g key={`ep${i}`}>
+                    <rect x="145" y={15+i*20} width="10" height="12" fill="#111" stroke="#e8543f" strokeWidth="0.8" rx="1" opacity="0.6" />
+                    <line x1="155" y1={21+i*20} x2="160" y2={21+i*20} stroke="#e8543f" strokeWidth="1" opacity="0.4" />
+                </g>
+            ))}
+            <path d="M155,21 Q165,21 168,40 Q170,60 168,80 Q165,100 155,101" fill="none" stroke="#e8543f" strokeWidth="1.5" opacity="0.4" />
+            <rect x="15" y="40" width="130" height="75" fill="none" stroke="#2a2a2a" strokeWidth="0.5" />
+            <rect x="20" y="118" width="120" height="15" fill="#151515" stroke="#444" strokeWidth="1" rx="2" />
+            <circle cx="40" cy="100" r="10" fill="#181818" stroke="#555" strokeWidth="1" />
+            <circle cx="40" cy="100" r="3" fill="#333" />
+            <text x="80" y="155" textAnchor="middle" fontSize="7" fill="#555" fontFamily="'JetBrains Mono', monospace">LEFT — EXHAUST SIDE</text>
+        </svg>
+    );
+}
+
+function EngineRightFace() {
+    return (
+        <svg viewBox="0 0 160 160" style={{ width: "100%", height: "100%", display: "block" }}>
+            <rect width="160" height="160" fill="#131313" />
+            <rect x="10" y="10" width="140" height="110" fill="#1a1a1a" stroke="#444" strokeWidth="1.5" rx="3" />
+            <line x1="10" y1="35" x2="150" y2="35" stroke="#555" strokeWidth="1" strokeDasharray="4 2" />
+            {[0,1,2,3,4].map(i => (
+                <g key={`ir${i}`}>
+                    <rect x="-5" y={15+i*20} width="18" height="10" fill="#111" stroke="#3b82f6" strokeWidth="0.8" rx="1" opacity="0.6" />
+                    <line x1="-5" y1={20+i*20} x2="-10" y2={20+i*20} stroke="#3b82f6" strokeWidth="1" opacity="0.4" />
+                </g>
+            ))}
+            <path d="M5,21 Q-5,21 -8,40 Q-10,60 -8,80 Q-5,100 5,101" fill="none" stroke="#3b82f6" strokeWidth="1.5" opacity="0.4" />
+            <rect x="15" y="40" width="130" height="75" fill="none" stroke="#2a2a2a" strokeWidth="0.5" />
+            <rect x="20" y="118" width="120" height="15" fill="#151515" stroke="#444" strokeWidth="1" rx="2" />
+            <rect x="100" y="85" width="30" height="18" fill="#181818" stroke="#555" strokeWidth="1" rx="3" />
+            <circle cx="115" cy="94" r="5" fill="#222" stroke="#666" strokeWidth="0.8" />
+            <text x="80" y="155" textAnchor="middle" fontSize="7" fill="#555" fontFamily="'JetBrains Mono', monospace">RIGHT — INTAKE SIDE</text>
+        </svg>
+    );
+}
+
+function Engine360Viewer() {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [rotX, setRotX] = useState(-25);
+    const [rotY, setRotY] = useState(35);
+    const [isDragging, setIsDragging] = useState(false);
+    const [autoRotate, setAutoRotate] = useState(true);
+    const dragStart = useRef({ x: 0, y: 0, rotX: 0, rotY: 0 });
+
+    useEffect(() => {
+        if (!autoRotate || isDragging) return;
+        const id = setInterval(() => {
+            setRotY(prev => prev + 0.3);
+        }, 30);
+        return () => clearInterval(id);
+    }, [autoRotate, isDragging]);
+
+    const handlePointerDown = useCallback((e: React.PointerEvent) => {
+        setIsDragging(true);
+        setAutoRotate(false);
+        dragStart.current = { x: e.clientX, y: e.clientY, rotX, rotY };
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    }, [rotX, rotY]);
+
+    const handlePointerMove = useCallback((e: React.PointerEvent) => {
+        if (!isDragging) return;
+        const dx = e.clientX - dragStart.current.x;
+        const dy = e.clientY - dragStart.current.y;
+        setRotY(dragStart.current.rotY + dx * 0.5);
+        setRotX(Math.max(-80, Math.min(80, dragStart.current.rotX - dy * 0.5)));
+    }, [isDragging]);
+
+    const handlePointerUp = useCallback(() => {
+        setIsDragging(false);
+    }, []);
+
+    const resetView = () => {
+        setRotX(-25);
+        setRotY(35);
+        setAutoRotate(true);
+    };
+
+    const normalizedY = ((rotY % 360) + 360) % 360;
+    let faceLabel = "FRONT";
+    if (normalizedY >= 45 && normalizedY < 135) faceLabel = "RIGHT";
+    else if (normalizedY >= 135 && normalizedY < 225) faceLabel = "REAR";
+    else if (normalizedY >= 225 && normalizedY < 315) faceLabel = "LEFT";
+
+    const W = 260, H = 160, D = 160;
+    const halfW = W / 2, halfH = H / 2, halfD = D / 2;
+
+    return (
+        <div
+            ref={containerRef}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            style={{
+                width: "100%", height: "100%", position: "relative",
+                cursor: isDragging ? "grabbing" : "grab",
+                userSelect: "none", touchAction: "none",
+                perspective: 800,
+                display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+        >
+            <div style={{
+                width: W, height: H, position: "relative",
+                transformStyle: "preserve-3d",
+                transform: `rotateX(${rotX}deg) rotateY(${rotY}deg)`,
+                transition: isDragging ? "none" : "transform 0.05s linear",
+            }}>
+                <div style={{
+                    position: "absolute", width: W, height: H,
+                    transform: `translateZ(${halfD}px)`,
+                    backfaceVisibility: "hidden",
+                }}>
+                    <EngineFrontFace />
+                </div>
+                <div style={{
+                    position: "absolute", width: W, height: H,
+                    transform: `translateZ(${-halfD}px) rotateY(180deg)`,
+                    backfaceVisibility: "hidden",
+                }}>
+                    <EngineBackFace />
+                </div>
+                <div style={{
+                    position: "absolute", width: D, height: H,
+                    left: (W - D) / 2,
+                    transform: `translateX(${-halfD}px) rotateY(-90deg)`,
+                    transformOrigin: `${halfD}px ${halfH}px`,
+                    backfaceVisibility: "hidden",
+                }}>
+                    <EngineLeftFace />
+                </div>
+                <div style={{
+                    position: "absolute", width: D, height: H,
+                    left: (W - D) / 2,
+                    transform: `translateX(${halfD}px) rotateY(90deg)`,
+                    transformOrigin: `${halfD}px ${halfH}px`,
+                    backfaceVisibility: "hidden",
+                }}>
+                    <EngineRightFace />
+                </div>
+                <div style={{
+                    position: "absolute", width: W, height: D,
+                    top: (H - D) / 2,
+                    transform: `translateY(${-halfD}px) rotateX(90deg)`,
+                    transformOrigin: `${halfW}px ${halfD}px`,
+                    backfaceVisibility: "hidden",
+                }}>
+                    <EngineTopFace />
+                </div>
+                <div style={{
+                    position: "absolute", width: W, height: D,
+                    top: (H - D) / 2,
+                    transform: `translateY(${halfD}px) rotateX(-90deg)`,
+                    transformOrigin: `${halfW}px ${halfD}px`,
+                    backfaceVisibility: "hidden",
+                }}>
+                    <EngineBottomFace />
+                </div>
+            </div>
+
+            <div style={{
+                position: "absolute", bottom: 6, left: 8, zIndex: 10,
+                fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#C6FF3D",
+                background: "rgba(5,5,5,0.8)", padding: "3px 8px",
+                border: "1px solid rgba(198,255,61,0.2)",
+                display: "flex", alignItems: "center", gap: 6,
+            }}>
+                <Move3d size={10} />
+                <span>X:{Math.round(rotX)}° Y:{Math.round(normalizedY)}°</span>
+                <span style={{ color: "#888", marginLeft: 4 }}>|</span>
+                <span style={{ color: "#fff" }}>{faceLabel}</span>
+            </div>
+
+            <div style={{
+                position: "absolute", top: 6, right: 8, zIndex: 10,
+                display: "flex", gap: 4,
+            }}>
+                <button
+                    onClick={(e) => { e.stopPropagation(); setAutoRotate(!autoRotate); }}
+                    style={{
+                        background: autoRotate ? "rgba(198,255,61,0.15)" : "rgba(255,255,255,0.05)",
+                        border: `1px solid ${autoRotate ? "rgba(198,255,61,0.4)" : "#333"}`,
+                        color: autoRotate ? "#C6FF3D" : "#666",
+                        padding: "3px 6px", cursor: "pointer", display: "flex", alignItems: "center", gap: 3,
+                        fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+                    }}
+                >
+                    <RotateCw size={10} /> {autoRotate ? "AUTO" : "MANUAL"}
+                </button>
+                <button
+                    onClick={(e) => { e.stopPropagation(); resetView(); }}
+                    style={{
+                        background: "rgba(255,255,255,0.05)",
+                        border: "1px solid #333",
+                        color: "#888", padding: "3px 6px", cursor: "pointer",
+                        display: "flex", alignItems: "center", gap: 3,
+                        fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+                    }}
+                >
+                    <RotateCcw size={10} /> RESET
+                </button>
+            </div>
+
+            <div style={{
+                position: "absolute", bottom: 6, right: 8, zIndex: 10,
+                fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: "#555",
+            }}>
+                DRAG TO ROTATE
+            </div>
+        </div>
+    );
+}
 
 function RadiatorGraphic() {
     return (
@@ -387,16 +691,10 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                                         <RadiatorGraphic />
                                     </div>
                                 </div>
-                                <div className="col-span-2 md:col-span-3 flex items-center justify-center p-2"
+                                <div className="col-span-2 md:col-span-3 flex items-center justify-center p-3"
                                     style={{ border: "1px solid #3a3a3a", borderRadius: 6, background: "#0a0a0a", position: "relative", overflow: "hidden" }}>
-                                    <div style={{ width: "100%", height: 380 }}>
-                                        <Drone3DViewer
-                                            rpm={rpm}
-                                            throttle={Number(throttle)}
-                                            vibration={parseFloat(vibration)}
-                                            cht={cht}
-                                            height={380}
-                                        />
+                                    <div style={{ width: "100%", height: 280 }}>
+                                        <Engine360Viewer />
                                     </div>
                                 </div>
                                 <div className="col-span-2 md:col-span-3 grid grid-cols-1 md:grid-cols-4 gap-2">
