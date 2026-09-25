@@ -62,6 +62,21 @@ class DigitalTwinService:
         prediction = self.predictor.predict(
             telemetry_window,
         )
+        
+        current_health = self.calculate_health(telemetry)
+
+        rul_hours = self.estimate_rul(
+            session,
+            telemetry.engine_id,
+            telemetry.mission_id,
+            current_health.overall,
+        )
+
+        prediction = prediction.model_copy(
+            update={
+                "rul_hours": rul_hours,
+            }
+        )
 
         state = self.build_state(
             telemetry,
@@ -131,28 +146,42 @@ class DigitalTwinService:
 
         cht_penalty = max(
             0,
-            telemetry.cht - 170,
+            telemetry.cht - 110,
         ) * 0.5
 
         egt_penalty = max(
             0,
-            telemetry.egt - 680,
-        ) * 0.2
+            telemetry.egt - 750,
+        ) * 0.15
 
         return self._score(
-            100 - cht_penalty - egt_penalty
+            98
+            - cht_penalty
+            - egt_penalty
         )
+
 
     def _combustion_health(
         self,
         telemetry: TelemetryCreate,
     ) -> float:
 
+        rpm_penalty = max(
+            0,
+            abs(telemetry.rpm - 4000) - 300,
+        ) * 0.01
+
+        egt_penalty = max(
+            0,
+            abs(telemetry.egt - 650) - 80,
+        ) * 0.05
+
         return self._score(
-            100
-            - abs(telemetry.rpm - 2500) * 0.02
-            - abs(telemetry.egt - 680) * 0.05
+            98
+            - rpm_penalty
+            - egt_penalty
         )
+
 
     def _lubrication_health(
         self,
@@ -166,27 +195,31 @@ class DigitalTwinService:
 
         temperature_penalty = max(
             0,
-            telemetry.oil_temperature - 90,
+            telemetry.oil_temperature - 115,
         ) * 0.5
 
         return self._score(
-            100
+            97
             - pressure_penalty
             - temperature_penalty
         )
+
 
     def _mechanical_health(
         self,
         telemetry: TelemetryCreate,
     ) -> float:
 
-        vibration_penalty = max(
-            0,
-            telemetry.vibration - 0.3,
-        ) * 100
+        vibration = abs(telemetry.vibration)
+
+        if vibration <= 3.0:
+            return 98.0
+
+        vibration_penalty = (vibration - 3.0) * 20
 
         return self._score(
-            100 - vibration_penalty
+            98
+            - vibration_penalty
         )
 
     @staticmethod
@@ -234,3 +267,64 @@ class DigitalTwinService:
             return "WARNING"
 
         return "NOMINAL"
+    
+    def estimate_rul(
+        self,
+        session: Session,
+        engine_id: str,
+        mission_id: str,
+        current_health: float,
+    ) -> float | None:
+
+        snapshots = self.repository.get_by_engine(
+            session,
+            engine_id,
+        )
+
+        snapshots = [
+            s for s in snapshots
+            if s.mission_id == mission_id
+        ]
+
+        if len(snapshots) < 2:
+            return None
+
+        now = snapshots[-1].time
+
+        recent = [
+            s for s in snapshots
+            if (now - s.time).total_seconds() <= 60
+        ]
+
+        previous = [
+            s for s in snapshots
+            if 60 < (now - s.time).total_seconds() <= 120
+        ]
+
+        if not recent or not previous:
+            return None
+
+        recent_health = sum(
+            (s.thermal + s.combustion + s.lubrication) / 3
+            for s in recent
+        ) / len(recent)
+
+        previous_health = sum(
+            (s.thermal + s.combustion + s.lubrication) / 3
+            for s in previous
+        ) / len(previous)
+
+        degradation = previous_health - recent_health
+
+        if degradation <= 0:
+            return None
+
+        degradation_rate = degradation / (10 / 60)
+
+        failure_threshold = 60.0
+
+        rul_hours = (
+            current_health - failure_threshold
+        ) / degradation_rate
+
+        return round(max(0.0, rul_hours), 2)

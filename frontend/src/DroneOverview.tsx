@@ -10,78 +10,188 @@ interface GaugeProps {
     majorTicks: number;
     minorPerMajor: number;
     redZone?: number;
-}
-
-function AnalogGauge({ value, max, label, unit, majorTicks, minorPerMajor, redZone }: GaugeProps) {
-    const S = 200, cx = 100, cy = 100, r = 78;
-    const startDeg = -135, sweepDeg = 270;
-
-    const polar = (deg: number, rad: number) => ({
-        x: cx + rad * Math.sin((deg * Math.PI) / 180),
-        y: cy - rad * Math.cos((deg * Math.PI) / 180),
-    });
-
-    const needleAngle = startDeg + (Math.min(value, max) / max) * sweepDeg;
-    const ticks: JSX.Element[] = [];
-
-    for (let i = 0; i <= majorTicks; i++) {
-        const a = startDeg + (i / majorTicks) * sweepDeg;
-        const tv = Math.round((i / majorTicks) * max);
-        const red = redZone !== undefined && tv >= redZone;
-        const o = polar(a, r), inn = polar(a, r - 12), lp = polar(a, r - 23);
-
-        ticks.push(<line key={`M${i}`} x1={inn.x} y1={inn.y} x2={o.x} y2={o.y} stroke={red ? "#e8543f" : "#999"} strokeWidth="2" />);
-        ticks.push(
-            <text key={`L${i}`} x={lp.x} y={lp.y} textAnchor="middle" dominantBaseline="middle"
-                fontSize="8" fill={red ? "#e8543f" : "#bbb"} fontFamily="'JetBrains Mono', monospace">{tv}</text>
-        );
-        if (i < majorTicks) {
-            for (let j = 1; j < minorPerMajor; j++) {
-                const ma = startDeg + ((i + j / minorPerMajor) / majorTicks) * sweepDeg;
-                const mo = polar(ma, r), mi = polar(ma, r - 6);
-                ticks.push(<line key={`m${i}_${j}`} x1={mi.x} y1={mi.y} x2={mo.x} y2={mo.y} stroke="#444" strokeWidth="1" />);
-            }
-        }
+    lowerRedZone?: number;
     }
 
-    const tip = polar(needleAngle, r - 18);
-    const tail = polar(needleAngle + 180, 10);
+function AnalogGauge({
+        value,
+        max,
+        label,
+        unit,
+        majorTicks,
+        minorPerMajor,
+        redZone,
+        lowerRedZone,
+    }: GaugeProps) {
+        const S = 200, cx = 100, cy = 100, r = 78;
+        const startDeg = -135, sweepDeg = 270;
 
-    return (
-        <svg viewBox={`0 0 ${S} ${S + 24}`} className="w-full h-full">
-            <circle cx={cx} cy={cy} r={r + 6} stroke="#4a4a4a" strokeWidth="2" fill="none" />
-            <circle cx={cx} cy={cy} r={r} stroke="#2a2a2a" strokeWidth="1" fill="#0d0d0d" />
-            {ticks}
-            <line x1={tail.x} y1={tail.y} x2={tip.x} y2={tip.y} stroke="#e8543f" strokeWidth="2.5" strokeLinecap="round"
-                style={{ transition: "all 0.3s ease-out" }} />
-            <circle cx={cx} cy={cy} r="6" fill="#333" stroke="#777" strokeWidth="1.5" />
-            <text x={cx} y={cy + 32} textAnchor="middle" fontSize="18" fontWeight="600" fill="#fff"
-                fontFamily="'Space Grotesk', sans-serif">{value}</text>
-            <text x={cx + 24} y={cy + 32} textAnchor="start" fontSize="8" fill="#c0c0c0"
-                fontFamily="'JetBrains Mono', monospace">{unit}</text>
-            <text x={cx} y={S + 14} textAnchor="middle" fontSize="9" fill="#c0c0c0" letterSpacing="2"
-                fontFamily="'JetBrains Mono', monospace">{label}</text>
-        </svg>
-    );
-}
+        const polar = (deg: number, rad: number) => ({
+            x: cx + rad * Math.sin((deg * Math.PI) / 180),
+            y: cy - rad * Math.cos((deg * Math.PI) / 180),
+        });
 
-function ShiftLightBar({ activeCount }: { activeCount: number }) {
-    const segments = 24;
-    return (
-        <div className="flex gap-[2px] items-center">
-            {Array.from({ length: segments }, (_, i) => {
-                const pct = i / segments;
-                let color = "#1a3a1a";
-                if (i < activeCount) {
-                    if (pct < 0.4) color = "#22c55e";
-                    else if (pct < 0.7) color = "#eab308";
-                    else color = "#ef4444";
+        const needleAngle =
+            startDeg + (Math.min(value, max) / max) * sweepDeg;
+
+        const ticks: JSX.Element[] = [];
+
+        for (let i = 0; i <= majorTicks; i++) {
+            const a = startDeg + (i / majorTicks) * sweepDeg;
+            const tv = Math.round((i / majorTicks) * max);
+
+            const red =
+                (redZone !== undefined && tv >= redZone) ||
+                (lowerRedZone !== undefined && tv <= lowerRedZone);
+
+            const o = polar(a, r);
+            const inn = polar(a, r - 12);
+            const lp = polar(a, r - 23);
+
+            ticks.push(
+                <line
+                    key={`M${i}`}
+                    x1={inn.x}
+                    y1={inn.y}
+                    x2={o.x}
+                    y2={o.y}
+                    stroke={red ? "#e8543f" : "#999"}
+                    strokeWidth="2"
+                />
+            );
+
+            ticks.push(
+                <text
+                    key={`L${i}`}
+                    x={lp.x}
+                    y={lp.y}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize="8"
+                    fill={red ? "#e8543f" : "#bbb"}
+                    fontFamily="'JetBrains Mono', monospace"
+                >
+                    {tv}
+                </text>
+            );
+
+            if (i < majorTicks) {
+                for (let j = 1; j < minorPerMajor; j++) {
+                    const tickValue =
+                        ((i + j / minorPerMajor) / majorTicks) * max;
+
+                    const ma =
+                        startDeg +
+                        ((i + j / minorPerMajor) / majorTicks) * sweepDeg;
+
+                    const mo = polar(ma, r);
+                    const mi = polar(ma, r - 6);
+
+                    const minorRed =
+                        (redZone !== undefined && tickValue >= redZone) ||
+                        (lowerRedZone !== undefined &&
+                            tickValue <= lowerRedZone);
+
+                    ticks.push(
+                        <line
+                            key={`m${i}_${j}`}
+                            x1={mi.x}
+                            y1={mi.y}
+                            x2={mo.x}
+                            y2={mo.y}
+                            stroke={minorRed ? "#e8543f" : "#444"}
+                            strokeWidth="1"
+                        />
+                    );
                 }
-                return <div key={i} style={{ background: color, width: 14, height: 8, borderRadius: 1 }} />;
-            })}
-        </div>
-    );
-}
+            }
+        }
+
+        const needle = polar(needleAngle, r - 18);
+
+        return (
+            <div
+                style={{
+                    width: 250,
+                    height: 250,
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
+                <svg
+                    width={S}
+                    height={S}
+                    viewBox="0 0 200 200"
+                    style={{ overflow: "visible" }}
+                >
+                    {/* Gauge ticks */}
+                    {ticks}
+
+                    {/* Needle */}
+                    <line
+                        x1={cx}
+                        y1={cy}
+                        x2={needle.x}
+                        y2={needle.y}
+                        stroke="#e8543f"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                    />
+
+                    {/* Center */}
+                    <circle
+                        cx={cx}
+                        cy={cy}
+                        r="5"
+                        fill="#e8543f"
+                    />
+
+                    {/* Value */}
+                    <text
+                        x={cx}
+                        y="145"
+                        textAnchor="middle"
+                        fill="#fff"
+                        fontSize="18"
+                        fontFamily="'JetBrains Mono', monospace"
+                        fontWeight="bold"
+                    >
+                        {Math.round(value)}
+                    </text>
+
+                    {/* Unit */}
+                    <text
+                        x={cx}
+                        y="158"
+                        textAnchor="middle"
+                        fill="#888"
+                        fontSize="8"
+                        fontFamily="'JetBrains Mono', monospace"
+                    >
+                        {unit}
+                    </text>
+                </svg>
+
+                {/* Label */}
+                <div
+                    style={{
+                        position: "absolute",
+                        top: 8,
+                        left: 0,
+                        right: 0,
+                        textAlign: "center",
+                        color: "#bbb",
+                        fontSize: 15,
+                        fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                >
+                    {label}
+                </div>
+            </div>
+        );
+    }
 
 function PistonGraphic({ phase }: { phase: number }) {
     const py = 35 + Math.sin(phase) * 20;
@@ -464,21 +574,59 @@ function RadiatorGraphic() {
     );
 }
 
-function TelemetryCell({ label, value, unit, color = "#fff", warn = false }: {
-    label: string; value: string | number; unit: string; color?: string; warn?: boolean;
-}) {
+function TelemetryCell({
+        label,
+        value,
+        unit,
+        color = "#fff",
+        warn = false
+    }: {
+        label: string;
+        value: string | number;
+        unit: string;
+        color?: string;
+        warn?: boolean;
+    }) {
     return (
-        <div className="px-3 py-2" style={{
-            border: `1px solid ${warn ? "rgba(232,84,63,0.5)" : "#3a3a3a"}`,
-            borderRadius: 6, background: warn ? "rgba(232,84,63,0.07)" : "#0a0a0a",
-        }}>
-            <div className="text-[10px] mb-1 font-semibold" style={{
-                color: warn ? "#e8543f" : "#c0c0c0",
-                fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1,
-            }}>{label}</div>
-            <div className="flex items-baseline gap-1">
-                <span className="text-base font-semibold" style={{ color, fontFamily: "'Space Grotesk', sans-serif" }}>{value}</span>
-                <span className="text-[10px]" style={{ color: "#b0b0b0", fontFamily: "'JetBrains Mono', monospace" }}>{unit}</span>
+        <div
+            className="px-4 py-3"
+            style={{
+                border: `1px solid ${warn ? "rgba(232,84,63,0.5)" : "#3a3a3a"}`,
+                borderRadius: 6,
+                background: warn ? "rgba(232,84,63,0.07)" : "#0a0a0a",
+            }}
+        >
+            <div
+                className="text-xs mb-1.5 font-semibold"
+                style={{
+                    color: warn ? "#e8543f" : "#c0c0c0",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    letterSpacing: 1,
+                }}
+            >
+                {label}
+            </div>
+
+            <div className="flex items-baseline gap-1.5">
+                <span
+                    className="text-lg font-semibold"
+                    style={{
+                        color,
+                        fontFamily: "'Space Grotesk', sans-serif",
+                    }}
+                >
+                    {value}
+                </span>
+
+                <span
+                    className="text-xs"
+                    style={{
+                        color: "#b0b0b0",
+                        fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                >
+                    {unit}
+                </span>
             </div>
         </div>
     );
@@ -499,67 +647,32 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
     }, []);
 
     const phase = tick * 0.08;
-    const idleRPM = 820 + Math.sin(phase * 0.4) * 40 + Math.sin(phase * 1.1) * 15;
-    const rpm = liveTelemetry?.rpm ?? Math.round(idleRPM);
-    const shiftActive = Math.floor((rpm / 9000) * 24);
+    const rpm = liveTelemetry?.rpm ?? 0;
+    const torque = (liveTelemetry?.torque ?? 0).toFixed(1);
+    const fuelFlow = (liveTelemetry?.fuel_flow ?? 0).toFixed(1);
+    const cht = Math.round(liveTelemetry?.cht ?? 0);
+    const egt = Math.round(liveTelemetry?.egt ?? 0);
+    const oilTemp = Math.round(liveTelemetry?.oil_temperature ?? 0);
+    const oilPressure = String(Math.round(liveTelemetry?.oil_pressure ?? 0));
+    const vibration = (liveTelemetry?.vibration ?? 0).toFixed(2);
+    const altitude = Math.round(liveTelemetry?.altitude ?? 0);
+    const ambientTemp = (liveTelemetry?.ambient_temp ?? 0).toFixed(1);
 
-    const torque = (liveTelemetry?.torque ?? (12.4 + Math.sin(phase * 0.3) * 1.8 + Math.sin(phase * 0.9) * 0.6)).toFixed(1);
-    const power = (liveTelemetry?.power ?? (0.18 + Math.sin(phase * 0.35) * 0.03)).toFixed(2);
-    const fuelFlow = (liveTelemetry?.fuel_flow ?? (2.1 + Math.sin(phase * 0.25) * 0.4 + Math.sin(phase * 0.7) * 0.15)).toFixed(1);
-    const cht = Math.round(liveTelemetry?.cht ?? (185 + Math.sin(phase * 0.15) * 12 + Math.sin(phase * 0.5) * 5));
-    const egt = Math.round(liveTelemetry?.egt ?? (620 + Math.sin(phase * 0.2) * 30 + Math.sin(phase * 0.6) * 10));
-    const oilTemp = Math.round(liveTelemetry?.oil_temperature ?? (95 + Math.sin(phase * 0.12) * 8));
-    const oilPressure = String(Math.round(liveTelemetry?.oil_pressure ?? (58 + Math.sin(phase * 0.18) * 6 + Math.sin(phase * 0.55) * 2)));
-    const vibration = (liveTelemetry?.vibration ?? (0.12 + Math.sin(phase * 1.2) * 0.04 + Math.sin(phase * 2.3) * 0.02)).toFixed(2);
-    const altitude = Math.round(liveTelemetry?.altitude ?? (150 + Math.sin(phase * 0.05) * 5));
-    const ambientTemp = (liveTelemetry?.ambient_temp ?? (28 + Math.sin(phase * 0.02) * 2)).toFixed(1);
-    const throttle = String(Math.round(liveTelemetry?.throttle ?? (5 + Math.sin(phase * 0.3) * 3 + Math.sin(phase * 0.8) * 1)));
-    const engineLoad = String(Math.round(liveTelemetry?.engine_load ?? (8 + Math.sin(phase * 0.28) * 4 + Math.sin(phase * 0.7) * 2)));
 
     const hrs = String(Math.floor(elapsedSec / 3600)).padStart(2, "0");
     const mins = String(Math.floor((elapsedSec % 3600) / 60)).padStart(2, "0");
     const secs = String(elapsedSec % 60).padStart(2, "0");
     const timeStr = `${hrs}:${mins}:${secs}`;
 
-    const statusLights = [
-        { label: "ENGINE", color: "#22c55e" },
-        { label: "FUEL", color: "#22c55e" },
-        { label: "OIL", color: "#22c55e" },
-        { label: "TEMP", color: "#22c55e" },
-        { label: "IDLE", color: "#3b82f6" },
-    ];
-
     return (
         <section style={{ background: "#0a0a0a", fontFamily: "'Space Grotesk', sans-serif" }} className="relative overflow-hidden">
             <div className="relative z-10 px-6 md:px-10 py-14">
                 <div className="text-sm mb-8 font-semibold" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#b0b0b0" }}>
-                    /03 &nbsp; ENGINE SIMULATION DASHBOARD
+                    &nbsp; ENGINE SIMULATION DASHBOARD
                 </div>
 
                 <div style={{ overflow: "hidden", background: "#111" }}>
-                    <div className="flex items-center justify-between px-3 py-2 flex-wrap gap-2" style={{ background: "#151515", borderBottom: "1px solid #333" }}>
-                        <div className="flex items-center gap-3">
-                            {statusLights.map((s, i) => (
-                                <div key={i} className="flex items-center gap-1">
-                                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: s.color, boxShadow: s.color !== "#555" ? `0 0 6px ${s.color}` : "none" }} />
-                                    <span className="text-[10px] hidden sm:inline font-semibold" style={{ color: "#d0d0d0", fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-between px-4 py-2 flex-wrap gap-2" style={{ background: "#0f0f0f", borderBottom: "1px solid #333" }}>
-                        <div className="text-[11px] flex items-center gap-4 font-semibold" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#c0c0c0" }}>
-                            <span>SHIFT LIGHT</span>
-                        </div>
-                        <ShiftLightBar activeCount={shiftActive} />
-                        <div className="text-[11px] flex items-center gap-4 font-semibold" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#c0c0c0" }}>
-                            <span>RPM <span style={{ color: "#fff" }}>{rpm}</span></span>
-                            <span>OPTIMAL <span style={{ color: "#C6FF3D" }}>9000</span></span>
-                        </div>
-                        <span className="text-[11px] font-bold" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#e8c34a" }}>STANDBY</span>
-                    </div>
-
+                    
                     <div className="flex" style={{ minHeight: 480 }}>
                         <div className="flex-1 p-4" style={{ background: "#0d0d0d" }}>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 h-full" style={{ gridTemplateRows: "auto 1fr auto" }}>
@@ -584,93 +697,74 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                                         <Engine360Viewer />
                                     </div>
                                 </div>
-                                <div className="col-span-2 md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-2">
-                                    <TelemetryCell label="TIME" value={timeStr} unit="" color="#3b82f6" />
-                                    <TelemetryCell label="TORQUE" value={torque} unit="N·m" />
-                                    <TelemetryCell label="POWER" value={power} unit="kW" />
-                                    <TelemetryCell label="FUEL FLOW" value={fuelFlow} unit="L/h" color="#eab308" />
-                                </div>
-                                <div className="col-span-2 md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-2">
-                                    <TelemetryCell label="CHT" value={cht} unit="°C" warn={cht > 195} />
-                                    <TelemetryCell label="EGT" value={egt} unit="°C" warn={egt > 650} />
-                                    <TelemetryCell label="OIL TEMP" value={oilTemp} unit="°C" />
-                                    <TelemetryCell label="OIL PRESSURE" value={oilPressure} unit="psi" color="#22c55e" />
-                                </div>
-                                <div className="col-span-2 md:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-2">
-                                    <TelemetryCell label="VIBRATION" value={vibration} unit="g" warn={parseFloat(vibration) > 0.15} />
-                                    <TelemetryCell label="ALTITUDE" value={altitude} unit="m" color="#a78bfa" />
-                                    <TelemetryCell label="AMBIENT TEMP" value={ambientTemp} unit="°C" />
-                                </div>
-                                <div className="col-span-2 md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    <div className="px-3 py-2" style={{ border: "1px solid #3a3a3a", borderRadius: 6, background: "#0a0a0a" }}>
-                                        <div className="text-[10px] mb-1 flex justify-between font-semibold" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>
-                                            <span>THROTTLE</span>
-                                            <span style={{ color: "#eab308" }}>{throttle}%</span>
-                                        </div>
-                                        <div className="w-full h-3 rounded" style={{ background: "#3a2a1a" }}>
-                                            <div className="h-full rounded" style={{
-                                                width: `${throttle}%`,
-                                                background: "linear-gradient(90deg, #eab308, #ca8a04)",
-                                                transition: "width 0.3s ease-out",
-                                            }} />
-                                        </div>
+                                <div className="col-span-2 md:col-span-3 grid grid-cols-1 md:grid-cols-4 gap-2">
+
+                                {/* TELEMETRY */}
+                                <div className="md:col-span-3 flex flex-col gap-2">
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                        <TelemetryCell label="TIME" value={timeStr} unit="" color="#3b82f6" />
+                                        <TelemetryCell label="TORQUE" value={torque} unit="N·m"  warn={parseFloat(torque) < 7.0}/>
+                                        <TelemetryCell label="FUEL FLOW" value={fuelFlow} unit="L/h" warn={parseFloat(fuelFlow) < 2.0}/>
+                                        <TelemetryCell label="VIBRATION" value={vibration} unit="g" warn={parseFloat(vibration) > 5}
+                                        />
                                     </div>
-                                    <div className="px-3 py-2" style={{ border: "1px solid #3a3a3a", borderRadius: 6, background: "#0a0a0a" }}>
-                                        <div className="text-[10px] mb-1 flex justify-between font-semibold" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>
-                                            <span>ENGINE LOAD</span>
-                                            <span style={{ color: "#3b82f6" }}>{engineLoad}%</span>
-                                        </div>
-                                        <div className="w-full h-3 rounded" style={{ background: "#1a2a3a" }}>
-                                            <div className="h-full rounded" style={{
-                                                width: `${engineLoad}%`,
-                                                background: "linear-gradient(90deg, #3b82f6, #2563eb)",
-                                                transition: "width 0.3s ease-out",
-                                            }} />
-                                        </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                        <TelemetryCell label="CHT" value={cht} unit="°C" warn={cht > 110} />
+                                        <TelemetryCell label="EGT" value={egt} unit="°C" warn={egt > 850} />
+                                        <TelemetryCell label="OIL TEMP" value={oilTemp} unit="°C" warn={oilTemp > 120}/>
+                                        <TelemetryCell label="OIL PRESSURE" value={oilPressure} unit="psi" warn={parseFloat(oilPressure) < 40}/>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 items-center md:grid-cols-3 gap-2">
+                                        
+                                        <TelemetryCell
+                                            label="ALTITUDE"
+                                            value={altitude}
+                                            unit="m"
+                                            color="#a78bfa"
+                                        />
+                                        <TelemetryCell
+                                            label="AMBIENT TEMP"
+                                            value={ambientTemp}
+                                            unit="°C"
+                                            color="#eab308"
+                                        />
+                                    </div>
+
+                                </div>
+
+                                {/* RPM GAUGE */}
+                                <div
+                                    className="flex items-center justify-center"
+                                    style={{
+                                        border: "1px solid #3a3a3a",
+                                        borderRadius: 6,
+                                        background: "#0a0a0a",
+                                        minHeight: 180,
+                                    }}
+                                >
+                                    <div style={{ width: 250, height: 250 }}>
+                                        <AnalogGauge
+                                            value={rpm}
+                                            max={5000}
+                                            label="RPM"
+                                            unit="RPM"
+                                            majorTicks={10}
+                                            minorPerMajor={5}
+                                            lowerRedZone={3200}
+                                            redZone={4800}
+                                        />
                                     </div>
                                 </div>
+
+                            </div>
+                                
                             </div>
                         </div>
 
-                        <div className="hidden lg:flex flex-col w-56 shrink-0" style={{ background: "#111", borderLeft: "1px solid #3a3a3a" }}>
-                            <div className="px-2 pt-3">
-                                <AnalogGauge value={rpm} max={12000} label="ENGINE SPEED" unit="rpm"
-                                    majorTicks={12} minorPerMajor={5} redZone={9000} />
-                            </div>
-                            <div className="flex-1 px-3 py-3 flex flex-col gap-2 overflow-y-auto" style={{ borderTop: "1px solid #3a3a3a" }}>
-                                <div className="text-[10px] font-bold mb-1" style={{ color: "#d0d0d0", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>
-                                    KEY PARAMETERS
-                                </div>
-                                {[
-                                    { label: "RPM", val: rpm, unit: "rpm", col: "#fff" },
-                                    { label: "TORQUE", val: torque, unit: "N·m", col: "#fff" },
-                                    { label: "POWER", val: power, unit: "kW", col: "#fff" },
-                                    { label: "FUEL FLOW", val: fuelFlow, unit: "L/h", col: "#eab308" },
-                                    { label: "CHT", val: cht, unit: "°C", col: cht > 195 ? "#e8543f" : "#fff" },
-                                    { label: "EGT", val: egt, unit: "°C", col: egt > 650 ? "#e8543f" : "#fff" },
-                                    { label: "OIL TEMP", val: oilTemp, unit: "°C", col: "#fff" },
-                                    { label: "OIL PRESS", val: oilPressure, unit: "psi", col: "#22c55e" },
-                                    { label: "VIBRATION", val: vibration, unit: "g", col: parseFloat(vibration) > 0.15 ? "#e8543f" : "#fff" },
-                                    { label: "ALTITUDE", val: altitude, unit: "m", col: "#a78bfa" },
-                                    { label: "AMB TEMP", val: ambientTemp, unit: "°C", col: "#fff" },
-                                    { label: "THROTTLE", val: `${throttle}%`, unit: "", col: "#eab308" },
-                                    { label: "ENG LOAD", val: `${engineLoad}%`, unit: "", col: "#3b82f6" },
-                                ].map((p, i) => (
-                                    <div key={i} className="flex items-center justify-between py-1" style={{ borderBottom: "1px solid #3a3a3a" }}>
-                                        <span className="text-[10px]" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>{p.label}</span>
-                                        <span className="text-[12px] font-semibold" style={{ color: p.col, fontFamily: "'Space Grotesk', sans-serif" }}>
-                                            {p.val} <span className="text-[9px]" style={{ color: "#b0b0b0" }}>{p.unit}</span>
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="px-3 py-3" style={{ borderTop: "1px solid #3a3a3a" }}>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-semibold" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>ELAPSED</span>
-                                    <span className="text-sm font-bold" style={{ color: "#3b82f6", fontFamily: "'JetBrains Mono', monospace" }}>{timeStr}</span>
-                                </div>
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
             </div>

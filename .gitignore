@@ -16,13 +16,22 @@ dist/
 out/
 *.tsbuildinfo
 
+# MATLAB / Simulink generated files
+*.slxc
+*.mat
+*.log
+
+# Simulation generated files
+fault_state.txt
+fault_command.txt
+engine_digital_twin_dataset.csv
+
 # IDEs
 .idea/
 .vscode/
 
 # OS
 .DS_Store
-
 *.sublime-project
 *.sublime-workspace
 *.sublime-projectsimulink/engine_digital_twin_dataset.csv

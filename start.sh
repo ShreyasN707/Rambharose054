@@ -3,7 +3,7 @@
 set -e
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SIMULINK_DIR="$PROJECT_DIR/simulink"
+SIMULINK_DIR="$PROJECT_DIR/simulation"
 
 echo "========================================"
 echo " Starting Digital Twin"
