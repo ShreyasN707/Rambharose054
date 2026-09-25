@@ -15,6 +15,7 @@ interface Series {
     label: string;
     unit: string;
     color: string;
+    axis?: "left" | "right";
 }
 
 interface TelemetryChartProps {
@@ -24,11 +25,21 @@ interface TelemetryChartProps {
     replayIndex?: number | null;
 }
 
-function formatTime(timestamp: string) {
-    return new Date(timestamp).toLocaleTimeString([], {
-        minute: "2-digit",
-        second: "2-digit",
-    });
+function formatElapsedTime(timestamp: string, startTimestamp: string) {
+    const start = new Date(startTimestamp).getTime();
+    const current = new Date(timestamp).getTime();
+
+    const elapsedSeconds = Math.max(
+        0,
+        Math.floor((current - start) / 1000)
+    );
+
+    const minutes = Math.floor(elapsedSeconds / 60);
+    const seconds = elapsedSeconds % 60;
+
+    return `T+${String(minutes).padStart(2, "0")}:${String(
+        seconds
+    ).padStart(2, "0")}`;
 }
 
 export default function TelemetryChart({
@@ -40,9 +51,11 @@ export default function TelemetryChart({
     const chartData = data.map((point, index) => ({
         ...point,
         index,
-        time: formatTime(point.timestamp),
+        time: formatElapsedTime(
+            point.timestamp,
+            data[0]?.timestamp ?? point.timestamp
+        ),
     }));
-
     return (
         <div
             className="p-4"
@@ -99,9 +112,9 @@ export default function TelemetryChart({
 
                         <XAxis
                             dataKey="time"
-                            stroke="#555"
+                            stroke="#ebe7e7"
                             tick={{
-                                fill: "#777",
+                                fill: "#fff8f8",
                                 fontSize: 10,
                                 fontFamily: "'JetBrains Mono', monospace",
                             }}
@@ -109,6 +122,19 @@ export default function TelemetryChart({
                         />
 
                         <YAxis
+                            yAxisId="left"
+                            stroke="#f7eeee"
+                            tick={{
+                                fill: "#f9f5f5",
+                                fontSize: 10,
+                                fontFamily: "'JetBrains Mono', monospace",
+                            }}
+                            width={55}
+                        />
+
+                        <YAxis
+                            yAxisId="right"
+                            orientation="right"
                             stroke="#555"
                             tick={{
                                 fill: "#777",
@@ -153,6 +179,7 @@ export default function TelemetryChart({
                                 dot={false}
                                 activeDot={{ r: 4 }}
                                 isAnimationActive={false}
+                                yAxisId={item.axis ?? "left"}
                             />
                         ))}
 

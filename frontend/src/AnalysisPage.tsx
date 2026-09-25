@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Clock3 } from "lucide-react";
+import EnginePerformanceChart from "./components/analysis/EnginePerformanceChart";
+import ThermalChart from "./components/analysis/ThermalChart";
 import {
     getMissions,
     getMission,
@@ -140,7 +142,7 @@ export default function AnalysisPage() {
                         className="font-bold text-xl"
                         style={{ color: "#fff" }}
                     >
-                        ENGINE_TWIN
+                        SKOPEO
                     </span>
 
                     <span style={{ color: "#555" }}>/</span>
@@ -366,50 +368,14 @@ export default function AnalysisPage() {
                     </div>
 
                     <div className="grid xl:grid-cols-2 gap-5">
-                        <TelemetryChart
-                            title="THERMAL"
+                        <ThermalChart
                             data={telemetry}
                             replayIndex={replayIndex}
-                            series={[
-                                {
-                                    key: "cht",
-                                    label: "CHT",
-                                    unit: "°C",
-                                    color: "#e8543f",
-                                },
-                                {
-                                    key: "egt",
-                                    label: "EGT",
-                                    unit: "°C",
-                                    color: "#e8c34a",
-                                },
-                                {
-                                    key: "oil_temperature",
-                                    label: "OIL TEMP",
-                                    unit: "°C",
-                                    color: "#ff8c42",
-                                },
-                            ]}
                         />
 
-                        <TelemetryChart
-                            title="ENGINE PERFORMANCE"
+                        <EnginePerformanceChart
                             data={telemetry}
                             replayIndex={replayIndex}
-                            series={[
-                                {
-                                    key: "rpm",
-                                    label: "RPM",
-                                    unit: "rpm",
-                                    color: "#C6FF3D",
-                                },
-                                {
-                                    key: "fuel_flow",
-                                    label: "FUEL FLOW",
-                                    unit: "gal/hr",
-                                    color: "#7fd4ff",
-                                },
-                            ]}
                         />
 
                         <TelemetryChart
