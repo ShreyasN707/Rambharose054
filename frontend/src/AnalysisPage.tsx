@@ -13,9 +13,12 @@ import type {
     MissionReplayResponse,
 } from "./types/api";
 import TelemetryChart from "./components/analysis/TelemetryChart";
-
+import { getEngineHealthHistory } from "./services/api";
+import type { HealthHistoryPoint } from "./types/api";
+import HealthTrendChart from "./components/analysis/HealthTrendChart";
 
 export default function AnalysisPage() {
+    const [healthHistory, setHealthHistory] = useState<HealthHistoryPoint[]>([]);
     const [missions, setMissions] = useState<MissionItem[]>([]);
     const [selectedMission, setSelectedMission] = useState("");
     const [mission, setMission] = useState<MissionSummary | null>(null);
@@ -60,16 +63,25 @@ export default function AnalysisPage() {
                 setLoading(true);
                 setError(null);
 
-                const [missionData, telemetryData, replayData] =
-                    await Promise.all([
-                        getMission(selectedMission),
-                        getMissionTelemetry(selectedMission),
-                        getMissionReplay(selectedMission),
-                    ]);
+                const missionData = await getMission(selectedMission);
+
+                const [
+                    telemetryData,
+                    replayData,
+                    healthHistoryData,
+                ] = await Promise.all([
+                    getMissionTelemetry(selectedMission),
+                    getMissionReplay(selectedMission),
+                    getEngineHealthHistory(
+                        missionData.engine_id,
+                        selectedMission
+                    ),
+                ]);
 
                 setMission(missionData);
                 setTelemetry(telemetryData);
                 setReplay(replayData);
+                setHealthHistory(healthHistoryData.history);
             } catch (err) {
                 setError(
                     err instanceof Error
@@ -417,32 +429,27 @@ export default function AnalysisPage() {
                     </div>
                 </section>
 
-                <section
-                    className="p-8 mb-6 flex items-center justify-center"
-                    style={{
-                        minHeight: "240px",
-                        border: "1px solid #3a3a3a",
-                        background: "#0e0e0e",
-                    }}
-                >
-                    <div className="text-center">
+                <section className="mb-8">
+                    <div className="mb-4">
                         <div
-                            className="font-bold text-lg mb-2"
-                            style={{ color: "#fff" }}
-                        >
-                            HEALTH TRENDS
-                        </div>
-
-                        <div
-                            className="text-sm"
+                            className="text-xs mb-1"
                             style={{
-                                color: "#777",
+                                color: "#C6FF3D",
                                 fontFamily: "'JetBrains Mono', monospace",
                             }}
                         >
-                            Health history will appear here
+                            ENGINE CONDITION HISTORY
                         </div>
+
+                        <h2
+                            className="text-2xl font-bold"
+                            style={{ color: "#fff" }}
+                        >
+                            HEALTH TRENDS
+                        </h2>
                     </div>
+
+                    <HealthTrendChart data={healthHistory} />
                 </section>
 
                 <section
