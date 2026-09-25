@@ -28,3 +28,5 @@ out/
 *.sublime-projectsimulink/engine_digital_twin_dataset.csv
 simulink/engine_digital_twin_dataset.csv
 simulink/fault_command.txt
+ML-workstation/
+containerized_classification_models/artifacts/
