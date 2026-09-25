@@ -6,7 +6,7 @@ import paho.mqtt.client as mqtt
 
 app = FastAPI(title="Simulink Controller")
 
-SIMULINK_DIR = "/home/vedanth/Projects/Rambharose054/simulink"
+SIMULINK_DIR = "/home/vedanth/Projects/Rambharose054/simulation"
 START_COMMAND = ["./start_simulation.sh"]
 
 MQTT_BROKER = "127.0.0.1"
@@ -95,9 +95,7 @@ def start_simulation():
         simulation_process = subprocess.Popen(
             START_COMMAND,
             cwd=SIMULINK_DIR,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            start_new_session=True,
+            start_new_session=True
         )
 
     except Exception as exc:

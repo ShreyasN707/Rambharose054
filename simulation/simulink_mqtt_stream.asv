@@ -145,17 +145,19 @@ while next_time <= simulation_time
 
     telemetry_log = ...
         simOut.telemetry_log;
+    fprintf("telemetry_log class: %s\n", class(telemetry_log));
+    disp(telemetry_log);
 
     %% Extract telemetry
 
-    rpm = telemetry_log(:, 1);
-    fuel_flow = telemetry_log(:, 2);
-    torque = telemetry_log(:, 3);
-    oil_temperature = telemetry_log(:, 4);
-    oil_pressure = telemetry_log(:, 5);
-    cht = telemetry_log(:, 6);
-    egt = telemetry_log(:, 8);
-    vibration = telemetry_log(:, 9);
+rpm = telemetry_log(:, 1);
+fuel_flow = telemetry_log(:, 2);
+torque = telemetry_log(:, 3);
+oil_temperature = telemetry_log(:, 4);
+oil_pressure = telemetry_log(:, 5);
+cht = telemetry_log(:, 6);
+egt = telemetry_log(:, 8);
+vibration = telemetry_log(:, 9);
 
     %% Get latest values
 
