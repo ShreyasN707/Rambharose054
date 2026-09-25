@@ -6,11 +6,13 @@ import {
     CartesianGrid,
     Tooltip,
     ResponsiveContainer,
+    ReferenceLine
 } from "recharts";
 import type { HealthHistoryPoint } from "../../types/api";
 
 interface HealthTrendChartProps {
     data: HealthHistoryPoint[];
+    replayIndex?: number | null;
 }
 
 const series = [
@@ -50,6 +52,7 @@ function formatTime(timestamp: string) {
 
 export default function HealthTrendChart({
     data,
+    replayIndex= null,
 }: HealthTrendChartProps) {
     const chartData = data.map((point) => ({
         ...point.health,
@@ -167,6 +170,18 @@ export default function HealthTrendChart({
                                 isAnimationActive={false}
                             />
                         ))}
+
+                        {replayIndex !== null &&
+                            replayIndex !== undefined &&
+                            replayIndex >= 0 &&
+                            replayIndex < chartData.length && (
+                                <ReferenceLine
+                                    x={chartData[replayIndex].time}
+                                    stroke="#ffffff"
+                                    strokeWidth={1}
+                                    strokeDasharray="4 4"
+                                />
+                            )}
                     </LineChart>
                 </ResponsiveContainer>
             </div>

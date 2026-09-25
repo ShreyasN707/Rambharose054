@@ -16,8 +16,9 @@ import TelemetryChart from "./components/analysis/TelemetryChart";
 import { getEngineHealthHistory } from "./services/api";
 import type { HealthHistoryPoint } from "./types/api";
 import HealthTrendChart from "./components/analysis/HealthTrendChart";
-
+import MissionReplay from "./components/analysis/MissionReplay";''
 export default function AnalysisPage() {
+    const [replayIndex, setReplayIndex] = useState(0);
     const [healthHistory, setHealthHistory] = useState<HealthHistoryPoint[]>([]);
     const [missions, setMissions] = useState<MissionItem[]>([]);
     const [selectedMission, setSelectedMission] = useState("");
@@ -81,6 +82,7 @@ export default function AnalysisPage() {
                 setMission(missionData);
                 setTelemetry(telemetryData);
                 setReplay(replayData);
+                setReplayIndex(0);
                 setHealthHistory(healthHistoryData.history);
             } catch (err) {
                 setError(
@@ -367,6 +369,7 @@ export default function AnalysisPage() {
                         <TelemetryChart
                             title="THERMAL"
                             data={telemetry}
+                            replayIndex={replayIndex}
                             series={[
                                 {
                                     key: "cht",
@@ -392,6 +395,7 @@ export default function AnalysisPage() {
                         <TelemetryChart
                             title="ENGINE PERFORMANCE"
                             data={telemetry}
+                            replayIndex={replayIndex}
                             series={[
                                 {
                                     key: "rpm",
@@ -411,6 +415,7 @@ export default function AnalysisPage() {
                         <TelemetryChart
                             title="LUBRICATION / MECHANICAL"
                             data={telemetry}
+                            replayIndex={replayIndex}
                             series={[
                                 {
                                     key: "oil_pressure",
@@ -448,36 +453,18 @@ export default function AnalysisPage() {
                             HEALTH TRENDS
                         </h2>
                     </div>
-
-                    <HealthTrendChart data={healthHistory} />
+                    <HealthTrendChart
+                        data={healthHistory}
+                        replayIndex={replayIndex}
+                    />
                 </section>
 
-                <section
-                    className="p-8 flex items-center justify-center"
-                    style={{
-                        minHeight: "240px",
-                        border: "1px solid #3a3a3a",
-                        background: "#0e0e0e",
-                    }}
-                >
-                    <div className="text-center">
-                        <div
-                            className="font-bold text-lg mb-2"
-                            style={{ color: "#fff" }}
-                        >
-                            MISSION REPLAY
-                        </div>
-
-                        <div
-                            className="text-sm"
-                            style={{
-                                color: "#777",
-                                fontFamily: "'JetBrains Mono', monospace",
-                            }}
-                        >
-                            {replay?.points.length ?? 0} replay points loaded
-                        </div>
-                    </div>
+                <section className="mb-8">
+                    <MissionReplay
+                        points={replay?.points ?? []}
+                        currentIndex={replayIndex}
+                        onIndexChange={setReplayIndex}
+                    />
                 </section>
             </main>
         </div>
