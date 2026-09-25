@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Clock3 } from "lucide-react";
 import EnginePerformanceChart from "./components/analysis/EnginePerformanceChart";
 import ThermalChart from "./components/analysis/ThermalChart";
+import LubricationChart from "./components/analysis/LubricationChart";
 import {
     getMissions,
     getMission,
@@ -378,25 +379,12 @@ export default function AnalysisPage() {
                             replayIndex={replayIndex}
                         />
 
-                        <TelemetryChart
-                            title="LUBRICATION / MECHANICAL"
-                            data={telemetry}
-                            replayIndex={replayIndex}
-                            series={[
-                                {
-                                    key: "oil_pressure",
-                                    label: "OIL PRESSURE",
-                                    unit: "psi",
-                                    color: "#7fd4ff",
-                                },
-                                {
-                                    key: "vibration",
-                                    label: "VIBRATION",
-                                    unit: "mm/s",
-                                    color: "#c084fc",
-                                },
-                            ]}
-                        />
+                        <div className="xl:col-span-2 xl:w-1/2 xl:justify-self-center">
+                            <LubricationChart
+                                data={telemetry}
+                                replayIndex={replayIndex}
+                            />
+                        </div>
                     </div>
                 </section>
 

@@ -146,28 +146,42 @@ class DigitalTwinService:
 
         cht_penalty = max(
             0,
-            telemetry.cht - 170,
+            telemetry.cht - 110,
         ) * 0.5
 
         egt_penalty = max(
             0,
-            telemetry.egt - 680,
-        ) * 0.2
+            telemetry.egt - 750,
+        ) * 0.15
 
         return self._score(
-            100 - cht_penalty - egt_penalty
+            98
+            - cht_penalty
+            - egt_penalty
         )
+
 
     def _combustion_health(
         self,
         telemetry: TelemetryCreate,
     ) -> float:
 
+        rpm_penalty = max(
+            0,
+            abs(telemetry.rpm - 4000) - 300,
+        ) * 0.01
+
+        egt_penalty = max(
+            0,
+            abs(telemetry.egt - 650) - 80,
+        ) * 0.05
+
         return self._score(
-            100
-            - abs(telemetry.rpm - 2500) * 0.02
-            - abs(telemetry.egt - 680) * 0.05
+            98
+            - rpm_penalty
+            - egt_penalty
         )
+
 
     def _lubrication_health(
         self,
@@ -181,14 +195,15 @@ class DigitalTwinService:
 
         temperature_penalty = max(
             0,
-            telemetry.oil_temperature - 90,
+            telemetry.oil_temperature - 115,
         ) * 0.5
 
         return self._score(
-            100
+            97
             - pressure_penalty
             - temperature_penalty
         )
+
 
     def _mechanical_health(
         self,
@@ -198,12 +213,13 @@ class DigitalTwinService:
         vibration = abs(telemetry.vibration)
 
         if vibration <= 3.0:
-            return 100.0
+            return 98.0
 
         vibration_penalty = (vibration - 3.0) * 20
 
         return self._score(
-            100 - vibration_penalty
+            98
+            - vibration_penalty
         )
 
     @staticmethod

@@ -69,7 +69,7 @@ export default function EnginePerformanceChart({
                 }}
             >
                 <span
-                    className="font-bold text-sm"
+                    className="font-bold text-xl"
                     style={{ color: "#fff" }}
                 >
                     ENGINE PERFORMANCE
@@ -105,8 +105,9 @@ export default function EnginePerformanceChart({
                 <div
                     className="text-[10px] mb-1"
                     style={{
-                        color: "#666",
+                        color: "#C6FF3D",
                         fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: 17
                     }}
                 >
                     RPM
@@ -130,10 +131,10 @@ export default function EnginePerformanceChart({
 
                             <XAxis
                                 dataKey="time"
-                                stroke="#555"
+                                stroke="#aca1a1"
                                 tick={{
-                                    fill: "#777",
-                                    fontSize: 10,
+                                    fill: "#efeaea",
+                                    fontSize: 11,
                                     fontFamily:
                                         "'JetBrains Mono', monospace",
                                 }}
@@ -141,11 +142,11 @@ export default function EnginePerformanceChart({
                             />
 
                             <YAxis
-                                stroke="#555"
+                                stroke="#aca1a1"
                                 domain={["auto", "auto"]}
                                 tick={{
-                                    fill: "#777",
-                                    fontSize: 10,
+                                    fill: "#efeaea",
+                                    fontSize: 11,
                                     fontFamily:
                                         "'JetBrains Mono', monospace",
                                 }}
@@ -200,8 +201,9 @@ export default function EnginePerformanceChart({
                 <div
                     className="text-[10px] mb-1"
                     style={{
-                        color: "#666",
+                        color: "#6DD5FF",
                         fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: 15
                     }}
                 >
                     FUEL FLOW

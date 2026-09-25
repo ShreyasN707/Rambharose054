@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import type { TelemetryData } from "../../types/api";
 
-interface ThermalChartProps {
+interface LubricationChartProps {
     data: TelemetryData[];
     replayIndex?: number | null;
 }
@@ -32,13 +32,47 @@ function formatElapsedTime(timestamp: string, startTimestamp: string) {
     ).padStart(2, "0")}`;
 }
 
-export default function ThermalChart({
+function movingAverage(
+    data: (number | undefined)[],
+    windowSize: number
+): (number | undefined)[] {
+    return data.map((_, index) => {
+        const start = Math.max(0, index - windowSize + 1);
+
+        const window = data
+            .slice(start, index + 1)
+            .filter((value): value is number => value !== undefined);
+
+        if (window.length === 0) {
+            return undefined;
+        }
+
+        return (
+            window.reduce((sum, value) => sum + value, 0) /
+            window.length
+        );
+    });
+}
+
+export default function LubricationChart({
     data,
     replayIndex = null,
-}: ThermalChartProps) {
+}: LubricationChartProps) {
+    const torqueSmoothed = movingAverage(
+        data.map((point) => point.torque),
+        5
+    );
+
+    const vibrationSmoothed = movingAverage(
+        data.map((point) => point.vibration),
+        8
+    );
+
     const chartData = data.map((point, index) => ({
         ...point,
         index,
+        torque_smoothed: torqueSmoothed[index],
+        vibration_smoothed: vibrationSmoothed[index],
         time: formatElapsedTime(
             point.timestamp,
             data[0]?.timestamp ?? point.timestamp
@@ -69,59 +103,62 @@ export default function ThermalChart({
                 }}
             >
                 <span
-                    className="font-bold text-sm text-xl"
+                    className="font-bold text-xl"
                     style={{ color: "#fff" }}
                 >
-                    THERMAL
+                    MECHANICAL / LUBRICATION
                 </span>
 
                 <div className="flex items-center gap-4">
+                    {/* Torque */}
                     <div
                         className="flex items-center gap-1.5 text-xs"
                         style={{ color: "#aaa" }}
                     >
                         <span
                             className="w-2 h-2 rounded-full"
-                            style={{ background: "#ff6b5c" }}
+                            style={{ background: "#60a5fa" }}
                         />
-                        CHT
+                        TORQUE
                     </div>
 
+                    {/* Vibration */}
                     <div
                         className="flex items-center gap-1.5 text-xs"
                         style={{ color: "#aaa" }}
                     >
                         <span
                             className="w-2 h-2 rounded-full"
-                            style={{ background: "#ff9f43" }}
+                            style={{ background: "#c084fc" }}
                         />
-                        OIL TEMP
+                        VIBRATION
                     </div>
 
+                    {/* Oil Pressure */}
                     <div
                         className="flex items-center gap-1.5 text-xs"
                         style={{ color: "#aaa" }}
                     >
                         <span
                             className="w-2 h-2 rounded-full"
-                            style={{ background: "#f5c542" }}
+                            style={{ background: "#38bdf8" }}
                         />
-                        EGT
+                        OIL PRESSURE
                     </div>
                 </div>
             </div>
 
-            {/* CHT + OIL TEMP */}
+            {/* TORQUE + VIBRATION */}
             <div className="mb-5">
                 <div
                     className="text-[10px] mb-1"
                     style={{
-                        color: "#ff9f43",
+                        color: "#60a5fa",
                         fontFamily: "'JetBrains Mono', monospace",
                         fontSize: 17,
                     }}
                 >
-                    CHT / OIL TEMPERATURE
+                    TORQUE / VIBRATION
                 </div>
 
                 <div style={{ width: "100%", height: 220 }}>
@@ -178,16 +215,16 @@ export default function ThermalChart({
                                     marginBottom: 5,
                                 }}
                                 formatter={(value, name) => [
-                                    `${Number(value).toFixed(2)} °C`,
+                                    Number(value).toFixed(2),
                                     name,
                                 ]}
                             />
 
                             <Line
                                 type="monotone"
-                                dataKey="cht"
-                                name="CHT"
-                                stroke="#ff6b5c"
+                                dataKey="torque_smoothed"
+                                name="TORQUE"
+                                stroke="#60a5fa"
                                 strokeWidth={1.8}
                                 dot={false}
                                 activeDot={{ r: 4 }}
@@ -196,9 +233,9 @@ export default function ThermalChart({
 
                             <Line
                                 type="monotone"
-                                dataKey="oil_temperature"
-                                name="OIL TEMP"
-                                stroke="#ff9f43"
+                                dataKey="vibration_smoothed"
+                                name="VIBRATION"
+                                stroke="#c084fc"
                                 strokeWidth={1.8}
                                 dot={false}
                                 activeDot={{ r: 4 }}
@@ -218,17 +255,17 @@ export default function ThermalChart({
                 </div>
             </div>
 
-            {/* EGT */}
+            {/* OIL PRESSURE */}
             <div>
                 <div
                     className="text-[10px] mb-1"
                     style={{
-                        color: "#f5c542",
+                        color: "#38bdf8",
                         fontFamily: "'JetBrains Mono', monospace",
                         fontSize: 17,
                     }}
                 >
-                    EXHAUST GAS TEMPERATURE
+                    OIL PRESSURE
                 </div>
 
                 <div style={{ width: "100%", height: 220 }}>
@@ -281,20 +318,20 @@ export default function ThermalChart({
                                     fontSize: 11,
                                 }}
                                 labelStyle={{
-                                    color: "#f5c542",
+                                    color: "#C6FF3D",
                                     marginBottom: 5,
                                 }}
                                 formatter={(value) => [
-                                    `${Number(value).toFixed(2)} °C`,
-                                    "EGT",
+                                    `${Number(value).toFixed(2)} psi`,
+                                    "OIL PRESSURE",
                                 ]}
                             />
 
                             <Line
                                 type="monotone"
-                                dataKey="egt"
-                                name="EGT"
-                                stroke="#f5c542"
+                                dataKey="oil_pressure"
+                                name="OIL PRESSURE"
+                                stroke="#38bdf8"
                                 strokeWidth={1.8}
                                 dot={false}
                                 activeDot={{ r: 4 }}
