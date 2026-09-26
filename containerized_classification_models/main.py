@@ -47,6 +47,7 @@ try:
 except Exception as e:
     raise RuntimeError(f"Failed to load models: {e}")
 
+
 class EngineTelemetry(BaseModel):
     Signal1_RPM: float
     Signal2_FuelFlow: float
