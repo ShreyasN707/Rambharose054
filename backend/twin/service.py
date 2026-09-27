@@ -133,18 +133,22 @@ class DigitalTwinService:
         telemetry: TelemetryCreate,
     ) -> float:
 
+        # Healthy operating region:
+        # CHT <= 100°C
+        # EGT <= 700°C
+
         cht_penalty = max(
             0,
-            telemetry.cht - 110,
-        ) * 0.5
+            telemetry.cht - 100,
+        ) * 1.5
 
         egt_penalty = max(
             0,
-            telemetry.egt - 750,
-        ) * 0.15
+            telemetry.egt - 700,
+        ) * 0.25
 
         return self._score(
-            98
+            100
             - cht_penalty
             - egt_penalty
         )
@@ -155,18 +159,29 @@ class DigitalTwinService:
         telemetry: TelemetryCreate,
     ) -> float:
 
+        # Healthy RPM centered around the current simulator's
+        # normal operating point (~4000 RPM).
+
+        rpm_deviation = abs(
+            telemetry.rpm - 4000
+        )
+
         rpm_penalty = max(
             0,
-            abs(telemetry.rpm - 4000) - 300,
-        ) * 0.01
+            rpm_deviation - 300,
+        ) * 0.04
+
+        egt_deviation = abs(
+            telemetry.egt - 650
+        )
 
         egt_penalty = max(
             0,
-            abs(telemetry.egt - 650) - 80,
-        ) * 0.05
+            egt_deviation - 80,
+        ) * 0.10
 
         return self._score(
-            98
+            100
             - rpm_penalty
             - egt_penalty
         )
@@ -177,18 +192,21 @@ class DigitalTwinService:
         telemetry: TelemetryCreate,
     ) -> float:
 
+        # Healthy oil pressure is around 60 psi.
+        # Oil temperature can normally be around 100-105°C.
+
         pressure_penalty = max(
             0,
-            50 - telemetry.oil_pressure,
-        ) * 1.5
+            55 - telemetry.oil_pressure,
+        ) * 3.0
 
         temperature_penalty = max(
             0,
             telemetry.oil_temperature - 115,
-        ) * 0.5
+        ) * 0.75
 
         return self._score(
-            97
+            100
             - pressure_penalty
             - temperature_penalty
         )
@@ -199,15 +217,20 @@ class DigitalTwinService:
         telemetry: TelemetryCreate,
     ) -> float:
 
-        vibration = abs(telemetry.vibration)
+        # Keep normal vibration near 100%.
+        # Penalize elevated vibration aggressively.
 
-        if vibration <= 3.0:
-            return 98.0
+        vibration = abs(
+            telemetry.vibration
+        )
 
-        vibration_penalty = (vibration - 3.0) * 20
+        vibration_penalty = max(
+            0,
+            vibration - 2.0,
+        ) * 25
 
         return self._score(
-            98
+            100
             - vibration_penalty
         )
 

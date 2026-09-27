@@ -118,6 +118,23 @@ class ModelPredictor(MLPredictor):
         # Build model input
         # -------------------------------------------------------------------
 
+        feature_names = [
+            "RPM",
+            "FuelFlow",
+            "Torque",
+            "OilTemperature",
+            "OilPressure",
+            "CHT",
+            "EGT",
+            "Vibration",
+            "CHT_above_Ambient",
+            "CHT_OilTemp_Ratio",
+            "Throttle",
+            "EngineLoad",
+            "Altitude",
+            "AmbientTemp",
+        ]
+
         xgb_features = pd.DataFrame(
             [[
                 rpm,
@@ -135,28 +152,10 @@ class ModelPredictor(MLPredictor):
                 altitude,
                 ambient_temperature,
             ]],
-            columns=[
-                "Signal1_RPM",
-                "Signal2_FuelFlow",
-                "Signal3_Torque",
-                "Signal4_OilTemp",
-                "Signal5_OilPressure",
-                "Signal6_CHT",
-                "Signal8_EGT",
-                "Signal9_Vibration",
-                "CHT_above_Ambient",
-                "CHT_OilTemp_Ratio",
-                "Throttle",
-                "EngineLoad",
-                "Altitude_m",
-                "AmbientTemp_C",
-            ],
+            columns=feature_names,
         )
 
-        input_scaled = _autoencoder_scaler.transform(
-            xgb_features
-        )
-
+        input_scaled = _autoencoder_scaler.transform(xgb_features)
         # -------------------------------------------------------------------
         # Anomaly detection
         # -------------------------------------------------------------------
