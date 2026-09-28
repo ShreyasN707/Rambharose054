@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float, Integer, String
+from sqlalchemy import DateTime, Float, Integer, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 
 from telemetry.models import Base
@@ -53,4 +53,29 @@ class HealthSnapshot(Base):
     mechanical: Mapped[float] = mapped_column(
         Float,
         nullable=False,
+    )
+
+    anomaly_score: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    is_anomaly: Mapped[bool | None] = mapped_column(
+        Boolean,
+        nullable=True,
+    )
+
+    fault: Mapped[str | None] = mapped_column(
+        String,
+        nullable=True,
+    )
+
+    confidence: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    rul_hours: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
     )

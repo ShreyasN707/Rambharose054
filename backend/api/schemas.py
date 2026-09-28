@@ -113,6 +113,7 @@ class ReplayPoint(BaseModel):
     timestamp: datetime
     telemetry: TelemetryResponse
     health: HealthResponse | None = None
+    prediction: PredictionResponse | None = None
 
 
 class ReplayResponse(BaseModel):

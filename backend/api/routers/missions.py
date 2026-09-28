@@ -15,31 +15,47 @@ from api.schemas import (
     ReplayResponse,
     ReplayPoint,
     HealthResponse,
+    PredictionResponse,
 )
 from telemetry.repository import TelemetryRepository
 from twin.repository import HealthSnapshotRepository
 
+
 router = APIRouter()
 
 
-@router.get("/missions", response_model=MissionListResponse)
+@router.get(
+    "/missions",
+    response_model=MissionListResponse,
+)
 def list_missions(
     session: Session = Depends(get_session),
     telemetry_repo: TelemetryRepository = Depends(get_telemetry_repo),
 ):
     mission_ids = telemetry_repo.get_distinct_missions(session)
+
     return MissionListResponse(
-        missions=[MissionSummary(mission_id=mid) for mid in mission_ids]
+        missions=[
+            MissionSummary(mission_id=mid)
+            for mid in mission_ids
+        ]
     )
 
 
-@router.get("/missions/{mission_id}", response_model=MissionResponse)
+@router.get(
+    "/missions/{mission_id}",
+    response_model=MissionResponse,
+)
 def get_mission(
     mission_id: str,
     session: Session = Depends(get_session),
     telemetry_repo: TelemetryRepository = Depends(get_telemetry_repo),
 ):
-    rows = telemetry_repo.get_by_mission(session, mission_id)
+    rows = telemetry_repo.get_by_mission(
+        session,
+        mission_id,
+    )
+
     if not rows:
         raise MissionNotFoundError(mission_id)
 
@@ -64,17 +80,29 @@ def mission_telemetry(
     telemetry_repo: TelemetryRepository = Depends(get_telemetry_repo),
 ):
     if start and end:
+
         if start >= end:
-            raise InvalidTimeRangeError("start must be before end")
+            raise InvalidTimeRangeError(
+                "start must be before end"
+            )
+
         rows = telemetry_repo.get_by_time_range(
             session,
-            engine_id=_engine_id_for_mission(session, telemetry_repo, mission_id),
+            engine_id=_engine_id_for_mission(
+                session,
+                telemetry_repo,
+                mission_id,
+            ),
             mission_id=mission_id,
             start_time=start,
             end_time=end,
         )
+
     else:
-        rows = telemetry_repo.get_by_mission(session, mission_id)
+        rows = telemetry_repo.get_by_mission(
+            session,
+            mission_id,
+        )
 
     if not rows:
         raise MissionNotFoundError(mission_id)
@@ -105,23 +133,49 @@ def mission_replay(
     mission_id: str,
     session: Session = Depends(get_session),
     telemetry_repo: TelemetryRepository = Depends(get_telemetry_repo),
-    health_repo: HealthSnapshotRepository = Depends(get_health_snapshot_repo),
+    health_repo: HealthSnapshotRepository = Depends(
+        get_health_snapshot_repo
+    ),
 ):
-    rows = telemetry_repo.get_by_mission(session, mission_id)
+    rows = telemetry_repo.get_by_mission(
+        session,
+        mission_id,
+    )
+
     if not rows:
         raise MissionNotFoundError(mission_id)
 
     engine_id = rows[0].engine_id
 
-    snapshots = health_repo.get_by_engine(session, engine_id)
-    snapshots = [s for s in snapshots if s.mission_id == mission_id]
-    health_by_time = {s.time: s for s in snapshots}
+    snapshots = health_repo.get_by_engine(
+        session,
+        engine_id,
+    )
+
+    snapshots = [
+        snapshot
+        for snapshot in snapshots
+        if snapshot.mission_id == mission_id
+    ]
+
+    health_by_time = {
+        snapshot.time: snapshot
+        for snapshot in snapshots
+    }
 
     points = []
-    for r in rows:
-        snapshot = health_by_time.get(r.time)
+
+    for row in rows:
+
+        snapshot = health_by_time.get(
+            row.time
+        )
+
         health = None
+        prediction = None
+
         if snapshot is not None:
+
             health = HealthResponse(
                 overall=snapshot.overall,
                 thermal=snapshot.thermal,
@@ -130,23 +184,44 @@ def mission_replay(
                 mechanical=snapshot.mechanical,
             )
 
+            # Older health snapshots were created before
+            # ML prediction fields were added.
+            #
+            # Those snapshots have NULL prediction values,
+            # so only create a prediction object when the
+            # required ML values are present.
+
+            if (
+                snapshot.anomaly_score is not None
+                and snapshot.confidence is not None
+            ):
+                prediction = PredictionResponse(
+                    anomaly_score=snapshot.anomaly_score,
+                    fault=snapshot.fault,
+                    confidence=snapshot.confidence,
+                    rul_hours=snapshot.rul_hours,
+                )
+
         points.append(
             ReplayPoint(
-                timestamp=r.time,
+                timestamp=row.time,
+
                 telemetry=TelemetryResponse(
-                    timestamp=r.time,
-                    engine_id=r.engine_id,
-                    mission_id=r.mission_id,
-                    rpm=r.rpm,
-                    torque=r.torque,
-                    cht=r.cht,
-                    egt=r.egt,
-                    oil_pressure=r.oil_pressure,
-                    oil_temperature=r.oil_temperature,
-                    fuel_flow=r.fuel_flow,
-                    vibration=r.vibration,
+                    timestamp=row.time,
+                    engine_id=row.engine_id,
+                    mission_id=row.mission_id,
+                    rpm=row.rpm,
+                    torque=row.torque,
+                    cht=row.cht,
+                    egt=row.egt,
+                    oil_pressure=row.oil_pressure,
+                    oil_temperature=row.oil_temperature,
+                    fuel_flow=row.fuel_flow,
+                    vibration=row.vibration,
                 ),
+
                 health=health,
+                prediction=prediction,
             )
         )
 
@@ -162,7 +237,13 @@ def _engine_id_for_mission(
     telemetry_repo: TelemetryRepository,
     mission_id: str,
 ) -> str:
-    rows = telemetry_repo.get_by_mission(session, mission_id)
+
+    rows = telemetry_repo.get_by_mission(
+        session,
+        mission_id,
+    )
+
     if not rows:
         raise MissionNotFoundError(mission_id)
+
     return rows[0].engine_id

@@ -116,11 +116,18 @@ class DigitalTwinService:
             time=timestamp,
             engine_id=state.engine_id,
             mission_id=state.mission_id,
+
             overall=state.health.overall,
             thermal=state.health.thermal,
             combustion=state.health.combustion,
             lubrication=state.health.lubrication,
             mechanical=state.health.mechanical,
+
+            anomaly_score=state.prediction.anomaly_score,
+            is_anomaly=state.prediction.anomaly_score >= 0.6150358457512803,
+            fault=state.prediction.fault,
+            confidence=state.prediction.confidence,
+            rul_hours=state.prediction.rul_hours,
         )
 
         return self.repository.save(
