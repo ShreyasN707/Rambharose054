@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import { Move3d, RotateCcw, RotateCw } from "lucide-react";
 import type { TelemetryData } from "./types/api";
+import Drone3DViewer from "./Drone3DViewer";
 
 interface GaugeProps {
     value: number;
@@ -693,8 +693,13 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                                 </div>
                                 <div className="col-span-2 md:col-span-3 flex items-center justify-center p-3"
                                     style={{ border: "1px solid #3a3a3a", borderRadius: 6, background: "#0a0a0a", position: "relative", overflow: "hidden" }}>
-                                    <div style={{ width: "100%", height: 280 }}>
-                                        <Engine360Viewer />
+                                    <div style={{ width: "100%", height: 380 }}>
+                                        <Drone3DViewer
+                                            rpm={rpm}
+                                            vibration={parseFloat(vibration)}
+                                            cht={cht}
+                                            height={380}
+                                        />
                                     </div>
                                 </div>
                                 <div className="col-span-2 md:col-span-3 grid grid-cols-1 md:grid-cols-4 gap-2">
