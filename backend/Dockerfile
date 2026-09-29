@@ -3,19 +3,19 @@ FROM python:3.12-slim
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-RUN pip install --no-cache-dir -r requirements.txt
 
-COPY alembic.ini .
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install \
+    --default-timeout=300 \
+    --retries=10 \
+    -r requirements.txt
 
-COPY telemetry ./telemetry
-COPY twin ./twin
-COPY api ./api
-COPY ml_artifacts ./ml_artifacts
-COPY entrypoint.sh .
+COPY . .
 
 ENV PYTHONPATH=/app:/app/telemetry
+
 RUN chmod +x entrypoint.sh
 
 ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
+
 CMD ["python", "-u", "-m", "telemetry.app"]

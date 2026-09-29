@@ -46,10 +46,17 @@ export interface SubsystemHealth {
 }
 
 export interface PredictionData {
+
     anomaly_score: number;
+
+    is_anomaly: boolean;
+
     fault: string | null;
+
     confidence: number;
+
     rul_hours: number | null;
+
 }
 
 export interface EngineHealthResponse {
@@ -92,9 +99,15 @@ export interface DashboardResponse {
 }
 
 export interface ReplayPoint {
+
     timestamp: string;
+
     telemetry: TelemetryData;
+
     health: SubsystemHealth | null;
+
+    prediction: PredictionData | null;
+
 }
 
 export interface MissionReplayResponse {

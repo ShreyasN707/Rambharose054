@@ -55,6 +55,10 @@ class DigitalTwinService:
                 "oil_temperature": item.oil_temperature,
                 "fuel_flow": item.fuel_flow,
                 "vibration": item.vibration,
+                "throttle": item.throttle,
+                "engine_load": item.engine_load,
+                "altitude": item.altitude,
+                "ambient_temperature": item.ambient_temperature,
             }
             for item in telemetry_records
         ]
@@ -63,21 +67,6 @@ class DigitalTwinService:
             telemetry_window,
         )
         
-        current_health = self.calculate_health(telemetry)
-
-        rul_hours = self.estimate_rul(
-            session,
-            telemetry.engine_id,
-            telemetry.mission_id,
-            current_health.overall,
-        )
-
-        prediction = prediction.model_copy(
-            update={
-                "rul_hours": rul_hours,
-            }
-        )
-
         state = self.build_state(
             telemetry,
             prediction,
@@ -127,11 +116,18 @@ class DigitalTwinService:
             time=timestamp,
             engine_id=state.engine_id,
             mission_id=state.mission_id,
+
             overall=state.health.overall,
             thermal=state.health.thermal,
             combustion=state.health.combustion,
             lubrication=state.health.lubrication,
             mechanical=state.health.mechanical,
+
+            anomaly_score=state.prediction.anomaly_score,
+            is_anomaly=state.prediction.anomaly_score >= 0.6150358457512803,
+            fault=state.prediction.fault,
+            confidence=state.prediction.confidence,
+            rul_hours=state.prediction.rul_hours,
         )
 
         return self.repository.save(
@@ -144,18 +140,22 @@ class DigitalTwinService:
         telemetry: TelemetryCreate,
     ) -> float:
 
+        # Healthy operating region:
+        # CHT <= 100°C
+        # EGT <= 700°C
+
         cht_penalty = max(
             0,
-            telemetry.cht - 110,
-        ) * 0.5
+            telemetry.cht - 100,
+        ) * 1.5
 
         egt_penalty = max(
             0,
-            telemetry.egt - 750,
-        ) * 0.15
+            telemetry.egt - 700,
+        ) * 0.25
 
         return self._score(
-            98
+            100
             - cht_penalty
             - egt_penalty
         )
@@ -166,18 +166,29 @@ class DigitalTwinService:
         telemetry: TelemetryCreate,
     ) -> float:
 
+        # Healthy RPM centered around the current simulator's
+        # normal operating point (~4000 RPM).
+
+        rpm_deviation = abs(
+            telemetry.rpm - 4000
+        )
+
         rpm_penalty = max(
             0,
-            abs(telemetry.rpm - 4000) - 300,
-        ) * 0.01
+            rpm_deviation - 300,
+        ) * 0.04
+
+        egt_deviation = abs(
+            telemetry.egt - 650
+        )
 
         egt_penalty = max(
             0,
-            abs(telemetry.egt - 650) - 80,
-        ) * 0.05
+            egt_deviation - 80,
+        ) * 0.10
 
         return self._score(
-            98
+            100
             - rpm_penalty
             - egt_penalty
         )
@@ -188,18 +199,21 @@ class DigitalTwinService:
         telemetry: TelemetryCreate,
     ) -> float:
 
+        # Healthy oil pressure is around 60 psi.
+        # Oil temperature can normally be around 100-105°C.
+
         pressure_penalty = max(
             0,
-            50 - telemetry.oil_pressure,
-        ) * 1.5
+            55 - telemetry.oil_pressure,
+        ) * 3.0
 
         temperature_penalty = max(
             0,
             telemetry.oil_temperature - 115,
-        ) * 0.5
+        ) * 0.75
 
         return self._score(
-            97
+            100
             - pressure_penalty
             - temperature_penalty
         )
@@ -210,15 +224,20 @@ class DigitalTwinService:
         telemetry: TelemetryCreate,
     ) -> float:
 
-        vibration = abs(telemetry.vibration)
+        # Keep normal vibration near 100%.
+        # Penalize elevated vibration aggressively.
 
-        if vibration <= 3.0:
-            return 98.0
+        vibration = abs(
+            telemetry.vibration
+        )
 
-        vibration_penalty = (vibration - 3.0) * 20
+        vibration_penalty = max(
+            0,
+            vibration - 2.0,
+        ) * 25
 
         return self._score(
-            98
+            100
             - vibration_penalty
         )
 
@@ -268,63 +287,3 @@ class DigitalTwinService:
 
         return "NOMINAL"
     
-    def estimate_rul(
-        self,
-        session: Session,
-        engine_id: str,
-        mission_id: str,
-        current_health: float,
-    ) -> float | None:
-
-        snapshots = self.repository.get_by_engine(
-            session,
-            engine_id,
-        )
-
-        snapshots = [
-            s for s in snapshots
-            if s.mission_id == mission_id
-        ]
-
-        if len(snapshots) < 2:
-            return None
-
-        now = snapshots[-1].time
-
-        recent = [
-            s for s in snapshots
-            if (now - s.time).total_seconds() <= 60
-        ]
-
-        previous = [
-            s for s in snapshots
-            if 60 < (now - s.time).total_seconds() <= 120
-        ]
-
-        if not recent or not previous:
-            return None
-
-        recent_health = sum(
-            (s.thermal + s.combustion + s.lubrication) / 3
-            for s in recent
-        ) / len(recent)
-
-        previous_health = sum(
-            (s.thermal + s.combustion + s.lubrication) / 3
-            for s in previous
-        ) / len(previous)
-
-        degradation = previous_health - recent_health
-
-        if degradation <= 0:
-            return None
-
-        degradation_rate = degradation / (10 / 60)
-
-        failure_threshold = 60.0
-
-        rul_hours = (
-            current_health - failure_threshold
-        ) / degradation_rate
-
-        return round(max(0.0, rul_hours), 2)
