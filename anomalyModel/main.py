@@ -2,9 +2,16 @@ from pydantic import BaseModel
 from typing import List, Dict, Any
 import joblib
 import numpy as np
+import os
+import warnings
+
+# Suppress TensorFlow C++ logging
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+# Suppress specific sklearn warnings about feature names
+warnings.filterwarnings("ignore", message="X does not have valid feature names")
+
 import tensorflow as tf
 from xgboost import XGBClassifier
-import os
 
 # Define the input features in the correct order
 FEATURES = [
@@ -47,6 +54,7 @@ try:
 except Exception as e:
     raise RuntimeError(f"Failed to load models: {e}")
 
+
 class EngineTelemetry(BaseModel):
     Signal1_RPM: float
     Signal2_FuelFlow: float
@@ -69,6 +77,7 @@ def predict(telemetry: EngineTelemetry) -> Dict[str, Any]:
     cht_above_ambient = telemetry.Signal6_CHT - telemetry.AmbientTemp_C
     cht_oiltemp_ratio = telemetry.Signal6_CHT / (telemetry.Signal4_OilTemp + 1e-6)
     
+    # Original features for Autoencoder
     xgb_features = [
         telemetry.Signal1_RPM,
         telemetry.Signal2_FuelFlow,
@@ -85,18 +94,48 @@ def predict(telemetry: EngineTelemetry) -> Dict[str, Any]:
         telemetry.Altitude_m,
         telemetry.AmbientTemp_C
     ]
-    input_data_xgb = np.array([xgb_features])
+    input_data_autoencoder = np.array([xgb_features])
     
     # Autoencoder anomaly detection
-    input_scaled = autoencoder_scaler.transform(input_data_xgb)
+    input_scaled = autoencoder_scaler.transform(input_data_autoencoder)
     reconstruction = autoencoder_model.predict(input_scaled, verbose=0)
     anomaly_score = np.mean(np.power(input_scaled - reconstruction, 2))
     is_anomaly = bool(anomaly_score > autoencoder_threshold)
     
-    # XGBoost fault classification
-    fault_id = int(xgboost_model.predict(input_data_xgb)[0])
+    # Calculate new additional features for improved XGBoost classifier
+    oilt_above_ambient = telemetry.Signal4_OilTemp - telemetry.AmbientTemp_C
+    egt_minus_cht = telemetry.Signal8_EGT - telemetry.Signal6_CHT
+    fuelflow_per_rpm = telemetry.Signal2_FuelFlow / (telemetry.Signal1_RPM + 1e-6)
+    torque_per_rpm = telemetry.Signal3_Torque / (telemetry.Signal1_RPM + 1e-6)
+    expected_power = telemetry.Throttle * telemetry.EngineLoad
+    
+    new_xgb_features = [
+        telemetry.Signal1_RPM,
+        telemetry.Signal2_FuelFlow,
+        telemetry.Signal3_Torque,
+        telemetry.Signal4_OilTemp,
+        telemetry.Signal5_OilPressure,
+        telemetry.Signal6_CHT,
+        telemetry.Signal8_EGT,
+        telemetry.Signal9_Vibration,
+        telemetry.Throttle,
+        telemetry.EngineLoad,
+        telemetry.Altitude_m,
+        telemetry.AmbientTemp_C,
+        cht_above_ambient,
+        cht_oiltemp_ratio,
+        oilt_above_ambient,
+        egt_minus_cht,
+        fuelflow_per_rpm,
+        torque_per_rpm,
+        expected_power
+    ]
+    input_xgb_only = np.array([new_xgb_features])
+    
+    # XGBoost fault classification (using the new 19 features)
+    fault_id = int(xgboost_model.predict(input_xgb_only)[0])
     fault_name = FAULT_NAMES.get(fault_id, "Unknown")
-    probabilities = xgboost_model.predict_proba(input_data_xgb)[0].tolist()
+    probabilities = xgboost_model.predict_proba(input_xgb_only)[0].tolist()
     
     return {
         "anomaly_score": float(anomaly_score),
