@@ -15,11 +15,13 @@ import type {
     TelemetryData,
     MissionReplayResponse,
 } from "./types/api";
-import TelemetryChart from "./components/analysis/TelemetryChart";
 import { getEngineHealthHistory } from "./services/api";
 import type { HealthHistoryPoint } from "./types/api";
 import HealthTrendChart from "./components/analysis/HealthTrendChart";
 import MissionReplay from "./components/analysis/MissionReplay";''
+import AnomalyChart from "./components/analysis/AnomalyChart";
+import RULChart from "./components/analysis/RULChart";
+
 export default function AnalysisPage() {
     const [replayIndex, setReplayIndex] = useState(0);
     const [healthHistory, setHealthHistory] = useState<HealthHistoryPoint[]>([]);
@@ -411,6 +413,39 @@ export default function AnalysisPage() {
                         data={healthHistory}
                         replayIndex={replayIndex}
                     />
+                </section>
+
+                <section className="mb-8">
+                    <div className="mb-4">
+                        <div
+                            className="text-xs mb-1"
+                            style={{
+                                color: "#C6FF3D",
+                                fontFamily: "'JetBrains Mono', monospace",
+                            }}
+                        >
+                            PREDICTIVE MAINTENANCE
+                        </div>
+
+                        <h2
+                            className="text-2xl font-bold"
+                            style={{ color: "#fff" }}
+                        >
+                            ML PREDICTIONS
+                        </h2>
+                    </div>
+
+                    <div className="grid xl:grid-cols-2 gap-5">
+                        <AnomalyChart
+                            data={replay?.points ?? []}
+                            replayIndex={replayIndex}
+                        />
+
+                        <RULChart
+                            data={replay?.points ?? []}
+                            replayIndex={replayIndex}
+                        />
+                    </div>
                 </section>
 
                 <section className="mb-8">

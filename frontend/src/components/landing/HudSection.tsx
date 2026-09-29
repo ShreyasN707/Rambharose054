@@ -384,31 +384,139 @@ export default function HudSection({
                             </div>
 
                             <div className="p-5 flex gap-4 items-center">
-                                <RadialHealth value={Math.round(engineData.health.overall)} />
+                        <RadialHealth value={Math.round(engineData.health.overall)} />
+
                                 <div className="flex-1">
-                                    <div className="font-bold text-base tracking-tight" style={{ color: "#fff" }}>
-                                        {engineData.health.overall > 90 ? "NOMINAL" : engineData.health.overall > 75 ? "GOOD" : "DEGRADED"}
+                                    <div
+                                        className="font-bold text-base tracking-tight"
+                                        style={{ color: "#fff" }}
+                                    >
+                                        {engineData.health.overall > 90
+                                            ? "NOMINAL"
+                                            : engineData.health.overall > 75
+                                                ? "GOOD"
+                                                : "DEGRADED"}
                                     </div>
-                                    <div className="text-sm mt-2" style={{ color: "#c0c0c0", fontFamily: "'JetBrains Mono', monospace" }}>
-                                        FAULT: <span style={{ color: "#fff" }}>{engineData.prediction.fault ?? "NONE DETECTED"}</span>
-                                    </div>
-                                    <div className="text-xs mt-2" style={{ color: "#888", fontFamily: "'JetBrains Mono', monospace" }}>
-                                        ANOMALY SCORE {engineData.prediction.anomaly_score.toFixed(2)}
+
+                                    <div
+                                        className="text-sm mt-2"
+                                        style={{
+                                            color: "#c0c0c0",
+                                            fontFamily: "'JetBrains Mono', monospace",
+                                        }}
+                                    >
+                                        FAULT:{" "}
+                                        <span style={{ color: "#fff" }}>
+                                            {engineData.prediction.fault ?? "NONE DETECTED"}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="px-5 pb-4 grid grid-cols-2 gap-y-2 text-sm" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#c0c0c0" }}>
-                                <span>EST. RUL</span>
-                                <span style={{ color: "#fff", fontWeight: 700 }}>
-                                    {engineData.prediction.rul_hours !== null ? `${engineData.prediction.rul_hours} hrs` : "N/A"}
-                                </span>
+                            {/* ML MODEL OUTPUT */}
+                            <div
+                                className="mx-5 mb-4 p-4"
+                                style={{
+                                    border: "1px solid #303030",
+                                    background: "#111111",
+                                }}
+                            >
+                                <div
+                                    className="text-xs font-bold mb-3"
+                                    style={{
+                                        color: "#888",
+                                        fontFamily: "'JetBrains Mono', monospace",
+                                        letterSpacing: "0.08em",
+                                    }}
+                                >
+                                    PREDICTIVE MODEL OUTPUT
+                                </div>
+
+                                <div
+                                    className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs"
+                                    style={{
+                                        fontFamily: "'JetBrains Mono', monospace",
+                                    }}
+                                >
+                                    <div>
+                                        <div style={{ color: "#777" }}>
+                                            ANOMALY SCORE
+                                        </div>
+
+                                        <div
+                                            className="mt-1 font-bold text-sm"
+                                            style={{
+                                                color: engineData.prediction.is_anomaly
+                                                    ? "#e8c34a"
+                                                    : "#7fe0a0",
+                                            }}
+                                        >
+                                            {engineData.prediction.anomaly_score.toFixed(2)}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div style={{ color: "#777" }}>
+                                            STATUS
+                                        </div>
+
+                                        <div
+                                            className="mt-1 font-bold text-sm"
+                                            style={{
+                                                color: engineData.prediction.is_anomaly
+                                                    ? "#e8543f"
+                                                    : "#7fe0a0",
+                                            }}
+                                        >
+                                            {engineData.prediction.is_anomaly
+                                                ? "ANOMALOUS"
+                                                : "NORMAL"}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div style={{ color: "#777" }}>
+                                            FAULT
+                                        </div>
+
+                                        <div
+                                            className="mt-1 font-bold text-sm"
+                                            style={{ color: "#fff" }}
+                                        >
+                                            {engineData.prediction.fault ?? "NONE"}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div style={{ color: "#777" }}>
+                                            CONFIDENCE
+                                        </div>
+
+                                        <div
+                                            className="mt-1 font-bold text-sm"
+                                            style={{ color: "#fff" }}
+                                        >
+                                            {(engineData.prediction.confidence * 100).toFixed(2)}%
+                                        </div>
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <div style={{ color: "#777" }}>
+                                            ESTIMATED RUL
+                                        </div>
+
+                                        <div
+                                            className="mt-1 font-bold text-base"
+                                            style={{ color: "#C6FF3D" }}
+                                        >
+                                            {engineData.prediction.rul_hours !== null
+                                                ? `${engineData.prediction.rul_hours.toFixed(2)} hrs`
+                                                : "N/A"}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="px-4 py-3 text-sm flex justify-between" style={{ borderTop: "1px solid #3a3a3a", fontFamily: "'JetBrains Mono', monospace", color: "#c0c0c0" }}>
-                                <span>LAST UPDATED</span>
-                                <span style={{ color: "#fff" }}>{pad(time.getHours())}:{pad(time.getMinutes())}:{pad(time.getSeconds())}</span>
-                            </div>
                         </div>
 
                         <div style={{ border: "1px solid #3a3a3a", background: "#0e0e0e" }} className="p-4">

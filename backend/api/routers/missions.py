@@ -80,7 +80,6 @@ def mission_telemetry(
     telemetry_repo: TelemetryRepository = Depends(get_telemetry_repo),
 ):
     if start and end:
-
         if start >= end:
             raise InvalidTimeRangeError(
                 "start must be before end"
@@ -166,16 +165,12 @@ def mission_replay(
     points = []
 
     for row in rows:
-
-        snapshot = health_by_time.get(
-            row.time
-        )
+        snapshot = health_by_time.get(row.time)
 
         health = None
         prediction = None
 
         if snapshot is not None:
-
             health = HealthResponse(
                 overall=snapshot.overall,
                 thermal=snapshot.thermal,
@@ -184,19 +179,15 @@ def mission_replay(
                 mechanical=snapshot.mechanical,
             )
 
-            # Older health snapshots were created before
-            # ML prediction fields were added.
-            #
-            # Those snapshots have NULL prediction values,
-            # so only create a prediction object when the
-            # required ML values are present.
-
+            # Older health snapshots may not contain ML prediction data.
             if (
                 snapshot.anomaly_score is not None
+                and snapshot.is_anomaly is not None
                 and snapshot.confidence is not None
             ):
                 prediction = PredictionResponse(
                     anomaly_score=snapshot.anomaly_score,
+                    is_anomaly=snapshot.is_anomaly,
                     fault=snapshot.fault,
                     confidence=snapshot.confidence,
                     rul_hours=snapshot.rul_hours,
@@ -205,7 +196,6 @@ def mission_replay(
         points.append(
             ReplayPoint(
                 timestamp=row.time,
-
                 telemetry=TelemetryResponse(
                     timestamp=row.time,
                     engine_id=row.engine_id,
@@ -219,7 +209,6 @@ def mission_replay(
                     fuel_flow=row.fuel_flow,
                     vibration=row.vibration,
                 ),
-
                 health=health,
                 prediction=prediction,
             )
@@ -237,7 +226,6 @@ def _engine_id_for_mission(
     telemetry_repo: TelemetryRepository,
     mission_id: str,
 ) -> str:
-
     rows = telemetry_repo.get_by_mission(
         session,
         mission_id,

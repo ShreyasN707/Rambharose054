@@ -25,7 +25,7 @@ common_time = (0:0.1:simulation_time)';
 fault_types = [0 1 2 3 4];
 
 % 6 runs per fault
-runs_per_fault = 6;
+runs_per_fault = 200;
 
 %% Initialize dataset
 master_dataset = table();

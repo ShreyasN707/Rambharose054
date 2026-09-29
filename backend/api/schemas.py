@@ -36,6 +36,7 @@ class HealthResponse(BaseModel):
 
 class PredictionResponse(BaseModel):
     anomaly_score: float
+    is_anomaly: bool
     fault: str | None
     confidence: float
     rul_hours: float | None
