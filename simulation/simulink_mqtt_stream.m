@@ -145,17 +145,17 @@ while next_time <= simulation_time
 
     telemetry_log = ...
         simOut.telemetry_log;
-
     %% Extract telemetry
+    
+    rpm = telemetry_log.signal1.Data;
+    fuel_flow = telemetry_log.signal2.Data;
+    torque = telemetry_log.signal3.Data;
+    oil_temperature = telemetry_log.signal4.Data;
+    oil_pressure = telemetry_log.signal5.Data;
+    cht = telemetry_log.signal6.Data;
+    egt = telemetry_log.signal8.Data;
+    vibration = telemetry_log.signal9.Data;
 
-    rpm = telemetry_log(:, 1);
-    fuel_flow = telemetry_log(:, 2);
-    torque = telemetry_log(:, 3);
-    oil_temperature = telemetry_log(:, 4);
-    oil_pressure = telemetry_log(:, 5);
-    cht = telemetry_log(:, 6);
-    egt = telemetry_log(:, 8);
-    vibration = telemetry_log(:, 9);
 
     %% External input values
 

@@ -45,12 +45,11 @@ FEATURES = [
 
 FAULT_NAMES = {
     0: "Healthy",
-    1: "Torque Reduction",
-    2: "Overheat",
-    3: "Low Oil Pressure",
-    4: "Fuel Flow Restriction",
+    1: "Misfire",
+    2: "Overheating",
+    3: "Oil Pressure Failure",
+    4: "Fuel Starvation",
 }
-
 
 # ---------------------------------------------------------------------------
 # Load models once
@@ -73,6 +72,187 @@ _xgboost_model.load_model(_XGBOOST_PATH)
 # ---------------------------------------------------------------------------
 
 class ModelPredictor(MLPredictor):
+    
+    @staticmethod
+    def _clamp(
+        value: float,
+        minimum: float = 0.0,
+        maximum: float = 1.0,
+    ) -> float:
+        return max(
+            minimum,
+            min(maximum, value),
+        )
+
+    def _adjust_rul(
+        self,
+        raw_rul: float | None,
+        fault_id: int,
+        telemetry: dict,
+    ) -> float | None:
+
+        if raw_rul is None:
+            return None
+
+        # Healthy engine:
+        # Do not alter the GRU prediction.
+        if fault_id == 0:
+            return round(raw_rul, 2)
+
+        rpm = telemetry["rpm"]
+        torque = telemetry["torque"]
+        fuel_flow = telemetry["fuel_flow"]
+        oil_temperature = telemetry["oil_temperature"]
+        oil_pressure = telemetry["oil_pressure"]
+        cht = telemetry["cht"]
+        egt = telemetry["egt"]
+
+        severity = 0.0
+
+        # ---------------------------------------------------------------
+        # Fault 1: Misfire
+        #
+        # Healthy:
+        #   RPM    ~3994
+        #   Torque ~9-10
+        #   EGT    ~708
+        #
+        # Fault:
+        #   RPM    ~3150
+        #   Torque ~5-7
+        #   EGT    ~605
+        # ---------------------------------------------------------------
+        if fault_id == 1:
+
+            rpm_loss = self._clamp(
+                (4000.0 - rpm) / 1000.0
+            )
+
+            torque_loss = self._clamp(
+                (10.0 - torque) / 5.0
+            )
+
+            egt_loss = self._clamp(
+                (700.0 - egt) / 150.0
+            )
+
+            severity = (
+                0.40 * rpm_loss
+                + 0.35 * torque_loss
+                + 0.25 * egt_loss
+            )
+
+        # ---------------------------------------------------------------
+        # Fault 2: Overheating
+        #
+        # Healthy:
+        #   CHT       ~75
+        #   EGT       ~708
+        #   Oil temp  ~105
+        #
+        # Fault:
+        #   CHT       ~115+
+        #   EGT       ~1000+
+        #   Oil temp  ~130+
+        # ---------------------------------------------------------------
+        elif fault_id == 2:
+
+            cht_rise = self._clamp(
+                (cht - 75.0) / 45.0
+            )
+
+            egt_rise = self._clamp(
+                (egt - 710.0) / 350.0
+            )
+
+            oil_temp_rise = self._clamp(
+                (oil_temperature - 105.0) / 40.0
+            )
+
+            severity = (
+                0.30 * cht_rise
+                + 0.45 * egt_rise
+                + 0.25 * oil_temp_rise
+            )
+
+        # ---------------------------------------------------------------
+        # Fault 3: Oil pressure failure
+        #
+        # Healthy:
+        #   Oil pressure ~60 psi
+        #
+        # Fault:
+        #   Oil pressure ~10-13 psi
+        #   Oil temperature rises substantially
+        # ---------------------------------------------------------------
+        elif fault_id == 3:
+
+            pressure_loss = self._clamp(
+                (60.0 - oil_pressure) / 50.0
+            )
+
+            oil_temp_rise = self._clamp(
+                (oil_temperature - 105.0) / 40.0
+            )
+
+            severity = (
+                0.75 * pressure_loss
+                + 0.25 * oil_temp_rise
+            )
+
+        # ---------------------------------------------------------------
+        # Fault 4: Fuel starvation
+        #
+        # Healthy:
+        #   Fuel flow ~3
+        #   RPM      ~4000
+        #   Torque   ~10
+        #
+        # Fault:
+        #   Fuel flow ~0.3-0.5
+        #   RPM      ~1700-3000
+        #   Torque   ~1-6
+        # ---------------------------------------------------------------
+        elif fault_id == 4:
+
+            fuel_loss = self._clamp(
+                (3.0 - fuel_flow) / 2.7
+            )
+
+            rpm_loss = self._clamp(
+                (4000.0 - rpm) / 2500.0
+            )
+
+            torque_loss = self._clamp(
+                (10.0 - torque) / 9.0
+            )
+
+            severity = (
+                0.45 * fuel_loss
+                + 0.35 * rpm_loss
+                + 0.20 * torque_loss
+            )
+
+        severity = self._clamp(severity)
+
+        # ---------------------------------------------------------------
+        # Convert telemetry severity into an RUL reduction.
+        #
+        # The GRU remains the base prediction.
+        # At maximum severity we retain 15% of the raw RUL.
+        # ---------------------------------------------------------------
+
+        MAX_RUL_REDUCTION = 0.85
+
+        corrected_rul = raw_rul * (
+            1.0
+            - MAX_RUL_REDUCTION * severity
+        )
+
+        return round(
+            max(0.1, corrected_rul),
+            2,
+        )
 
     def predict(
         self,
@@ -210,8 +390,14 @@ class ModelPredictor(MLPredictor):
         # RUL prediction
         # -------------------------------------------------------------------
 
-        rul_hours = predict_rul(
+        raw_rul_hours = predict_rul(
             telemetry_window,
+        )
+
+        rul_hours = self._adjust_rul(
+            raw_rul_hours,
+            fault_id,
+            telemetry,
         )
 
         print(

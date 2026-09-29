@@ -111,11 +111,11 @@ def dashboard(
 
     prediction = PredictionResponse(
         anomaly_score=ml_prediction.anomaly_score,
+        is_anomaly=ml_prediction.anomaly_score >= 0.6150358457512803,
         fault=ml_prediction.fault,
         confidence=ml_prediction.confidence,
         rul_hours=ml_prediction.rul_hours,
     )
-
     if health is not None:
         operating_state = twin_service._determine_operating_state(
             health.overall,
