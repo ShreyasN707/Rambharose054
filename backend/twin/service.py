@@ -1,4 +1,5 @@
 from datetime import datetime
+from statistics import median
 
 from sqlalchemy.orm import Session
 
@@ -26,7 +27,6 @@ class DigitalTwinService:
         self.repository = repository
         self.telemetry_repository = telemetry_repository
         self.predictor = predictor
-
 
     def process(
         self,
@@ -66,10 +66,18 @@ class DigitalTwinService:
         prediction = self.predictor.predict(
             telemetry_window,
         )
-        
+
+        # get_latest_window() returns newest samples first, so the first
+        # samples here are the most recent vibration readings.
+        recent_vibration = [
+            item.vibration
+            for item in telemetry_records[:10]
+        ]
+
         state = self.build_state(
             telemetry,
             prediction,
+            recent_vibration=recent_vibration,
         )
 
         self.save_health_snapshot(
@@ -83,12 +91,16 @@ class DigitalTwinService:
     def calculate_health(
         self,
         telemetry: TelemetryCreate,
+        recent_vibration: list[float] | None = None,
     ) -> HealthState:
 
         thermal = self._thermal_health(telemetry)
         combustion = self._combustion_health(telemetry)
         lubrication = self._lubrication_health(telemetry)
-        mechanical = self._mechanical_health(telemetry)
+        mechanical = self._mechanical_health(
+            telemetry,
+            recent_vibration=recent_vibration,
+        )
 
         overall = (
             thermal
@@ -160,7 +172,6 @@ class DigitalTwinService:
             - egt_penalty
         )
 
-
     def _combustion_health(
         self,
         telemetry: TelemetryCreate,
@@ -193,7 +204,6 @@ class DigitalTwinService:
             - egt_penalty
         )
 
-
     def _lubrication_health(
         self,
         telemetry: TelemetryCreate,
@@ -218,19 +228,31 @@ class DigitalTwinService:
             - temperature_penalty
         )
 
-
     def _mechanical_health(
         self,
         telemetry: TelemetryCreate,
+        recent_vibration: list[float] | None = None,
     ) -> float:
 
-        # Keep normal vibration near 100%.
-        # Penalize elevated vibration aggressively.
+        # Vibration can contain short-lived spikes. Use the median of the
+        # latest samples for the health score so one noisy sample does not
+        # make mechanical health jump from healthy to critical and back.
+        #
+        # The raw vibration telemetry is NOT changed; only the health
+        # calculation is smoothed.
+        if recent_vibration:
+            vibration = float(
+                median(recent_vibration[-10:])
+            )
+        else:
+            vibration = abs(
+                telemetry.vibration
+            )
 
-        vibration = abs(
-            telemetry.vibration
-        )
+        vibration = abs(vibration)
 
+        # Keep the original healthy threshold and penalty curve, but apply
+        # them to the smoothed vibration value.
         vibration_penalty = max(
             0,
             vibration - 2.0,
@@ -253,9 +275,13 @@ class DigitalTwinService:
         self,
         telemetry: TelemetryCreate,
         prediction: MLPrediction,
+        recent_vibration: list[float] | None = None,
     ) -> DigitalTwinState:
 
-        health = self.calculate_health(telemetry)
+        health = self.calculate_health(
+            telemetry,
+            recent_vibration=recent_vibration,
+        )
 
         operating_state = self._determine_operating_state(
             health.overall,
@@ -286,4 +312,3 @@ class DigitalTwinService:
             return "WARNING"
 
         return "NOMINAL"
-    

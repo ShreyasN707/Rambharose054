@@ -17,19 +17,8 @@ interface Drone3DViewerProps {
     throttle?: number;
     vibration?: number;
     cht?: number;
-    egt?: number;
-    oilTemperature?: number;
-    oilPressure?: number;
-    fuelFlow?: number;
-    torque?: number;
     height?: number | string;
     onSelectPart?: (partName: string) => void;
-
-    // Digital-twin prediction state
-    anomalyScore?: number;
-    isAnomaly?: boolean;
-    fault?: string | null;
-    operatingState?: "NOMINAL" | "WARNING" | "DEGRADED" | "CRITICAL";
 }
 
 type ViewPreset = "PERSPECTIVE" | "TOP" | "FRONT" | "SIDE" | "REAR";
@@ -124,25 +113,13 @@ export default function Drone3DViewer({
     rpm = 3400,
     throttle = 45,
     vibration = 0.08,
-    cht = 80,
-    egt = 700,
-    oilTemperature = 105,
-    oilPressure = 60,
-    fuelFlow = 3.0,
-    torque = 10,
+    cht = 175,
     height = "100%",
-    anomalyScore = 0,
-    isAnomaly = false,
-    fault = null,
-    operatingState = "NOMINAL",
 }: Drone3DViewerProps) {
     const mountRef       = useRef<HTMLDivElement>(null);
     const rendererRef    = useRef<THREE.WebGLRenderer | null>(null);
     const cameraRef      = useRef<THREE.PerspectiveCamera | null>(null);
     const strobeLightRef = useRef<THREE.PointLight | null>(null);
-    const engineAlertLightRef = useRef<THREE.PointLight | null>(null);
-    const exhaustMaterialRef = useRef<THREE.MeshStandardMaterial | null>(null);
-    const exhaustGlowMaterialRef = useRef<THREE.MeshBasicMaterial | null>(null);
     const materialsRef   = useRef<THREE.MeshStandardMaterial[]>([]);
 
     const [autoRotate,  setAutoRotate]  = useState(true);
@@ -161,18 +138,10 @@ export default function Drone3DViewer({
     // Keep autoRotate ref in sync
     useEffect(() => { autoRotateRef.current = autoRotate; }, [autoRotate]);
 
-    // Telemetry + digital-twin prediction ref.
-    // This lets the Three.js animation loop react without rebuilding the scene.
-    const telemetryRef = useRef({
-        rpm, throttle, vibration, cht,
-        anomalyScore, isAnomaly, fault, operatingState,
-    });
-    useEffect(() => {
-        telemetryRef.current = {
-            rpm, throttle, vibration, cht,
-            anomalyScore, isAnomaly, fault, operatingState,
-        };
-    }, [rpm, throttle, vibration, cht, anomalyScore, isAnomaly, fault, operatingState]);
+    // Telemetry ref
+    const telemetryRef = useRef({ rpm, throttle, vibration, cht });
+    useEffect(() => { telemetryRef.current = { rpm, throttle, vibration, cht }; },
+        [rpm, throttle, vibration, cht]);
 
     // View presets
     const applyViewPreset = useCallback((preset: ViewPreset) => {
@@ -197,9 +166,11 @@ export default function Drone3DViewer({
                 mat.color.setHex(0x00f0ff);
                 mat.emissive.setHex(0x003344);
             } else if (displayMode === "THERMAL") {
-                // Combined EGT + oil temperature + CHT thermal map is
-                // continuously applied by the animation loop.
                 mat.wireframe = false;
+                const heat = Math.min(Math.max((telemetryRef.current.cht - 120) / 100, 0), 1);
+                const col = new THREE.Color().setHSL(0.66 - heat * 0.66, 1.0, 0.45);
+                mat.color.copy(col);
+                mat.emissive.copy(col.clone().multiplyScalar(0.4));
             } else {
                 mat.wireframe = false;
                 if (mat.userData.origColor)    mat.color.copy(mat.userData.origColor);
@@ -258,13 +229,6 @@ export default function Drone3DViewer({
         scene.add(strobeLight);
         strobeLightRef.current = strobeLight;
 
-        // Engine warning light: invisible when nominal, illuminates the engine
-        // and exhaust area when the digital twin reports a fault.
-        const engineAlertLight = new THREE.PointLight(0xffaa00, 0, 4.5);
-        engineAlertLight.position.set(0, 0, -3.35);
-        scene.add(engineAlertLight);
-        engineAlertLightRef.current = engineAlertLight;
-
         // ── Material factory ──
         const mats: THREE.MeshStandardMaterial[] = [];
         const mkMat = (params: THREE.MeshStandardMaterialParameters & { side?: THREE.Side }): THREE.MeshStandardMaterial => {
@@ -285,7 +249,6 @@ export default function Drone3DViewer({
         const ledRed    = mkMat({ color: 0xff2222, emissive: new THREE.Color(0xff0000), emissiveIntensity: 4.0, roughness: 0.1 });
         const ledWhite  = mkMat({ color: 0xffffff, emissive: new THREE.Color(0xffffff), emissiveIntensity: 2.5, roughness: 0.1 });
         const exhaustMat = mkMat({ color: 0xff5500, emissive: new THREE.Color(0xff2200), emissiveIntensity: 1.8, roughness: 0.2 });
-        exhaustMaterialRef.current = exhaustMat;
         const glassMat  = new THREE.MeshPhysicalMaterial({
             color: 0x050d1a, roughness: 0.04, metalness: 0.05,
             transmission: 0.88, transparent: true, reflectivity: 0.95,
@@ -294,12 +257,6 @@ export default function Drone3DViewer({
         // ── Drone Group ──
         const drone = new THREE.Group();
         scene.add(drone);
-
-        // Base transform is kept fixed so fault vibration never accumulates
-        // frame-to-frame. The whole aircraft shakes around this transform.
-        const baseDronePosition = drone.position.clone();
-        const baseDroneRotation = drone.rotation.clone();
-        let vibrationPhase = 0;
 
         // ── 1. FUSELAGE (LatheGeometry, Global-Hawk / RQ-4 style) ──────────
         // Profile from TAIL (y=0, thin) → NOSE (y=7, bulbous).
@@ -488,13 +445,11 @@ export default function Drone3DViewer({
         exhCap.position.set(0, 0, -3.65);
         drone.add(exhCap);
 
-        // Heat shimmer / anomaly glow
+        // Heat shimmer glow
         const exhGlowGeo = new THREE.CircleGeometry(0.22, 18);
-        const exhGlowMat = new THREE.MeshBasicMaterial({
+        const exhGlow = new THREE.Mesh(exhGlowGeo, new THREE.MeshBasicMaterial({
             color: 0xff3300, transparent: true, opacity: 0.18,
-        });
-        exhaustGlowMaterialRef.current = exhGlowMat;
-        const exhGlow = new THREE.Mesh(exhGlowGeo, exhGlowMat);
+        }));
         exhGlow.position.set(0, 0, -3.68);
         drone.add(exhGlow);
 
@@ -543,108 +498,6 @@ export default function Drone3DViewer({
         mkRing(7.5,  7.54, 0x3b82f6, 0.18);
         mkRing(10.5, 10.53, 0x3b82f6, 0.10);
 
-        // ── DIGITAL-TWIN VISUAL STATE ─────────────────────────────────────────
-        // TACTICAL  -> realistic aircraft + fault-specific engine behavior
-        // WIREFRAME -> affected engine/subsystem highlighted
-        // THERMAL   -> combined EGT + oil temperature + CHT
-        const clamp01 = (v: number) => THREE.MathUtils.clamp(v, 0, 1);
-
-        const getDigitalTwinState = (t: typeof telemetryRef.current) => {
-            const faultName = (t.fault || "").toLowerCase();
-
-            // Simulator-aware thermal severity.
-            // EGT reacts fastest, oil temperature follows, CHT is slowest.
-            const egtHeat = clamp01((t.egt - 700) / (1150 - 700));
-            const oilHeat = clamp01((t.oilTemperature - 105) / (150 - 105));
-            const chtHeat = clamp01((t.cht - 80) / (120 - 80));
-
-            const thermalHeat = clamp01(
-                egtHeat * 0.50 +
-                oilHeat * 0.30 +
-                chtHeat * 0.20
-            );
-
-            const stateSeverity =
-                t.operatingState === "CRITICAL" ? 1 :
-                t.operatingState === "DEGRADED" ? 0.65 :
-                t.operatingState === "WARNING" ? 0.35 : 0;
-
-            const anomalySeverity = clamp01((t.anomalyScore || 0) / 1.0);
-            const active =
-                t.isAnomaly ||
-                !!t.fault ||
-                t.operatingState !== "NOMINAL";
-
-            let faultType:
-                | "NONE"
-                | "MISFIRE"
-                | "OVERHEATING"
-                | "OIL"
-                | "FUEL"
-                | "GENERIC" = "NONE";
-
-            if (faultName.includes("misfire") || faultName.includes("torque")) {
-                faultType = "MISFIRE";
-            } else if (faultName.includes("overheat")) {
-                faultType = "OVERHEATING";
-            } else if (faultName.includes("oil") || faultName.includes("lubric")) {
-                faultType = "OIL";
-            } else if (faultName.includes("fuel")) {
-                faultType = "FUEL";
-            } else if (active) {
-                faultType = "GENERIC";
-            }
-
-            let faultSeverity = Math.max(anomalySeverity, stateSeverity);
-
-            if (faultType === "OVERHEATING") {
-                faultSeverity = Math.max(faultSeverity, thermalHeat);
-            } else if (faultType === "MISFIRE") {
-                const rpmLoss = clamp01((4000 - t.rpm) / 1000);
-                const torqueLoss = clamp01((10 - t.torque) / 9);
-                const egtDrop = clamp01((700 - t.egt) / 150);
-                const vibrationRise = clamp01((t.vibration - 0.08) / 0.22);
-                faultSeverity = Math.max(
-                    faultSeverity,
-                    rpmLoss * 0.30 +
-                    torqueLoss * 0.25 +
-                    egtDrop * 0.20 +
-                    vibrationRise * 0.25
-                );
-            } else if (faultType === "OIL") {
-                const pressureLoss = clamp01((60 - t.oilPressure) / 50);
-                faultSeverity = Math.max(
-                    faultSeverity,
-                    pressureLoss * 0.75 + oilHeat * 0.25
-                );
-            } else if (faultType === "FUEL") {
-                const fuelLoss = clamp01((3.0 - t.fuelFlow) / 2.7);
-                const rpmLoss = clamp01((4000 - t.rpm) / 2300);
-                const torqueLoss = clamp01((10 - t.torque) / 9);
-                faultSeverity = Math.max(
-                    faultSeverity,
-                    fuelLoss * 0.45 +
-                    rpmLoss * 0.35 +
-                    torqueLoss * 0.20
-                );
-            }
-
-            let faultColor = 0x22ff55;
-            if (faultType === "OVERHEATING") faultColor = 0xff2200;
-            else if (faultType === "OIL") faultColor = 0xff9d00;
-            else if (faultType === "FUEL") faultColor = 0xffcc22;
-            else if (faultType === "MISFIRE") faultColor = 0xff3355;
-            else if (faultType === "GENERIC") faultColor = 0xff3355;
-
-            return {
-                active,
-                faultType,
-                faultSeverity: clamp01(faultSeverity),
-                thermalHeat,
-                faultColor,
-            };
-        };
-
         // ── ANIMATION LOOP ───────────────────────────────────────────────────
         let animId: number;
         const clock = new THREE.Clock();
@@ -675,227 +528,10 @@ export default function Drone3DViewer({
                 }
             }
 
-            // ── DIGITAL-TWIN VISUALIZATION ────────────────────────────────────
+            // Exhaust flicker
             exhaustFlicker += delta * 8;
-
-            const visual = getDigitalTwinState(telemetryRef.current);
-
-            // ── PHYSICAL AIRFRAME VIBRATION ─────────────────────────────────
-            // The model itself moves/shakes instead of only changing materials.
-            // Vibration is driven by the real telemetry value and fault severity.
-            // Each fault gets a different mechanical signature.
-            const telemetryVibration = THREE.MathUtils.clamp(
-                (telemetryRef.current.vibration - 0.08) / 0.30,
-                0,
-                1
-            );
-
-            const faultVibrationMultiplier =
-                visual.faultType === "MISFIRE" ? 1.00 :
-                visual.faultType === "OIL" ? 0.72 :
-                visual.faultType === "FUEL" ? 0.58 :
-                visual.faultType === "OVERHEATING" ? 0.10 :
-                visual.faultType === "GENERIC" ? 0.55 :
-                0;
-
-            const mechanicalVibration = Math.max(
-                telemetryVibration,
-                visual.faultSeverity * faultVibrationMultiplier
-            );
-
-            vibrationPhase += delta;
-
-            if (mechanicalVibration > 0.01) {
-                const t = vibrationPhase;
-                const isMisfire = visual.faultType === "MISFIRE";
-                const isFuel = visual.faultType === "FUEL";
-
-                // High-frequency mixed oscillations make misfire look rough and
-                // irregular, while fuel starvation has a more intermittent jerk.
-                const frequency = isMisfire ? 38 : isFuel ? 17 : 24;
-                const irregularX =
-                    Math.sin(t * frequency) * 0.60 +
-                    Math.sin(t * (frequency * 1.71)) * 0.30 +
-                    Math.sin(t * (frequency * 2.43)) * 0.10;
-                const irregularY =
-                    Math.sin(t * (frequency * 1.23) + 1.7) * 0.55 +
-                    Math.sin(t * (frequency * 2.11) + 0.4) * 0.30;
-                const irregularZ =
-                    Math.sin(t * (frequency * 0.83) + 2.4) * 0.65 +
-                    Math.sin(t * (frequency * 1.91)) * 0.35;
-
-                const jerk = isFuel
-                    ? Math.pow(Math.abs(Math.sin(t * 5.5)), 3)
-                    : 1;
-
-                const positionAmplitude =
-                    (isMisfire ? 0.060 :
-                     visual.faultType === "OIL" ? 0.042 :
-                     isFuel ? 0.035 :
-                     visual.faultType === "OVERHEATING" ? 0.008 :
-                     0.030) * mechanicalVibration * (0.65 + jerk * 0.35);
-
-                const rotationAmplitude =
-                    (isMisfire ? 0.020 :
-                     visual.faultType === "OIL" ? 0.013 :
-                     isFuel ? 0.010 :
-                     visual.faultType === "OVERHEATING" ? 0.003 :
-                     0.010) * mechanicalVibration;
-
-                drone.position.x = baseDronePosition.x + irregularX * positionAmplitude;
-                drone.position.y = baseDronePosition.y + irregularY * positionAmplitude * 0.75;
-                drone.position.z = baseDronePosition.z + irregularZ * positionAmplitude * 0.55;
-
-                drone.rotation.x = baseDroneRotation.x + irregularY * rotationAmplitude;
-                drone.rotation.y = baseDroneRotation.y + irregularZ * rotationAmplitude * 0.65;
-                drone.rotation.z = baseDroneRotation.z + irregularX * rotationAmplitude;
-            } else {
-                // Smoothly settle the model back to its exact base transform.
-                drone.position.lerp(baseDronePosition, Math.min(1, delta * 12));
-                drone.rotation.x = THREE.MathUtils.lerp(drone.rotation.x, baseDroneRotation.x, Math.min(1, delta * 12));
-                drone.rotation.y = THREE.MathUtils.lerp(drone.rotation.y, baseDroneRotation.y, Math.min(1, delta * 12));
-                drone.rotation.z = THREE.MathUtils.lerp(drone.rotation.z, baseDroneRotation.z, Math.min(1, delta * 12));
-            }
-
-            const pulseSpeed =
-                visual.faultType === "MISFIRE" ? 10 :
-                visual.faultType === "FUEL" ? 5 :
-                visual.faultType === "OIL" ? 7 :
-                visual.faultType === "OVERHEATING" ? 3.5 : 6;
-
-            const pulse = 0.55 + 0.45 * Math.abs(
-                Math.sin(exhaustFlicker * pulseSpeed * 0.12)
-            );
-
-            // TACTICAL + WIREFRAME: fault-specific engine/exhaust behavior.
-            if (exhaustMaterialRef.current) {
-                const mat = exhaustMaterialRef.current;
-
-                if (!visual.active) {
-                    mat.color.setHex(0xff5500);
-                    mat.emissive.setHex(0xff2200);
-                    mat.emissiveIntensity = 1.8;
-                } else {
-                    mat.color.setHex(visual.faultColor);
-                    mat.emissive.setHex(visual.faultColor);
-
-                    const instability =
-                        visual.faultType === "MISFIRE" ? 2.2 :
-                        visual.faultType === "FUEL" ? 1.6 : 1.0;
-
-                    mat.emissiveIntensity =
-                        1.8 + visual.faultSeverity * 4.5 * pulse * instability;
-                }
-            }
-
-            if (exhaustGlowMaterialRef.current) {
-                const glowMat = exhaustGlowMaterialRef.current;
-
-                if (!visual.active) {
-                    glowMat.color.setHex(0xff3300);
-                    glowMat.opacity =
-                        0.10 + 0.12 * Math.abs(Math.sin(exhaustFlicker));
-                } else {
-                    glowMat.color.setHex(visual.faultColor);
-
-                    const glowMultiplier =
-                        visual.faultType === "FUEL" ? pulse * 0.75 :
-                        visual.faultType === "MISFIRE" ? pulse :
-                        0.75 + pulse * 0.45;
-
-                    glowMat.opacity = Math.min(
-                        0.86,
-                        0.12 + visual.faultSeverity * 0.62 * glowMultiplier
-                    );
-                }
-            }
-
-            if (engineAlertLightRef.current) {
-                engineAlertLightRef.current.color.setHex(visual.faultColor);
-                engineAlertLightRef.current.intensity =
-                    visual.active
-                        ? visual.faultSeverity * (0.8 + 2.8 * pulse)
-                        : 0;
-            }
-
-            // THERMAL: all three thermal signals contribute.
-            if (displayMode === "THERMAL") {
-                materialsRef.current.forEach((mat) => {
-                    const heat = visual.thermalHeat;
-                    const thermalColor = new THREE.Color();
-
-                    if (heat < 0.25) {
-                        thermalColor.setHSL(
-                            THREE.MathUtils.lerp(0.55, 0.42, heat / 0.25),
-                            0.95,
-                            0.45
-                        );
-                    } else if (heat < 0.50) {
-                        thermalColor.setHSL(
-                            THREE.MathUtils.lerp(0.42, 0.18, (heat - 0.25) / 0.25),
-                            0.95,
-                            0.45
-                        );
-                    } else if (heat < 0.75) {
-                        thermalColor.setHSL(
-                            THREE.MathUtils.lerp(0.18, 0.07, (heat - 0.50) / 0.25),
-                            1.0,
-                            0.45
-                        );
-                    } else {
-                        thermalColor.setHSL(
-                            THREE.MathUtils.lerp(0.07, 0.0, (heat - 0.75) / 0.25),
-                            1.0,
-                            0.45
-                        );
-                    }
-
-                    mat.color.copy(thermalColor);
-                    mat.emissive.copy(thermalColor);
-                    mat.emissiveIntensity = 0.25 + heat * 0.85;
-                    mat.wireframe = false;
-                });
-
-                // Engine/exhaust remains the hottest visual region.
-                if (exhaustMaterialRef.current) {
-                    const engineColor = new THREE.Color();
-                    engineColor.setHSL(
-                        THREE.MathUtils.lerp(0.08, 0.0, visual.thermalHeat),
-                        1.0,
-                        0.45
-                    );
-                    exhaustMaterialRef.current.color.copy(engineColor);
-                    exhaustMaterialRef.current.emissive.copy(engineColor);
-                    exhaustMaterialRef.current.emissiveIntensity =
-                        1.5 + visual.thermalHeat * 5;
-                }
-
-                if (exhaustGlowMaterialRef.current) {
-                    exhaustGlowMaterialRef.current.color.setHSL(
-                        THREE.MathUtils.lerp(0.10, 0.0, visual.thermalHeat),
-                        1.0,
-                        0.5
-                    );
-                    exhaustGlowMaterialRef.current.opacity =
-                        0.12 + visual.thermalHeat * 0.62;
-                }
-            }
-
-            // WIREFRAME: retain the cyan aircraft structure, but make the
-            // affected engine/subsystem visibly stand out.
-            if (displayMode === "WIREFRAME" && visual.active) {
-                if (exhaustMaterialRef.current) {
-                    exhaustMaterialRef.current.color.setHex(visual.faultColor);
-                    exhaustMaterialRef.current.emissive.setHex(visual.faultColor);
-                    exhaustMaterialRef.current.emissiveIntensity =
-                        2.0 + visual.faultSeverity * 5.0 * pulse;
-                }
-
-                if (exhaustGlowMaterialRef.current) {
-                    exhaustGlowMaterialRef.current.color.setHex(visual.faultColor);
-                    exhaustGlowMaterialRef.current.opacity =
-                        0.20 + visual.faultSeverity * 0.60 * pulse;
-                }
+            if (exhGlow.material instanceof THREE.MeshBasicMaterial) {
+                exhGlow.material.opacity = 0.10 + 0.12 * Math.abs(Math.sin(exhaustFlicker));
             }
 
             const degYaw = THREE.MathUtils.radToDeg(sphericalRef.current.theta) % 360;
@@ -922,9 +558,6 @@ export default function Drone3DViewer({
             if (renderer.domElement && container.contains(renderer.domElement))
                 container.removeChild(renderer.domElement);
             renderer.dispose();
-            exhaustMaterialRef.current = null;
-            exhaustGlowMaterialRef.current = null;
-            engineAlertLightRef.current = null;
             scene.clear();
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -963,24 +596,6 @@ export default function Drone3DViewer({
         sphericalRef.current.radius = Math.max(2.0, Math.min(22, sphericalRef.current.radius + e.deltaY * 0.005));
     };
 
-    // ── Anomaly HUD state ────────────────────────────────────────────────────
-    const normalizedFault = (fault || "").toLowerCase();
-    const anomalyActive = isAnomaly || operatingState !== "NOMINAL" || !!fault;
-
-    const statusLabel =
-        operatingState === "CRITICAL" ? "CRITICAL" :
-        operatingState === "DEGRADED" ? "DEGRADED" :
-        operatingState === "WARNING" ? "WARNING" :
-        anomalyActive ? "ANOMALY" : "NOMINAL";
-
-    const statusColor =
-        operatingState === "CRITICAL" || normalizedFault.includes("overheat") ? "#ff3322" :
-        operatingState === "DEGRADED" || normalizedFault.includes("oil") || normalizedFault.includes("lubric") ? "#ff9d00" :
-        operatingState === "WARNING" || normalizedFault.includes("fuel") || normalizedFault.includes("misfire") || normalizedFault.includes("torque") ? "#ffd43b" :
-        "#22ff55";
-
-    const faultLabel = fault || "NO ACTIVE FAULT";
-
     // ── JSX ──────────────────────────────────────────────────────────────────
     return (
         <div
@@ -1017,12 +632,12 @@ export default function Drone3DViewer({
             {/* ── TOP BAR ── */}
             <div style={{ position: "absolute", top: 10, left: 12, zIndex: 10, display: "flex", alignItems: "center", gap: 8, pointerEvents: "none" }}>
                 <div style={{ background: "rgba(8,13,20,0.88)", border: "1px solid rgba(198,255,61,0.32)", borderRadius: 4, padding: "4px 10px", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", gap: 7 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: statusColor, boxShadow: `0 0 8px ${statusColor}`, flexShrink: 0 }} />
+                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#C6FF3D", boxShadow: "0 0 8px #C6FF3D", flexShrink: 0 }} />
                     <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, fontWeight: 700, color: "#fff", letterSpacing: 1.4 }}>
                         RQ-4 GLOBAL HAWK · DIGITAL TWIN
                     </span>
                     <span style={{ fontSize: 9, color: "#666" }}>|</span>
-                    <span style={{ fontSize: 9, color: statusColor, letterSpacing: 1 }}>{statusLabel}</span>
+                    <span style={{ fontSize: 9, color: "#C6FF3D", letterSpacing: 1 }}>LIVE 3D</span>
                 </div>
             </div>
 
@@ -1063,7 +678,7 @@ export default function Drone3DViewer({
                     { p: "REAR"        as ViewPreset, icon: <ShieldAlert size={9} /> },
                 ].map(({ p, icon }) => (
                     <button key={p} onClick={() => applyViewPreset(p)}
-                        style={{ background: viewPreset === p ? "rgba(59,130,246,0.22)" : "rgba(12,18,26,0.88)", border: `1px solid ${viewPreset === p ? "rgba(59,130,246,0.5)" : "#2c2c2c"}`, color: viewPreset === p ? "#60a5fa" : "#777", padding: "8px 13px", minWidth: 122, minHeight: 34, borderRadius: 5, cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", fontSize: 10, backdropFilter: "blur(6px)", letterSpacing: 1.1, display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 7 }}>
+                        style={{ background: viewPreset === p ? "rgba(59,130,246,0.22)" : "rgba(12,18,26,0.85)", border: `1px solid ${viewPreset === p ? "rgba(59,130,246,0.5)" : "#2c2c2c"}`, color: viewPreset === p ? "#60a5fa" : "#555", padding: "4px 8px", borderRadius: 4, cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", fontSize: 8, backdropFilter: "blur(6px)", letterSpacing: 1, display: "flex", alignItems: "center", gap: 5 }}>
                         {icon}<span>{p}</span>
                     </button>
                 ))}
@@ -1072,25 +687,17 @@ export default function Drone3DViewer({
             {/* ── HUD – Bottom Left ── */}
             <div style={{ position: "absolute", bottom: 10, left: 12, zIndex: 10, background: "rgba(6,10,18,0.88)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 4, padding: "6px 10px", fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#9aa", backdropFilter: "blur(8px)", display: "flex", flexDirection: "column", gap: 4, minWidth: 160 }}>
                 <HudRow icon={<Gauge size={9} />}     label="YAW"  value={`${hudData.yaw}°`}          color="#C6FF3D" />
-                <HudRow icon={<ShieldAlert size={9} />} label="CHT"  value={`${cht}°C`}              color={cht > 100 ? "#e8543f" : "#aaa"} />
-                <HudRow icon={<ShieldAlert size={9} />} label="STATE" value={statusLabel} color={statusColor} />
-                <HudRow icon={<Crosshair size={9} />} label="ANOM" value={anomalyScore.toFixed(2)} color={anomalyActive ? statusColor : "#22ff55"} />
-                {anomalyActive && (
-                    <div style={{ marginTop: 2, paddingTop: 4, borderTop: "1px solid rgba(255,255,255,0.08)", fontSize: 8, color: statusColor, letterSpacing: 0.7, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        FAULT · {faultLabel.toUpperCase()}
+                <HudRow icon={<Gauge size={9} />}     label="RPM"  value={rpm.toLocaleString()}        color={rpm > 4500 ? "#e8543f" : "#60a5fa"} />
+                <HudRow icon={<ShieldAlert size={9} />} label="CHT"  value={`${cht}°C`}              color={cht > 200  ? "#e8543f" : "#aaa"} />
+                <HudRow icon={<Radio size={9} />}     label="DIST" value={`${hudData.distance} u`}     color="#a78bfa" />
+                {/* RPM bar */}
+                <div style={{ marginTop: 2 }}>
+                    <div style={{ fontSize: 7, color: "#444", letterSpacing: 1, marginBottom: 2 }}>THROTTLE</div>
+                    <div style={{ width: "100%", height: 3, background: "rgba(255,255,255,0.07)", borderRadius: 2 }}>
+                        <div style={{ width: `${Math.min((rpm / 5000) * 100, 100)}%`, height: "100%", borderRadius: 2, background: `linear-gradient(90deg, #3b82f6, ${rpm / 5000 > 0.85 ? "#e8543f" : "#C6FF3D"})`, transition: "width 0.6s ease" }} />
                     </div>
-                )}
-            </div>
-
-            {/* ── ENGINE ALERT ── */}
-            {anomalyActive && (
-                <div style={{ position: "absolute", bottom: 30, left: "50%", transform: "translateX(-50%)", zIndex: 10, pointerEvents: "none", background: "rgba(6,10,18,0.90)", border: `1px solid ${statusColor}`, borderRadius: 4, padding: "5px 12px", boxShadow: `0 0 18px ${statusColor}33`, backdropFilter: "blur(8px)", display: "flex", alignItems: "center", gap: 8, fontFamily: "'JetBrains Mono', monospace" }}>
-                    <ShieldAlert size={11} color={statusColor} />
-                    <span style={{ fontSize: 8, color: statusColor, fontWeight: 700, letterSpacing: 1 }}>
-                        ENGINE {statusLabel} · {faultLabel.toUpperCase()}
-                    </span>
                 </div>
-            )}
+            </div>
 
             {/* ── Controls hint ── */}
             <div style={{ position: "absolute", bottom: 10, right: 50, zIndex: 10, pointerEvents: "none" }}>
@@ -1099,13 +706,6 @@ export default function Drone3DViewer({
                 </div>
             </div>
 
-            {/* ── "360° 3D" badge ── */}
-            <div style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 10, pointerEvents: "none" }}>
-                <div style={{ background: "rgba(6,10,18,0.85)", border: "1px solid rgba(198,255,61,0.28)", borderRadius: 20, padding: "3px 14px", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ fontSize: 12, fontWeight: 900, color: "#C6FF3D", letterSpacing: 1, fontFamily: "'JetBrains Mono', monospace" }}>360°</span>
-                    <span style={{ fontSize: 8, color: "#666", letterSpacing: 1.5, fontFamily: "'JetBrains Mono', monospace" }}>3D MODEL</span>
-                </div>
-            </div>
 
             <style>{`@keyframes drone3d-spin { to { transform: rotate(360deg); } }`}</style>
         </div>

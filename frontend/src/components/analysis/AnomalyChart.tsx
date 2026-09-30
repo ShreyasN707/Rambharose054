@@ -98,7 +98,7 @@ export default function AnomalyChart({
                         />
 
                         <ReferenceLine
-                            y={0.6150358457512803}
+                            y={1.1}
                             stroke="#888"
                             strokeDasharray="5 5"
                             label={{

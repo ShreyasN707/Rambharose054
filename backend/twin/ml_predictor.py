@@ -27,7 +27,6 @@ _XGBOOST_PATH = _MODEL_DIR / "xgboost_fault_classifier_realistic.json"
 # Feature definitions
 # ---------------------------------------------------------------------------
 
-# Feature names used by the trained anomaly/fault models.
 FEATURES = [
     "Signal1_RPM",
     "Signal2_FuelFlow",
@@ -51,6 +50,7 @@ FAULT_NAMES = {
     4: "Fuel Starvation",
 }
 
+
 # ---------------------------------------------------------------------------
 # Load models once
 # ---------------------------------------------------------------------------
@@ -72,7 +72,7 @@ _xgboost_model.load_model(_XGBOOST_PATH)
 # ---------------------------------------------------------------------------
 
 class ModelPredictor(MLPredictor):
-    
+
     @staticmethod
     def _clamp(
         value: float,
@@ -295,10 +295,12 @@ class ModelPredictor(MLPredictor):
         )
 
         # -------------------------------------------------------------------
-        # Build model input
+        # Autoencoder input
+        #
+        # The new autoencoder still expects the original 14 features.
         # -------------------------------------------------------------------
 
-        feature_names = [
+        autoencoder_feature_names = [
             "RPM",
             "FuelFlow",
             "Torque",
@@ -315,7 +317,7 @@ class ModelPredictor(MLPredictor):
             "AmbientTemp",
         ]
 
-        xgb_features = pd.DataFrame(
+        autoencoder_features = pd.DataFrame(
             [[
                 rpm,
                 fuel_flow,
@@ -332,13 +334,16 @@ class ModelPredictor(MLPredictor):
                 altitude,
                 ambient_temperature,
             ]],
-            columns=feature_names,
+            columns=autoencoder_feature_names,
         )
 
-        input_scaled = _autoencoder_scaler.transform(xgb_features)
         # -------------------------------------------------------------------
         # Anomaly detection
         # -------------------------------------------------------------------
+
+        input_scaled = _autoencoder_scaler.transform(
+            autoencoder_features
+        )
 
         reconstruction = _autoencoder_model.predict(
             input_scaled,
@@ -359,8 +364,81 @@ class ModelPredictor(MLPredictor):
         )
 
         # -------------------------------------------------------------------
-        # XGBoost fault classification
+        # Additional features required by the NEW 19-feature XGBoost model
         # -------------------------------------------------------------------
+
+        oilt_above_ambient = (
+            oil_temperature - ambient_temperature
+        )
+
+        egt_minus_cht = (
+            egt - cht
+        )
+
+        fuelflow_per_rpm = (
+            fuel_flow / (rpm + 1e-6)
+        )
+
+        torque_per_rpm = (
+            torque / (rpm + 1e-6)
+        )
+
+        expected_power = (
+            throttle * engine_load
+        )
+
+        # -------------------------------------------------------------------
+        # XGBoost fault classification
+        #
+        # New model expects 19 features.
+        # -------------------------------------------------------------------
+
+        xgb_feature_names = [
+            "RPM",
+            "FuelFlow",
+            "Torque",
+            "OilTemperature",
+            "OilPressure",
+            "CHT",
+            "EGT",
+            "Vibration",
+            "Throttle",
+            "EngineLoad",
+            "Altitude",
+            "AmbientTemp",
+            "CHT_above_Ambient",
+            "CHT_OilTemp_Ratio",
+            "OilT_above_Ambient",
+            "EGT_minus_CHT",
+            "FuelFlow_per_RPM",
+            "Torque_per_RPM",
+            "Expected_Power",
+        ]
+
+        xgb_features = pd.DataFrame(
+            [[
+                rpm,
+                fuel_flow,
+                torque,
+                oil_temperature,
+                oil_pressure,
+                cht,
+                egt,
+                vibration,
+                throttle,
+                engine_load,
+                altitude,
+                ambient_temperature,
+                cht_above_ambient,
+                cht_oiltemp_ratio,
+                oilt_above_ambient,
+                egt_minus_cht,
+                fuelflow_per_rpm,
+                torque_per_rpm,
+                expected_power,
+            ]],
+            columns=xgb_feature_names,
+        )
 
         fault_id = int(
             _xgboost_model.predict(xgb_features)[0]
