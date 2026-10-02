@@ -20,6 +20,7 @@ out/
 *.slxc
 *.mat
 *.log
+*.slprj
 
 # Simulation generated files
 fault_state.txt
