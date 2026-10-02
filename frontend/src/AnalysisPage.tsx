@@ -3,6 +3,7 @@ import { ArrowLeft, Clock3 } from "lucide-react";
 import EnginePerformanceChart from "./components/analysis/EnginePerformanceChart";
 import ThermalChart from "./components/analysis/ThermalChart";
 import LubricationChart from "./components/analysis/LubricationChart";
+import TelemetryChart from "./components/analysis/TelemetryChart";
 import {
     getMissions,
     getMission,
@@ -387,6 +388,48 @@ export default function AnalysisPage() {
                                 replayIndex={replayIndex}
                             />
                         </div>
+
+                        <TelemetryChart
+                            title="ELECTRICAL SYSTEM"
+                            data={telemetry}
+                            replayIndex={replayIndex}
+                            series={[
+                                {
+                                    key: "battery_voltage",
+                                    label: "BATTERY V",
+                                    unit: "V",
+                                    color: "#34d399",
+                                },
+                                {
+                                    key: "alternator_current",
+                                    label: "ALTERNATOR I",
+                                    unit: "A",
+                                    color: "#7fd4ff",
+                                    axis: "right",
+                                },
+                            ]}
+                        />
+
+                        <TelemetryChart
+                            title="FUEL INJECTION"
+                            data={telemetry}
+                            replayIndex={replayIndex}
+                            series={[
+                                {
+                                    key: "injection_timing",
+                                    label: "TIMING",
+                                    unit: "° BTDC",
+                                    color: "#e8c34a",
+                                },
+                                {
+                                    key: "injection_duration",
+                                    label: "DURATION",
+                                    unit: "ms",
+                                    color: "#c084fc",
+                                    axis: "right",
+                                },
+                            ]}
+                        />
                     </div>
                 </section>
 

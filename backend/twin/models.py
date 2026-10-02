@@ -55,6 +55,11 @@ class HealthSnapshot(Base):
         nullable=False,
     )
 
+    electrical: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
     anomaly_score: Mapped[float | None] = mapped_column(
         Float,
         nullable=True,

@@ -20,11 +20,12 @@ const DEFAULT_HEALTH: SubsystemHealth = {
     combustion: 76.2,
     lubrication: 94.8,
     mechanical: 88.0,
-    electrical: 99.4,
+    electrical: null,
 };
 
 const DEFAULT_PREDICTION: PredictionData = {
     anomaly_score: 0.28,
+    is_anomaly: false,
     fault: "Misfire detected",
     confidence: 94,
     rul_hours: null,
@@ -60,15 +61,17 @@ const ZERO_TELEMETRY: TelemetryData = {
     oil_temperature: 0,
     fuel_flow: 0,
     vibration: 0,
-    battery_voltage: 0,
-    alternator_current: 0,
-    injection_timing: 0,
     torque: 0,
     power: 0,
     altitude: 0,
-    ambient_temp: 0,
+    ambient_temperature: 0,
     throttle: 0,
     engine_load: 0,
+    // Unknown until the simulator reports them (rendered as "--").
+    battery_voltage: null,
+    alternator_current: null,
+    injection_timing: null,
+    injection_duration: null,
 };
 
 export function useEngineData() {

@@ -84,7 +84,10 @@ class TelemetryService:
             engine_load=data.engine_load,
             altitude=data.altitude,
             ambient_temperature=data.ambient_temperature,
-
+            battery_voltage=data.battery_voltage,
+            alternator_current=data.alternator_current,
+            injection_timing=data.injection_timing,
+            injection_duration=data.injection_duration,
         )
 
         return self.repository.save(session, telemetry)

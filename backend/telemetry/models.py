@@ -75,6 +75,12 @@ class Telemetry(Base):
     altitude: Mapped[float] = mapped_column(Float, nullable=False)
     ambient_temperature: Mapped[float] = mapped_column(Float, nullable=False)
 
+    # Nullable: rows ingested before these signals existed have no value.
+    battery_voltage: Mapped[float | None] = mapped_column(Float, nullable=True)       # V
+    alternator_current: Mapped[float | None] = mapped_column(Float, nullable=True)    # A
+    injection_timing: Mapped[float | None] = mapped_column(Float, nullable=True)      # deg BTDC
+    injection_duration: Mapped[float | None] = mapped_column(Float, nullable=True)    # ms
+
 
 class IngestionEvent(Base):
     __tablename__ = "ingestion_events"

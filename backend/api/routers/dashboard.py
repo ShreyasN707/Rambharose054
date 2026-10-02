@@ -9,6 +9,7 @@ from api.dependencies import (
 )
 from api.exceptions import EngineNotFoundError
 from api.schemas import (
+    ANOMALY_THRESHOLD,
     DashboardResponse,
     TelemetryResponse,
     HealthResponse,
@@ -40,19 +41,7 @@ def dashboard(
     if latest_row is None:
         raise EngineNotFoundError(engine_id)
 
-    latest_telemetry = TelemetryResponse(
-        timestamp=latest_row.time,
-        engine_id=latest_row.engine_id,
-        mission_id=latest_row.mission_id,
-        rpm=latest_row.rpm,
-        torque=latest_row.torque,
-        cht=latest_row.cht,
-        egt=latest_row.egt,
-        oil_pressure=latest_row.oil_pressure,
-        oil_temperature=latest_row.oil_temperature,
-        fuel_flow=latest_row.fuel_flow,
-        vibration=latest_row.vibration,
-    )
+    latest_telemetry = TelemetryResponse.from_row(latest_row)
 
     snapshots = health_repo.get_by_engine(session, engine_id)
     snapshots = [s for s in snapshots if s.mission_id == mission_id]
@@ -63,23 +52,11 @@ def dashboard(
 
     if snapshots:
         latest_snapshot = snapshots[-1]
-        health = HealthResponse(
-            overall=latest_snapshot.overall,
-            thermal=latest_snapshot.thermal,
-            combustion=latest_snapshot.combustion,
-            lubrication=latest_snapshot.lubrication,
-            mechanical=latest_snapshot.mechanical,
-        )
+        health = HealthResponse.from_snapshot(latest_snapshot)
         recent_health_history = [
             HealthHistoryPoint(
                 timestamp=s.time,
-                health=HealthResponse(
-                    overall=s.overall,
-                    thermal=s.thermal,
-                    combustion=s.combustion,
-                    lubrication=s.lubrication,
-                    mechanical=s.mechanical,
-                ),
+                health=HealthResponse.from_snapshot(s),
             )
             for s in snapshots[-20:]
         ]
@@ -111,7 +88,7 @@ def dashboard(
 
     prediction = PredictionResponse(
         anomaly_score=ml_prediction.anomaly_score,
-        is_anomaly=ml_prediction.anomaly_score >= 0.6150358457512803,
+        is_anomaly=ml_prediction.anomaly_score >= ANOMALY_THRESHOLD,
         fault=ml_prediction.fault,
         confidence=ml_prediction.confidence,
         rul_hours=ml_prediction.rul_hours,

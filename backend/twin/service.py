@@ -16,6 +16,17 @@ from twin.schemas import (
 )
 
 
+# Electrical health limits. They mirror the Simulink Electrical_Model
+# parameters in simulation/engine_params.m (elec.*).
+#
+# Healthy: the alternator carries the 28 V bus (elec.V_bus_reg) and supplies
+# at least the avionics load (elec.I_avionics = 10 A, 1 A sensor margin).
+BUS_VOLTAGE_MIN_V = 27.0
+BUS_VOLTAGE_MAX_V = 29.5
+ALTERNATOR_CURRENT_MIN_A = 9.0
+ALTERNATOR_CURRENT_MAX_A = 25.0   # elec.I_alt_max (rated output)
+
+
 class DigitalTwinService:
 
     def __init__(
@@ -102,6 +113,11 @@ class DigitalTwinService:
             recent_vibration=recent_vibration,
         )
 
+        # Reported separately; deliberately not part of the overall
+        # average so existing health scores and operating states are
+        # unchanged.
+        electrical = self._electrical_health(telemetry)
+
         overall = (
             thermal
             + combustion
@@ -115,6 +131,7 @@ class DigitalTwinService:
             combustion=combustion,
             lubrication=lubrication,
             mechanical=mechanical,
+            electrical=electrical,
         )
 
     def save_health_snapshot(
@@ -134,6 +151,7 @@ class DigitalTwinService:
             combustion=state.health.combustion,
             lubrication=state.health.lubrication,
             mechanical=state.health.mechanical,
+            electrical=state.health.electrical,
 
             anomaly_score=state.prediction.anomaly_score,
             is_anomaly=state.prediction.anomaly_score >= 0.6150358457512803,
@@ -261,6 +279,39 @@ class DigitalTwinService:
         return self._score(
             100
             - vibration_penalty
+        )
+
+    def _electrical_health(
+        self,
+        telemetry: TelemetryCreate,
+    ) -> float | None:
+
+        # Older telemetry has no electrical signals.
+        if (
+            telemetry.battery_voltage is None
+            or telemetry.alternator_current is None
+        ):
+            return None
+
+        # Under-voltage: bus sagging toward battery voltage means the
+        # alternator is no longer carrying the load (20 points per volt).
+        # Over-voltage: regulator fault (25 points per volt).
+        voltage_penalty = (
+            max(0, BUS_VOLTAGE_MIN_V - telemetry.battery_voltage) * 20
+            + max(0, telemetry.battery_voltage - BUS_VOLTAGE_MAX_V) * 25
+        )
+
+        # Alternator output below the avionics load drains the battery;
+        # output above rating indicates an overloaded alternator.
+        current_penalty = (
+            max(0, ALTERNATOR_CURRENT_MIN_A - telemetry.alternator_current) * 4
+            + max(0, telemetry.alternator_current - ALTERNATOR_CURRENT_MAX_A) * 4
+        )
+
+        return self._score(
+            100
+            - voltage_penalty
+            - current_penalty
         )
 
     @staticmethod

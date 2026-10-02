@@ -100,3 +100,87 @@ drift_oilp          = -0.0005; % Pressure calibration loss
 Ts_telemetry_std    = 0.1;     % 10 Hz telemetry rate for standard signals
 Ts_telemetry_fast   = 0.005;   % 200 Hz sampling rate for high-freq vibration
 Ts_telemetry_slow   = 0.5;     % 2 Hz sampling rate for slow thermal channels
+
+%% ========================================================================
+%  PHASE 10: ELECTRICAL SYSTEM (BATTERY / ALTERNATOR)  -> Electrical_Model
+%  ========================================================================
+% 28 VDC aircraft bus fed by an engine-driven alternator through a voltage
+% regulator, backed by a 24 V nominal battery. The model only reads RPM;
+% alternator load torque is NOT fed back into EngineCore.
+elec.V_bus_reg      = 28.0;    % Regulated bus voltage when alternator carries the load (V)
+elec.V_batt_full    = 25.6;    % Battery open-circuit voltage at 100 % state of charge (V)
+elec.V_batt_empty   = 22.0;    % Battery open-circuit voltage at 0 % state of charge (V)
+elec.R_batt_int     = 0.05;    % Battery internal resistance (ohm)
+elec.C_batt_Ah      = 7.0;     % Battery capacity (Ah)
+elec.SoC_init       = 0.85;    % Battery state of charge at mission start (0-1)
+elec.SoC_taper      = 0.95;    % State of charge above which charge current tapers to zero (0-1)
+elec.I_avionics     = 10.0;    % Constant avionics + payload bus load (A)
+elec.I_charge_max   = 5.0;     % Maximum battery charge acceptance current (A)
+elec.I_alt_max      = 25.0;    % Rated alternator output current (A)
+elec.RPM_alt_cutin  = 1200;    % Engine speed at which the alternator starts producing current (RPM)
+elec.RPM_alt_rated  = 3500;    % Engine speed at which the alternator reaches rated output (RPM)
+
+%% ========================================================================
+%  PHASE 11: FUEL INJECTION (ECU)  -> Injection_Model
+%  ========================================================================
+% Read-only ECU parameters: they are reported as telemetry but do NOT feed
+% back into the combustion / engine physics.
+%
+% injection_timing   = start of injection, degrees crank angle BTDC
+%                      (positive = before top dead centre), from an
+%                      ECU-style 2-D map of engine speed x throttle.
+% injection_duration = injector pulse width per injection event (ms),
+%                      derived from fuel flow and engine speed.
+inj.rpm_bp       = [1500 3000 4500 6000 7500];   % Map breakpoints: engine speed (RPM)
+inj.throttle_bp  = [0 0.25 0.5 0.75 1.0];        % Map breakpoints: throttle position (0-1)
+% Start-of-injection map (deg BTDC). Rows = rpm_bp, columns = throttle_bp.
+% Advance grows with RPM to compensate the shorter time per crank degree
+% and shrinks slightly with throttle as more fuel is delivered per event.
+inj.timing_table = [
+    12 11 10  9  8
+    16 15 14 13 12
+    20 19 18 17 16
+    23 22 21 20 19
+    26 25 24 23 22
+];
+inj.n_cyl          = 1;      % Number of cylinders (one injector per cylinder)
+inj.strokes        = 4;      % Engine cycle (4-stroke: one injection per 2 revolutions)
+inj.q_static_gps   = 2.5;    % Injector static flow rate (g/s)
+inj.t_dead_ms      = 0.8;    % Injector opening dead time added to every pulse (ms)
+inj.rpm_min        = 300;    % Below this speed the ECU does not inject (RPM)
+
+%% ========================================================================
+%  PHASE 12: SENSOR CONDITIONING FOR ELECTRICAL & INJECTION TELEMETRY
+%  ========================================================================
+% Same chain as the existing sensors: first-order lag -> drift -> band-
+% limited white noise -> zero-order hold -> saturation.
+% The lag 1/(tau*s + 1) is implemented as its exact discrete equivalent at
+% Ts_telemetry_std, (1 - a)/(z - a) with a = exp(-Ts_telemetry_std/tau),
+% and the battery state of charge uses a discrete integrator. Keeping the
+% new blocks discrete leaves the variable-step solver's continuous states
+% unchanged, so signals 1-9 stay bit-identical to the original model.
+% Noise power P gives a standard deviation of sqrt(P / Ts_telemetry_std).
+tau_vbatt_sensor    = 0.1;       % Battery voltage sensor lag (s)
+tau_ialt_sensor     = 0.1;       % Alternator current sensor lag (s)
+tau_injt_sensor     = 0.05;      % Injection timing reporting lag (s)
+tau_injd_sensor     = 0.05;      % Injection duration reporting lag (s)
+
+noise_vbatt         = 2.5e-4;    % ~0.05 V standard deviation
+noise_ialt          = 4e-3;      % ~0.2 A standard deviation
+noise_injt          = 1e-3;      % ~0.1 deg standard deviation
+noise_injd          = 4e-5;      % ~0.02 ms standard deviation
+
+seed_vbatt          = 23351;     % Independent noise seeds for the new sensors
+seed_ialt           = 23352;
+seed_injt           = 23353;
+seed_injd           = 23354;
+
+drift_vbatt         = 0;         % No calibration drift modelled (units/s)
+drift_ialt          = 0;
+drift_injt          = 0;
+drift_injd          = 0;
+
+sat_vbatt           = [0 36];    % Battery voltage sensor range (V)
+sat_ialt            = [0 40];    % Alternator current sensor range (A)
+sat_injt            = [0 60];    % Injection timing reporting range (deg BTDC)
+sat_injd            = [0 30];    % Injection duration reporting range (ms)

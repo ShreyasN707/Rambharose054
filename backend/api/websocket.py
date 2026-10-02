@@ -2,6 +2,11 @@ import asyncio
 
 from fastapi import WebSocket, WebSocketDisconnect
 
+from api.schemas import (
+    ANOMALY_THRESHOLD,
+    HealthResponse,
+    TelemetryResponse,
+)
 from telemetry.database import SessionLocal
 from telemetry.repository import TelemetryRepository
 from twin.repository import HealthSnapshotRepository
@@ -100,19 +105,9 @@ class ConnectionManager:
             if latest_row is None:
                 return None
 
-            telemetry = {
-                "timestamp": latest_row.time.isoformat(),
-                "engine_id": latest_row.engine_id,
-                "mission_id": latest_row.mission_id,
-                "rpm": latest_row.rpm,
-                "torque": latest_row.torque,
-                "cht": latest_row.cht,
-                "egt": latest_row.egt,
-                "oil_pressure": latest_row.oil_pressure,
-                "oil_temperature": latest_row.oil_temperature,
-                "fuel_flow": latest_row.fuel_flow,
-                "vibration": latest_row.vibration,
-            }
+            telemetry = TelemetryResponse.from_row(
+                latest_row
+            ).model_dump(mode="json")
 
             snapshots = _health_repo.get_by_engine(
                 session,
@@ -130,13 +125,9 @@ class ConnectionManager:
             if snapshots:
                 snapshot = snapshots[-1]
 
-                health = {
-                    "overall": snapshot.overall,
-                    "thermal": snapshot.thermal,
-                    "combustion": snapshot.combustion,
-                    "lubrication": snapshot.lubrication,
-                    "mechanical": snapshot.mechanical,
-                }
+                health = HealthResponse.from_snapshot(
+                    snapshot
+                ).model_dump(mode="json")
 
             window = _telemetry_repo.get_latest_window(
                 session,
@@ -179,6 +170,9 @@ class ConnectionManager:
 
             prediction = {
                 "anomaly_score": ml_prediction.anomaly_score,
+                "is_anomaly": (
+                    ml_prediction.anomaly_score >= ANOMALY_THRESHOLD
+                ),
                 "fault": ml_prediction.fault,
                 "confidence": ml_prediction.confidence,
                 "rul_hours": ml_prediction.rul_hours,

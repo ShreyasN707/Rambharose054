@@ -144,6 +144,10 @@ export default function HudSection({
         { name: "COMBUSTION", score: engineData.health.combustion, status: engineData.health.combustion < 80 ? "warn" : "ok" },
         { name: "LUBRICATION", score: engineData.health.lubrication, status: engineData.health.lubrication < 80 ? "warn" : "ok" },
         { name: "MECHANICAL", score: engineData.health.mechanical, status: engineData.health.mechanical < 80 ? "warn" : "ok" },
+        // Electrical is reported separately and is not part of overall health.
+        ...(engineData.health.electrical != null
+            ? [{ name: "ELECTRICAL", score: engineData.health.electrical, status: engineData.health.electrical < 80 ? "warn" : "ok" }]
+            : []),
     ];
 
     const statusColor: Record<string, string> = { ok: "#7fe0a0", warn: "#e8c34a", critical: "#e8543f" };

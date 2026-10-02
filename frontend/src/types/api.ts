@@ -25,15 +25,19 @@ export interface TelemetryData {
     oil_temperature: number;
     fuel_flow: number;
     vibration: number;
-    battery_voltage?: number;
-    alternator_current?: number;
-    injection_timing?: number;
     torque?: number;
     power?: number;
-    altitude?: number;
-    ambient_temp?: number;
-    throttle?: number;
-    engine_load?: number;
+    // Operating conditions
+    throttle?: number | null;              // 0-1
+    engine_load?: number | null;           // 0-1
+    altitude?: number | null;              // m
+    ambient_temperature?: number | null;   // °C
+    // Electrical system (null for telemetry recorded before it existed)
+    battery_voltage?: number | null;       // V
+    alternator_current?: number | null;    // A
+    // ECU injection parameters
+    injection_timing?: number | null;      // degrees crank angle BTDC
+    injection_duration?: number | null;    // ms per injection event
 }
 
 export interface SubsystemHealth {
@@ -42,7 +46,8 @@ export interface SubsystemHealth {
     combustion: number;
     lubrication: number;
     mechanical: number;
-    electrical: number;
+    // Rule-based battery/alternator health; not part of `overall`.
+    electrical?: number | null;
 }
 
 export interface PredictionData {

@@ -43,6 +43,56 @@ function formatDuration(seconds: number) {
     )}`;
 }
 
+function ReplayValue({
+    label,
+    value,
+    unit,
+}: {
+    label: string;
+    value: number | null | undefined;
+    unit: string;
+}) {
+    return (
+        <div
+            className="p-3"
+            style={{
+                border: "1px solid #292929",
+                background: "#090909",
+            }}
+        >
+            <div
+                className="text-[10px] mb-1"
+                style={{
+                    color: "#666",
+                    fontFamily: "'JetBrains Mono', monospace",
+                }}
+            >
+                {label}
+            </div>
+
+            <div
+                className="font-bold text-sm"
+                style={{
+                    color: "#fff",
+                    fontFamily: "'JetBrains Mono', monospace",
+                }}
+            >
+                {value == null ? "--" : Number(value).toFixed(2)}
+            </div>
+
+            <div
+                className="text-[10px] mt-0.5"
+                style={{
+                    color: "#555",
+                    fontFamily: "'JetBrains Mono', monospace",
+                }}
+            >
+                {unit}
+            </div>
+        </div>
+    );
+}
+
 export default function MissionReplay({
     points,
     currentIndex,
@@ -326,78 +376,80 @@ export default function MissionReplay({
 
             {/* Current telemetry */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
-                {[
-                    ["RPM", currentPoint.telemetry.rpm, "rpm"],
-                    ["CHT", currentPoint.telemetry.cht, "°C"],
-                    ["EGT", currentPoint.telemetry.egt, "°C"],
+                {(
                     [
-                        "OIL PRESSURE",
-                        currentPoint.telemetry.oil_pressure,
-                        "psi",
-                    ],
-                    [
-                        "OIL TEMP",
-                        currentPoint.telemetry.oil_temperature,
-                        "°C",
-                    ],
-                    [
-                        "FUEL FLOW",
-                        currentPoint.telemetry.fuel_flow,
-                        "gal/hr",
-                    ],
-                    [
-                        "VIBRATION",
-                        currentPoint.telemetry.vibration,
-                        "mm/s",
-                    ],
-                ].map(([label, value, unit]) => (
-                    <div
-                        key={String(label)}
-                        className="p-3"
-                        style={{
-                            border: "1px solid #292929",
-                            background: "#090909",
-                        }}
-                    >
-                        <div
-                            className="text-[10px] mb-1"
-                            style={{
-                                color: "#666",
-                                fontFamily:
-                                    "'JetBrains Mono', monospace",
-                            }}
-                        >
-                            {label}
-                        </div>
+                        ["RPM", currentPoint.telemetry.rpm, "rpm"],
+                        ["CHT", currentPoint.telemetry.cht, "°C"],
+                        ["EGT", currentPoint.telemetry.egt, "°C"],
+                        [
+                            "OIL PRESSURE",
+                            currentPoint.telemetry.oil_pressure,
+                            "psi",
+                        ],
+                        [
+                            "OIL TEMP",
+                            currentPoint.telemetry.oil_temperature,
+                            "°C",
+                        ],
+                        [
+                            "FUEL FLOW",
+                            currentPoint.telemetry.fuel_flow,
+                            "kg/h",
+                        ],
+                        [
+                            "VIBRATION",
+                            currentPoint.telemetry.vibration,
+                            "mm/s",
+                        ],
+                    ] as const
+                ).map(([label, value, unit]) => (
+                    <ReplayValue
+                        key={label}
+                        label={label}
+                        value={value}
+                        unit={unit}
+                    />
+                ))}
+            </div>
 
-                        <div
-                            className="font-bold text-sm"
-                            style={{
-                                color: "#fff",
-                                fontFamily:
-                                    "'JetBrains Mono', monospace",
-                            }}
-                        >
-                            {Number(value).toFixed(2)}
-                        </div>
-
-                        <div
-                            className="text-[10px] mt-0.5"
-                            style={{
-                                color: "#555",
-                                fontFamily:
-                                    "'JetBrains Mono', monospace",
-                            }}
-                        >
-                            {unit}
-                        </div>
-                    </div>
+            {/* Electrical and injection telemetry (null before these signals existed) */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                {(
+                    [
+                        [
+                            "BATTERY VOLTAGE",
+                            currentPoint.telemetry.battery_voltage,
+                            "V",
+                        ],
+                        [
+                            "ALTERNATOR CURRENT",
+                            currentPoint.telemetry.alternator_current,
+                            "A",
+                        ],
+                        [
+                            "INJECTION TIMING",
+                            currentPoint.telemetry.injection_timing,
+                            "° BTDC",
+                        ],
+                        [
+                            "INJECTION DURATION",
+                            currentPoint.telemetry.injection_duration,
+                            "ms",
+                        ],
+                    ] as const
+                ).map(([label, value, unit]) => (
+                    <ReplayValue
+                        key={label}
+                        label={label}
+                        value={value}
+                        unit={unit}
+                    />
                 ))}
             </div>
 
             {/* Health at replay point */}
             {currentPoint.health && (
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mt-2">
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-2 mt-2">
                     {[
                         ["OVERALL", currentPoint.health.overall],
                         ["THERMAL", currentPoint.health.thermal],
@@ -412,6 +464,10 @@ export default function MissionReplay({
                         [
                             "MECHANICAL",
                             currentPoint.health.mechanical,
+                        ],
+                        [
+                            "ELECTRICAL",
+                            currentPoint.health.electrical,
                         ],
                     ].map(([label, value]) => (
                         <div
@@ -441,7 +497,9 @@ export default function MissionReplay({
                                         "'JetBrains Mono', monospace",
                                 }}
                             >
-                                {Number(value).toFixed(1)}%
+                                {value == null
+                                    ? "--"
+                                    : `${Number(value).toFixed(1)}%`}
                             </div>
                         </div>
                     ))}

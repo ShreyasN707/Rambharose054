@@ -107,19 +107,7 @@ def mission_telemetry(
         raise MissionNotFoundError(mission_id)
 
     return [
-        TelemetryResponse(
-            timestamp=r.time,
-            engine_id=r.engine_id,
-            mission_id=r.mission_id,
-            rpm=r.rpm,
-            torque=r.torque,
-            cht=r.cht,
-            egt=r.egt,
-            oil_pressure=r.oil_pressure,
-            oil_temperature=r.oil_temperature,
-            fuel_flow=r.fuel_flow,
-            vibration=r.vibration,
-        )
+        TelemetryResponse.from_row(r)
         for r in rows
     ]
 
@@ -171,13 +159,7 @@ def mission_replay(
         prediction = None
 
         if snapshot is not None:
-            health = HealthResponse(
-                overall=snapshot.overall,
-                thermal=snapshot.thermal,
-                combustion=snapshot.combustion,
-                lubrication=snapshot.lubrication,
-                mechanical=snapshot.mechanical,
-            )
+            health = HealthResponse.from_snapshot(snapshot)
 
             # Older health snapshots may not contain ML prediction data.
             if (
@@ -196,19 +178,7 @@ def mission_replay(
         points.append(
             ReplayPoint(
                 timestamp=row.time,
-                telemetry=TelemetryResponse(
-                    timestamp=row.time,
-                    engine_id=row.engine_id,
-                    mission_id=row.mission_id,
-                    rpm=row.rpm,
-                    torque=row.torque,
-                    cht=row.cht,
-                    egt=row.egt,
-                    oil_pressure=row.oil_pressure,
-                    oil_temperature=row.oil_temperature,
-                    fuel_flow=row.fuel_flow,
-                    vibration=row.vibration,
-                ),
+                telemetry=TelemetryResponse.from_row(row),
                 health=health,
                 prediction=prediction,
             )

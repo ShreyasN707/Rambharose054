@@ -16,6 +16,8 @@ class HealthState(BaseModel):
     combustion: float
     lubrication: float
     mechanical: float
+    # Not part of `overall`; None when telemetry lacks electrical signals.
+    electrical: float | None = None
 
 
 class DigitalTwinState(BaseModel):

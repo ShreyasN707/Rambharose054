@@ -2,6 +2,14 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from telemetry.models import Telemetry
+from twin.models import HealthSnapshot
+
+
+# Autoencoder reconstruction-error threshold
+# (twin/ml_models/anomaly/autoencoder_threshold.pkl).
+ANOMALY_THRESHOLD = 0.6150358457512803
+
 
 # ---------------------------------------------------------------------------
 # Telemetry
@@ -20,6 +28,44 @@ class TelemetryResponse(BaseModel):
     fuel_flow: float
     vibration: float
 
+    # Operating conditions (Simulink inputs)
+    throttle: float | None = None               # 0-1
+    engine_load: float | None = None            # 0-1
+    altitude: float | None = None               # m
+    ambient_temperature: float | None = None    # °C
+
+    # Electrical system; None for telemetry recorded before these existed
+    battery_voltage: float | None = None        # V
+    alternator_current: float | None = None     # A
+
+    # ECU injection parameters
+    injection_timing: float | None = None       # deg BTDC
+    injection_duration: float | None = None     # ms
+
+    @classmethod
+    def from_row(cls, row: Telemetry) -> "TelemetryResponse":
+        return cls(
+            timestamp=row.time,
+            engine_id=row.engine_id,
+            mission_id=row.mission_id,
+            rpm=row.rpm,
+            torque=row.torque,
+            cht=row.cht,
+            egt=row.egt,
+            oil_pressure=row.oil_pressure,
+            oil_temperature=row.oil_temperature,
+            fuel_flow=row.fuel_flow,
+            vibration=row.vibration,
+            throttle=row.throttle,
+            engine_load=row.engine_load,
+            altitude=row.altitude,
+            ambient_temperature=row.ambient_temperature,
+            battery_voltage=row.battery_voltage,
+            alternator_current=row.alternator_current,
+            injection_timing=row.injection_timing,
+            injection_duration=row.injection_duration,
+        )
+
 
 # ---------------------------------------------------------------------------
 # Health / Prediction (mirror twin/schemas.py shapes, kept separate on purpose
@@ -32,6 +78,19 @@ class HealthResponse(BaseModel):
     combustion: float
     lubrication: float
     mechanical: float
+    # Reported separately; not included in `overall`.
+    electrical: float | None = None
+
+    @classmethod
+    def from_snapshot(cls, snapshot: HealthSnapshot) -> "HealthResponse":
+        return cls(
+            overall=snapshot.overall,
+            thermal=snapshot.thermal,
+            combustion=snapshot.combustion,
+            lubrication=snapshot.lubrication,
+            mechanical=snapshot.mechanical,
+            electrical=snapshot.electrical,
+        )
 
 
 class PredictionResponse(BaseModel):

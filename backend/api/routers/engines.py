@@ -11,6 +11,7 @@ from api.dependencies import (
 )
 from api.exceptions import EngineNotFoundError
 from api.schemas import (
+    ANOMALY_THRESHOLD,
     EngineListResponse,
     EngineSummary,
     TelemetryResponse,
@@ -224,19 +225,7 @@ def latest_telemetry(
     if row is None:
         raise EngineNotFoundError(engine_id)
 
-    return TelemetryResponse(
-        timestamp=row.time,
-        engine_id=row.engine_id,
-        mission_id=row.mission_id,
-        rpm=row.rpm,
-        torque=row.torque,
-        cht=row.cht,
-        egt=row.egt,
-        oil_pressure=row.oil_pressure,
-        oil_temperature=row.oil_temperature,
-        fuel_flow=row.fuel_flow,
-        vibration=row.vibration,
-    )
+    return TelemetryResponse.from_row(row)
 
 
 # ---------------------------------------------------------
@@ -276,13 +265,7 @@ def engine_health(
 
     latest_snapshot = snapshots[-1]
 
-    health = HealthResponse(
-        overall=latest_snapshot.overall,
-        thermal=latest_snapshot.thermal,
-        combustion=latest_snapshot.combustion,
-        lubrication=latest_snapshot.lubrication,
-        mechanical=latest_snapshot.mechanical,
-    )
+    health = HealthResponse.from_snapshot(latest_snapshot)
 
     window = telemetry_repo.get_latest_window(
         session,
@@ -327,6 +310,7 @@ def engine_health(
 
     prediction = PredictionResponse(
         anomaly_score=ml_prediction.anomaly_score,
+        is_anomaly=ml_prediction.anomaly_score >= ANOMALY_THRESHOLD,
         fault=ml_prediction.fault,
         confidence=ml_prediction.confidence,
         rul_hours=ml_prediction.rul_hours,
@@ -383,13 +367,7 @@ def health_history(
         history=[
             HealthHistoryPoint(
                 timestamp=s.time,
-                health=HealthResponse(
-                    overall=s.overall,
-                    thermal=s.thermal,
-                    combustion=s.combustion,
-                    lubrication=s.lubrication,
-                    mechanical=s.mechanical,
-                ),
+                health=HealthResponse.from_snapshot(s),
             )
             for s in snapshots
         ],

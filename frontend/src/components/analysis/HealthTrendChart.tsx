@@ -41,6 +41,12 @@ const series = [
         label: "MECHANICAL",
         color: "#c084fc",
     },
+    {
+        // Not part of OVERALL; gaps where older snapshots have no value.
+        key: "electrical",
+        label: "ELECTRICAL",
+        color: "#34d399",
+    },
 ] as const;
 
 function formatTime(timestamp: string) {

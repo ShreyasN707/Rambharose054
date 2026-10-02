@@ -17,6 +17,8 @@ interface Drone3DViewerProps {
     throttle?: number;
     vibration?: number;
     cht?: number;
+    egt?: number;
+    oilTemperature?: number;
     height?: number | string;
     onSelectPart?: (partName: string) => void;
 }
@@ -114,6 +116,8 @@ export default function Drone3DViewer({
     throttle = 45,
     vibration = 0.08,
     cht = 175,
+    egt = 700,
+    oilTemperature = 105,
     height = "100%",
 }: Drone3DViewerProps) {
     const mountRef       = useRef<HTMLDivElement>(null);
@@ -134,14 +138,17 @@ export default function Drone3DViewer({
     const sphericalRef   = useRef({ radius: 9.0, theta: Math.PI / 4, phi: Math.PI / 3 });
     const targetRef      = useRef(new THREE.Vector3(0, 0, 0));
     const autoRotateRef  = useRef(autoRotate);
+    const displayModeRef = useRef<DisplayMode>(displayMode);
 
-    // Keep autoRotate ref in sync
+    // Keep refs in sync
     useEffect(() => { autoRotateRef.current = autoRotate; }, [autoRotate]);
+    useEffect(() => { displayModeRef.current = displayMode; }, [displayMode]);
 
     // Telemetry ref
-    const telemetryRef = useRef({ rpm, throttle, vibration, cht });
-    useEffect(() => { telemetryRef.current = { rpm, throttle, vibration, cht }; },
-        [rpm, throttle, vibration, cht]);
+    const telemetryRef = useRef({ rpm, throttle, vibration, cht, egt, oilTemperature });
+    useEffect(() => {
+        telemetryRef.current = { rpm, throttle, vibration, cht, egt, oilTemperature };
+    }, [rpm, throttle, vibration, cht, egt, oilTemperature]);
 
     // View presets
     const applyViewPreset = useCallback((preset: ViewPreset) => {
@@ -167,10 +174,6 @@ export default function Drone3DViewer({
                 mat.emissive.setHex(0x003344);
             } else if (displayMode === "THERMAL") {
                 mat.wireframe = false;
-                const heat = Math.min(Math.max((telemetryRef.current.cht - 120) / 100, 0), 1);
-                const col = new THREE.Color().setHSL(0.66 - heat * 0.66, 1.0, 0.45);
-                mat.color.copy(col);
-                mat.emissive.copy(col.clone().multiplyScalar(0.4));
             } else {
                 mat.wireframe = false;
                 if (mat.userData.origColor)    mat.color.copy(mat.userData.origColor);
@@ -526,6 +529,38 @@ export default function Drone3DViewer({
                     strobeLightRef.current.intensity = 4.0;
                     if (strobeTimer > 1.45) { strobeLightRef.current.intensity = 0; strobeTimer = 0; }
                 }
+            }
+
+            // Live thermal rendering from CHT + EGT + oil temperature.
+            if (displayModeRef.current === "THERMAL") {
+                const t = telemetryRef.current;
+
+                const chtHeat = THREE.MathUtils.clamp((t.cht - 25) / 75, 0, 1);
+                const egtHeat = THREE.MathUtils.clamp((t.egt - 700) / 300, 0, 1);
+                const oilHeat = THREE.MathUtils.clamp((t.oilTemperature - 100) / 40, 0, 1);
+
+                const rawHeat = THREE.MathUtils.clamp(
+                chtHeat * 0.25 +
+                egtHeat * 0.50 +
+                oilHeat * 0.25,
+                0,
+                1
+            );
+
+            // Make the color transition much more responsive
+            const heat = THREE.MathUtils.clamp(
+                Math.pow(rawHeat, 0.3),
+                0,
+                1
+            );
+                const col = new THREE.Color().setHSL(0.66 - heat * 0.66, 1.0, 0.45);
+
+                materialsRef.current.forEach((mat) => {
+                    mat.wireframe = false;
+                    mat.color.copy(col);
+                    mat.emissive.copy(col);
+                    mat.emissiveIntensity = 0.4 + heat * 1.6;
+                });
             }
 
             // Exhaust flicker

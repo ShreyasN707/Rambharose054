@@ -28,6 +28,10 @@ class TelemetryRepository:
             engine_load=telemetry.engine_load,
             altitude=telemetry.altitude,
             ambient_temperature=telemetry.ambient_temperature,
+            battery_voltage=telemetry.battery_voltage,
+            alternator_current=telemetry.alternator_current,
+            injection_timing=telemetry.injection_timing,
+            injection_duration=telemetry.injection_duration,
         )
 
         statement = statement.on_conflict_do_nothing(

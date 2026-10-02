@@ -574,6 +574,11 @@ function RadiatorGraphic() {
     );
 }
 
+// Telemetry recorded before a signal existed arrives as null/undefined.
+function formatOptional(value: number | null | undefined, digits: number): string {
+    return value == null ? "--" : value.toFixed(digits);
+}
+
 function TelemetryCell({
         label,
         value,
@@ -656,7 +661,11 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
     const oilPressure = String(Math.round(liveTelemetry?.oil_pressure ?? 0));
     const vibration = (liveTelemetry?.vibration ?? 0).toFixed(2);
     const altitude = Math.round(liveTelemetry?.altitude ?? 0);
-    const ambientTemp = (liveTelemetry?.ambient_temp ?? 0).toFixed(1);
+    const ambientTemp = (liveTelemetry?.ambient_temperature ?? 0).toFixed(1);
+    const batteryVoltage = liveTelemetry?.battery_voltage;
+    const alternatorCurrent = liveTelemetry?.alternator_current;
+    const injectionTiming = liveTelemetry?.injection_timing;
+    const injectionDuration = liveTelemetry?.injection_duration;
 
 
     const hrs = String(Math.floor(elapsedSec / 3600)).padStart(2, "0");
@@ -710,7 +719,7 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                         <TelemetryCell label="TIME" value={timeStr} unit="" color="#3b82f6" />
                                         <TelemetryCell label="TORQUE" value={torque} unit="N·m"  warn={parseFloat(torque) < 7.0}/>
-                                        <TelemetryCell label="FUEL FLOW" value={fuelFlow} unit="L/h" warn={parseFloat(fuelFlow) < 2.0}/>
+                                        <TelemetryCell label="FUEL FLOW" value={fuelFlow} unit="kg/h" warn={parseFloat(fuelFlow) < 2.0}/>
                                         <TelemetryCell label="VIBRATION" value={vibration} unit="g" warn={parseFloat(vibration) > 5}
                                         />
                                     </div>
@@ -735,6 +744,31 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                                             value={ambientTemp}
                                             unit="°C"
                                             color="#eab308"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                        <TelemetryCell
+                                            label="BATTERY VOLTAGE"
+                                            value={formatOptional(batteryVoltage, 2)}
+                                            unit="V"
+                                            warn={batteryVoltage != null && batteryVoltage < 27.0}
+                                        />
+                                        <TelemetryCell
+                                            label="ALTERNATOR CURRENT"
+                                            value={formatOptional(alternatorCurrent, 1)}
+                                            unit="A"
+                                            warn={alternatorCurrent != null && alternatorCurrent < 9.0}
+                                        />
+                                        <TelemetryCell
+                                            label="INJECTION TIMING"
+                                            value={formatOptional(injectionTiming, 1)}
+                                            unit="° BTDC"
+                                        />
+                                        <TelemetryCell
+                                            label="INJECTION DURATION"
+                                            value={formatOptional(injectionDuration, 2)}
+                                            unit="ms"
                                         />
                                     </div>
 
