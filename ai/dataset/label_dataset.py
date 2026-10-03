@@ -68,7 +68,8 @@ COLUMNS = (
     + ("fault_id", "severity", "failed", "rul_seconds")
 )
 
-_service = DigitalTwinService(None, None, None)
+# Only the health calculation is used: no repositories or predictors.
+_service = DigitalTwinService(None, None, None, None)
 _start = datetime(2026, 1, 1, tzinfo=timezone.utc)
 
 
@@ -125,7 +126,11 @@ def label_run(raw_csv: Path, out_dir: Path) -> dict:
                  s.injection_timing, s.injection_duration)
                 for s in window[-10:]
             ],
-            recent_rpm=[s.rpm for s in rough],
+            # Deviation from the expected RPM, as the live twin uses.
+            recent_rpm=[
+                rows[j]["rpm"] - float(expected["rpm"][j])
+                for j in range(i - len(rough) + 1, i + 1)
+            ],
             recent_cht=[s.cht for s in rough],
             expected={k: float(v[i]) for k, v in expected.items()},
         )

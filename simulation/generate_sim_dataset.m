@@ -35,6 +35,12 @@ mdl = 'AeroPistonEngineSimulator';
 load_system(mdl);
 evalin('base', 'engine_params;');
 
+% Don't keep every run's logged signals in the Simulation Data Inspector:
+% over hundreds of runs that fills the RAM.
+Simulink.sdi.setAutoArchiveMode(false);
+Simulink.sdi.setArchiveRunLimit(0);
+Simulink.sdi.clear;
+
 raw_dir = fullfile(out_dir, 'raw');
 if ~exist(raw_dir, 'dir')
     mkdir(raw_dir);
@@ -79,9 +85,19 @@ for seed = seeds
             done = done + 1;
             run_id = sprintf('%s_f%d_s%d', profiles{p}, fault_id, seed);
             csv_path = fullfile(raw_dir, [run_id '.csv']);
-            if exist(csv_path, 'file')
+            skip_path = fullfile(raw_dir, [run_id '.skip']);
+            busy_path = fullfile(raw_dir, [run_id '.inprogress']);
+            if exist(csv_path, 'file') || exist(skip_path, 'file')
                 continue;
             end
+            % A leftover marker means this run crashed MATLAB last time.
+            if exist(busy_path, 'file')
+                movefile(busy_path, skip_path);
+                fprintf('[%d/%d] %-28s SKIPPED (crashed MATLAB earlier)\n', ...
+                    done, total, run_id);
+                continue;
+            end
+            fclose(fopen(busy_path, 'w'));
 
             % Independent, reproducible random stream per run.
             rs = RandStream('mt19937ar', 'Seed', 10000 * seed + 100 * p + fault_id);
@@ -113,9 +129,33 @@ for seed = seeds
             end
             in = in.setModelParameter('StopTime', num2str(duration));
 
+            % Rarely a run finishes with an empty log; retry it with fresh
+            % noise seeds, and skip it (leaving a .skip marker) if that
+            % keeps happening, instead of stopping the whole generation.
             tic;
-            o = sim(in);
-            log = o.telemetry_log;
+            log = [];
+            for attempt = 1:3
+                o = sim(in);
+                if numel(o.telemetry_log.signal1.Time) >= 2
+                    log = o.telemetry_log;
+                    break;
+                end
+                fprintf('%s: empty log (attempt %d), new noise seeds\n', run_id, attempt);
+                noise_seeds = randi(rs, 2^31 - 2, size(noise_blocks, 1), 1);
+                for k = 1:size(noise_blocks, 1)
+                    in = in.setBlockParameter([mdl '/' noise_blocks{k, 1}], ...
+                        noise_blocks{k, 2}, num2str(noise_seeds(k)));
+                end
+                Simulink.sdi.clear;
+            end
+            if isempty(log)
+                fid = fopen(skip_path, 'w');
+                fprintf(fid, 'empty telemetry_log after 3 attempts\n');
+                fclose(fid);
+                delete(busy_path);
+                fprintf('[%d/%d] %-28s SKIPPED (empty log)\n', done, total, run_id);
+                continue;
+            end
 
             ts = (0:duration)';
             T = table(ts, 'VariableNames', {'sim_time'});
@@ -125,6 +165,11 @@ for seed = seeds
                 end
                 s = log.(sprintf('signal%d', k));
                 d = squeeze(s.Data);
+                if numel(s.Time) < 2
+                    error('generate_sim_dataset:shortLog', ...
+                        '%s: signal%d (%s) logged only %d sample(s)', ...
+                        run_id, k, names{k}, numel(s.Time));
+                end
                 % The live stream publishes the latest logged value.
                 T.(names{k}) = interp1(s.Time, d, ts, 'previous', 'extrap');
             end
@@ -152,6 +197,9 @@ for seed = seeds
             % Write the CSV last: its presence marks the run as complete.
             writetable(T, [csv_path '.tmp'], 'FileType', 'text');
             movefile([csv_path '.tmp'], csv_path);
+            delete(busy_path);
+            clear o log T U t u;
+            Simulink.sdi.clear;
 
             fprintf('[%d/%d] %-28s onset %4d s  ramp %4d s  %5d s simulated in %4.0f s\n', ...
                 done, total, run_id, onset, ramp, duration, toc);
