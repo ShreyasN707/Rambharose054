@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A real-time digital twin of an aero-piston engine. A Simulink model generates engine telemetry, which flows over MQTT into TimescaleDB, gets health/ML analysis, and is shown live in a React dashboard. Faults can be injected from the dashboard while the simulation runs.
 
+It answers the SIH 2026 problem statement in `docs/PROBLEM_STATEMENT.md` (MALE UAV aero-piston engine digital twin); `docs/ARCHITECTURE.md` §2 maps every PS requirement to the code. Check new work against the PS.
+
 ## Data flow
 
 ```
