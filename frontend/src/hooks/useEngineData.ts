@@ -74,6 +74,7 @@ const ZERO_TELEMETRY: TelemetryData = {
     alternator_current: null,
     injection_timing: null,
     injection_duration: null,
+    sim_time: null,
 };
 
 export function useEngineData() {

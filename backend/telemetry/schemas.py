@@ -48,6 +48,13 @@ class TelemetryCreate(BaseModel):
         description="Injector pulse width per injection event (ms)",
     )
 
+    # Simulink simulation clock; fault onset and progression are timed on it.
+    sim_time: float | None = Field(
+        default=None,
+        ge=0,
+        description="Simulation time since the run started (s)",
+    )
+
     @field_validator("timestamp")
     @classmethod
     def validate_timestamp(cls, value: datetime) -> datetime:

@@ -88,6 +88,7 @@ class TelemetryService:
             alternator_current=data.alternator_current,
             injection_timing=data.injection_timing,
             injection_duration=data.injection_duration,
+            sim_time=data.sim_time,
         )
 
         return self.repository.save(session, telemetry)

@@ -80,6 +80,7 @@ class Telemetry(Base):
     alternator_current: Mapped[float | None] = mapped_column(Float, nullable=True)    # A
     injection_timing: Mapped[float | None] = mapped_column(Float, nullable=True)      # deg BTDC
     injection_duration: Mapped[float | None] = mapped_column(Float, nullable=True)    # ms
+    sim_time: Mapped[float | None] = mapped_column(Float, nullable=True)              # s
 
 
 class IngestionEvent(Base):
