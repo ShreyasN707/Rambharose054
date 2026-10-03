@@ -3,7 +3,6 @@ import * as THREE from "three";
 import {
     RotateCw,
     RotateCcw,
-    Maximize2,
     Eye,
     Layers,
     Gauge,
