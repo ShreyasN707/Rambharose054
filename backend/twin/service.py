@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from telemetry.repository import TelemetryRepository
 from telemetry.schemas import TelemetryCreate
 
+from twin import baseline
 from twin.ml import MLPredictor
 from twin.models import HealthSnapshot
 from twin.repository import HealthSnapshotRepository
@@ -15,6 +16,22 @@ from twin.schemas import (
     HealthState,
     MLPrediction,
 )
+
+
+# Healthy readings at the nominal cruise point (full throttle, 50 % load,
+# sea level, 25 degC, warmed up), where the fixed limits below were
+# calibrated. When the healthy baseline (twin/baseline.py) is available,
+# each limit moves by (expected now - this reference), so health measures
+# the deviation from a healthy engine in the same flight conditions.
+CRUISE_REFERENCE = {
+    "rpm": 3993.94,
+    "egt": 709.15,
+    "cht": 80.13,
+    "oil_pressure": 59.37,
+    "oil_temperature": 105.73,
+    "battery_voltage": 28.0,
+    "alternator_current": 12.47,
+}
 
 
 # Autoencoder reconstruction-error threshold
@@ -97,16 +114,38 @@ class DigitalTwinService:
         telemetry: TelemetryCreate,
     ) -> DigitalTwinState | None:
 
-        telemetry_records = (
+        # The healthy baseline needs the operating-condition history; the
+        # other checks use the latest 60 samples of it.
+        history_records = (
             self.telemetry_repository.get_latest_window(
                 session,
                 telemetry.engine_id,
                 telemetry.mission_id,
+                limit=baseline.HISTORY_SAMPLES,
             )
         )
 
-        if len(telemetry_records) < 60:
+        if len(history_records) < 60:
             return None
+
+        telemetry_records = history_records[-60:]
+
+        # A shorter history than requested covers the whole mission, so
+        # the baseline can follow the engine from a cold start.
+        expected = baseline.expected(
+            [
+                {
+                    "throttle": item.throttle,
+                    "engine_load": item.engine_load,
+                    "altitude": item.altitude,
+                    "ambient_temperature": item.ambient_temperature,
+                }
+                for item in history_records
+            ],
+            from_engine_start=(
+                len(history_records) < baseline.HISTORY_SAMPLES
+            ),
+        )
 
         telemetry_window = [
             {
@@ -158,6 +197,7 @@ class DigitalTwinService:
             recent_injection=recent_injection,
             recent_rpm=[item.rpm for item in roughness_records],
             recent_cht=[item.cht for item in roughness_records],
+            expected=expected,
         )
 
         self.save_health_snapshot(
@@ -175,21 +215,30 @@ class DigitalTwinService:
         recent_injection: list[tuple] | None = None,
         recent_rpm: list[float] | None = None,
         recent_cht: list[float] | None = None,
+        expected: dict[str, float] | None = None,
     ) -> HealthState:
 
-        thermal = self._thermal_health(telemetry)
+        # How far each healthy reading sits from the cruise reference in
+        # the current flight conditions (all zero without a baseline).
+        shift = {
+            name: (expected[name] - reference) if expected else 0.0
+            for name, reference in CRUISE_REFERENCE.items()
+        }
+
+        thermal = self._thermal_health(telemetry, shift)
         combustion = self._combustion_health(
             telemetry,
+            shift,
             recent_rpm=recent_rpm,
         )
-        lubrication = self._lubrication_health(telemetry)
+        lubrication = self._lubrication_health(telemetry, shift)
         mechanical = self._mechanical_health(
             telemetry,
             recent_vibration=recent_vibration,
         )
 
         # None when the telemetry has no electrical / injection signals.
-        electrical = self._electrical_health(telemetry)
+        electrical = self._electrical_health(telemetry, shift)
         injection = self._injection_health(
             telemetry,
             recent_injection=recent_injection,
@@ -264,20 +313,21 @@ class DigitalTwinService:
     def _thermal_health(
         self,
         telemetry: TelemetryCreate,
+        shift: dict[str, float],
     ) -> float:
 
-        # Healthy operating region:
+        # Healthy operating region at cruise (limits move with `shift`):
         # CHT <= 100°C
         # EGT <= 700°C
 
         cht_penalty = max(
             0,
-            telemetry.cht - 100,
+            telemetry.cht - (100 + shift["cht"]),
         ) * 1.5
 
         egt_penalty = max(
             0,
-            telemetry.egt - 700,
+            telemetry.egt - (700 + shift["egt"]),
         ) * 0.25
 
         return self._score(
@@ -289,14 +339,15 @@ class DigitalTwinService:
     def _combustion_health(
         self,
         telemetry: TelemetryCreate,
+        shift: dict[str, float],
         recent_rpm: list[float] | None = None,
     ) -> float:
 
-        # Healthy RPM centered around the current simulator's
-        # normal operating point (~4000 RPM).
+        # Healthy RPM centered around the expected speed (~4000 RPM at
+        # the cruise point).
 
         rpm_deviation = abs(
-            telemetry.rpm - 4000
+            telemetry.rpm - (4000 + shift["rpm"])
         )
 
         rpm_penalty = max(
@@ -305,7 +356,7 @@ class DigitalTwinService:
         ) * 0.04
 
         egt_deviation = abs(
-            telemetry.egt - 650
+            telemetry.egt - (650 + shift["egt"])
         )
 
         egt_penalty = max(
@@ -330,19 +381,20 @@ class DigitalTwinService:
     def _lubrication_health(
         self,
         telemetry: TelemetryCreate,
+        shift: dict[str, float],
     ) -> float:
 
-        # Healthy oil pressure is around 60 psi.
-        # Oil temperature can normally be around 100-105°C.
+        # At cruise, healthy oil pressure is around 60 psi and oil
+        # temperature around 100-105°C (limits move with `shift`).
 
         pressure_penalty = max(
             0,
-            55 - telemetry.oil_pressure,
+            (55 + shift["oil_pressure"]) - telemetry.oil_pressure,
         ) * 3.0
 
         temperature_penalty = max(
             0,
-            telemetry.oil_temperature - 115,
+            telemetry.oil_temperature - (115 + shift["oil_temperature"]),
         ) * 0.75
 
         return self._score(
@@ -384,6 +436,7 @@ class DigitalTwinService:
     def _electrical_health(
         self,
         telemetry: TelemetryCreate,
+        shift: dict[str, float],
     ) -> float | None:
 
         # Older telemetry has no electrical signals.
@@ -396,15 +449,25 @@ class DigitalTwinService:
         # Under-voltage: bus sagging toward battery voltage means the
         # alternator is no longer carrying the load (20 points per volt).
         # Over-voltage: regulator fault (25 points per volt).
+        # The lower limits move with `shift` (at low engine speed a healthy
+        # alternator delivers less); the upper ones are equipment ratings.
         voltage_penalty = (
-            max(0, BUS_VOLTAGE_MIN_V - telemetry.battery_voltage) * 20
+            max(
+                0,
+                (BUS_VOLTAGE_MIN_V + shift["battery_voltage"])
+                - telemetry.battery_voltage,
+            ) * 20
             + max(0, telemetry.battery_voltage - BUS_VOLTAGE_MAX_V) * 25
         )
 
         # Alternator output below the avionics load drains the battery;
         # output above rating indicates an overloaded alternator.
         current_penalty = (
-            max(0, ALTERNATOR_CURRENT_MIN_A - telemetry.alternator_current) * 4
+            max(
+                0,
+                (ALTERNATOR_CURRENT_MIN_A + shift["alternator_current"])
+                - telemetry.alternator_current,
+            ) * 4
             + max(0, telemetry.alternator_current - ALTERNATOR_CURRENT_MAX_A) * 4
         )
 
@@ -582,6 +645,7 @@ class DigitalTwinService:
         recent_injection: list[tuple] | None = None,
         recent_rpm: list[float] | None = None,
         recent_cht: list[float] | None = None,
+        expected: dict[str, float] | None = None,
     ) -> DigitalTwinState:
 
         health = self.calculate_health(
@@ -590,6 +654,7 @@ class DigitalTwinService:
             recent_injection=recent_injection,
             recent_rpm=recent_rpm,
             recent_cht=recent_cht,
+            expected=expected,
         )
 
         operating_state = self._determine_operating_state(
