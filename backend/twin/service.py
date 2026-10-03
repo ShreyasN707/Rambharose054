@@ -1,4 +1,5 @@
 from datetime import datetime
+from math import sqrt
 from statistics import median
 
 from sqlalchemy.orm import Session
@@ -16,6 +17,13 @@ from twin.schemas import (
 )
 
 
+# Autoencoder reconstruction-error threshold
+# (twin/ml_models/anomaly/autoencoder_threshold.pkl). The anomaly score is
+# the raw reconstruction error, so it is unbounded: compare it with this
+# threshold, not with fixed 0-1 levels.
+ANOMALY_THRESHOLD = 0.6150358457512803
+
+
 # Electrical health limits. They mirror the Simulink Electrical_Model
 # parameters in simulation/engine_params.m (elec.*).
 #
@@ -25,6 +33,50 @@ BUS_VOLTAGE_MIN_V = 27.0
 BUS_VOLTAGE_MAX_V = 29.5
 ALTERNATOR_CURRENT_MIN_A = 9.0
 ALTERNATOR_CURRENT_MAX_A = 25.0   # elec.I_alt_max (rated output)
+
+
+# ECU injection parameters. They mirror the Simulink Injection_Model
+# parameters in simulation/engine_params.m (inj.*).
+#
+# Start-of-injection map (deg BTDC). Rows = INJ_RPM_BP, columns =
+# INJ_THROTTLE_BP. Linear interpolation, clipped at the map edges.
+INJ_RPM_BP = (1500, 3000, 4500, 6000, 7500)
+INJ_THROTTLE_BP = (0.0, 0.25, 0.5, 0.75, 1.0)
+INJ_TIMING_TABLE = (
+    (12, 11, 10, 9, 8),
+    (16, 15, 14, 13, 12),
+    (20, 19, 18, 17, 16),
+    (23, 22, 21, 20, 19),
+    (26, 25, 24, 23, 22),
+)
+INJ_N_CYL = 1
+INJ_STROKES = 4
+INJ_Q_STATIC_GPS = 2.5     # injector static flow rate (g/s)
+INJ_T_DEAD_MS = 0.8        # opening dead time added to every pulse (ms)
+INJ_RPM_MIN = 300          # below this speed the ECU does not inject
+
+# Healthy: reported values match the ECU map / measured fuel flow within
+# the sensor noise and lag (timing ~0.1 deg; fuel flow ~0.15 kg/h, which
+# is a large fraction of the flow at low throttle).
+INJ_TIMING_TOLERANCE_DEG = 1.0
+INJ_FUEL_TOLERANCE = 0.05       # relative to the commanded fuel flow
+INJ_FUEL_NOISE_KGPH = 0.15      # absolute floor for the fuel tolerance
+
+
+# Signal roughness (median |second difference| over ROUGHNESS_WINDOW
+# samples). Real engine temperatures and speed change smoothly, even
+# through throttle transitions, so sample-to-sample jitter points at
+# combustion instability (RPM) or a failing sensor (CHT). Healthy limits
+# come from simulator runs incl. rapid throttle transitions: RPM <= 0.75,
+# CHT <= 1.0.
+ROUGHNESS_WINDOW = 30
+RPM_ROUGHNESS_LIMIT = 2.0       # RPM
+CHT_ROUGHNESS_LIMIT = 1.2       # degC
+
+# Vibration RMS over ROUGHNESS_WINDOW samples. Healthy simulator runs stay
+# <= 2.1 (incl. every non-vibration fault); imbalance / bearing wear
+# grows it to ~6.
+VIBRATION_RMS_LIMIT = 2.2
 
 
 class DigitalTwinService:
@@ -78,17 +130,34 @@ class DigitalTwinService:
             telemetry_window,
         )
 
-        # get_latest_window() returns newest samples first, so the first
-        # samples here are the most recent vibration readings.
+        # get_latest_window() returns samples oldest first, so the last
+        # samples here are the most recent readings.
+        recent_records = telemetry_records[-10:]
+        roughness_records = telemetry_records[-ROUGHNESS_WINDOW:]
+
         recent_vibration = [
             item.vibration
-            for item in telemetry_records[:10]
+            for item in roughness_records
+        ]
+
+        recent_injection = [
+            (
+                item.rpm,
+                item.throttle,
+                item.fuel_flow,
+                item.injection_timing,
+                item.injection_duration,
+            )
+            for item in recent_records
         ]
 
         state = self.build_state(
             telemetry,
             prediction,
             recent_vibration=recent_vibration,
+            recent_injection=recent_injection,
+            recent_rpm=[item.rpm for item in roughness_records],
+            recent_cht=[item.cht for item in roughness_records],
         )
 
         self.save_health_snapshot(
@@ -103,27 +172,50 @@ class DigitalTwinService:
         self,
         telemetry: TelemetryCreate,
         recent_vibration: list[float] | None = None,
+        recent_injection: list[tuple] | None = None,
+        recent_rpm: list[float] | None = None,
+        recent_cht: list[float] | None = None,
     ) -> HealthState:
 
         thermal = self._thermal_health(telemetry)
-        combustion = self._combustion_health(telemetry)
+        combustion = self._combustion_health(
+            telemetry,
+            recent_rpm=recent_rpm,
+        )
         lubrication = self._lubrication_health(telemetry)
         mechanical = self._mechanical_health(
             telemetry,
             recent_vibration=recent_vibration,
         )
 
-        # Reported separately; deliberately not part of the overall
-        # average so existing health scores and operating states are
-        # unchanged.
+        # None when the telemetry has no electrical / injection signals.
         electrical = self._electrical_health(telemetry)
+        injection = self._injection_health(
+            telemetry,
+            recent_injection=recent_injection,
+        )
 
-        overall = (
-            thermal
-            + combustion
-            + lubrication
-            + mechanical
-        ) / 4
+        # Instrumentation health. Not part of `overall`: a failing sensor
+        # says the data is unreliable, not that the engine is degrading.
+        # It still drives the operating state.
+        sensor = self._sensor_health(recent_cht)
+
+        # Average over the subsystems that have data, so older telemetry
+        # without electrical / injection signals is not penalised.
+        components = [
+            score
+            for score in (
+                thermal,
+                combustion,
+                lubrication,
+                mechanical,
+                electrical,
+                injection,
+            )
+            if score is not None
+        ]
+
+        overall = sum(components) / len(components)
 
         return HealthState(
             overall=round(overall, 2),
@@ -132,6 +224,8 @@ class DigitalTwinService:
             lubrication=lubrication,
             mechanical=mechanical,
             electrical=electrical,
+            injection=injection,
+            sensor=sensor,
         )
 
     def save_health_snapshot(
@@ -152,9 +246,11 @@ class DigitalTwinService:
             lubrication=state.health.lubrication,
             mechanical=state.health.mechanical,
             electrical=state.health.electrical,
+            injection=state.health.injection,
+            sensor=state.health.sensor,
 
             anomaly_score=state.prediction.anomaly_score,
-            is_anomaly=state.prediction.anomaly_score >= 0.6150358457512803,
+            is_anomaly=state.prediction.anomaly_score >= ANOMALY_THRESHOLD,
             fault=state.prediction.fault,
             confidence=state.prediction.confidence,
             rul_hours=state.prediction.rul_hours,
@@ -193,6 +289,7 @@ class DigitalTwinService:
     def _combustion_health(
         self,
         telemetry: TelemetryCreate,
+        recent_rpm: list[float] | None = None,
     ) -> float:
 
         # Healthy RPM centered around the current simulator's
@@ -216,10 +313,18 @@ class DigitalTwinService:
             egt_deviation - 80,
         ) * 0.10
 
+        # Combustion instability: cycle-to-cycle torque variation makes
+        # the RPM rough (2.5 points per RPM beyond the healthy limit).
+        roughness_penalty = max(
+            0,
+            self._roughness(recent_rpm) - RPM_ROUGHNESS_LIMIT,
+        ) * 2.5
+
         return self._score(
             100
             - rpm_penalty
             - egt_penalty
+            - roughness_penalty
         )
 
     def _lubrication_health(
@@ -252,28 +357,23 @@ class DigitalTwinService:
         recent_vibration: list[float] | None = None,
     ) -> float:
 
-        # Vibration can contain short-lived spikes. Use the median of the
-        # latest samples for the health score so one noisy sample does not
-        # make mechanical health jump from healthy to critical and back.
+        # Vibration telemetry is a 1 Hz sample of a fast oscillating
+        # signal, so single samples (and their signed median, which hovers
+        # around zero) say little. The RMS over the latest samples tracks
+        # the vibration amplitude.
         #
         # The raw vibration telemetry is NOT changed; only the health
         # calculation is smoothed.
-        if recent_vibration:
-            vibration = float(
-                median(recent_vibration[-10:])
-            )
-        else:
-            vibration = abs(
-                telemetry.vibration
-            )
+        samples = recent_vibration or [telemetry.vibration]
 
-        vibration = abs(vibration)
+        vibration_rms = sqrt(
+            sum(value * value for value in samples) / len(samples)
+        )
 
-        # Keep the original healthy threshold and penalty curve, but apply
-        # them to the smoothed vibration value.
+        # 25 points per unit of RMS beyond the healthy limit.
         vibration_penalty = max(
             0,
-            vibration - 2.0,
+            vibration_rms - VIBRATION_RMS_LIMIT,
         ) * 25
 
         return self._score(
@@ -314,6 +414,158 @@ class DigitalTwinService:
             - current_penalty
         )
 
+    def _injection_health(
+        self,
+        telemetry: TelemetryCreate,
+        recent_injection: list[tuple] | None = None,
+    ) -> float | None:
+
+        # Compares the reported ECU injection parameters with the rest of
+        # the engine state:
+        #   timing   -> start-of-injection map (RPM x throttle)
+        #   duration -> the fuel flow the pulse width commands, against the
+        #               measured fuel flow (a fouled injector delivers less
+        #               fuel than the ECU commands)
+        # A persistent mismatch points at injector or ECU timing faults.
+        #
+        # The median of the signed errors over the latest samples is used,
+        # so symmetric sensor noise and the fuel-flow sensor lag during
+        # throttle transitions cancel out and only a persistent bias
+        # remains.
+        samples = recent_injection or [
+            (
+                telemetry.rpm,
+                telemetry.throttle,
+                telemetry.fuel_flow,
+                telemetry.injection_timing,
+                telemetry.injection_duration,
+            )
+        ]
+
+        timing_errors = []
+        commanded_fuel = []
+        fuel_errors = []
+
+        for rpm, throttle, fuel_flow, timing, duration in samples:
+
+            # Older telemetry has no injection signals, and the ECU does
+            # not inject while the engine is stopped.
+            if (
+                timing is None
+                or duration is None
+                or rpm < INJ_RPM_MIN
+            ):
+                continue
+
+            timing_errors.append(
+                timing - self._expected_injection_timing(rpm, throttle)
+            )
+
+            commanded = self._commanded_fuel_flow(rpm, duration)
+            commanded_fuel.append(commanded)
+            fuel_errors.append(commanded - fuel_flow)
+
+        if not timing_errors:
+            return None
+
+        # 10 points per degree beyond tolerance.
+        timing_penalty = max(
+            0,
+            abs(median(timing_errors)) - INJ_TIMING_TOLERANCE_DEG,
+        ) * 10
+
+        # 2 points per percent of the commanded flow beyond tolerance.
+        commanded = max(median(commanded_fuel), INJ_FUEL_NOISE_KGPH)
+        fuel_tolerance = max(
+            INJ_FUEL_TOLERANCE * commanded,
+            INJ_FUEL_NOISE_KGPH,
+        )
+        fuel_penalty = max(
+            0,
+            abs(median(fuel_errors)) - fuel_tolerance,
+        ) / commanded * 200
+
+        return self._score(
+            100
+            - timing_penalty
+            - fuel_penalty
+        )
+
+    @staticmethod
+    def _expected_injection_timing(
+        rpm: float,
+        throttle: float,
+    ) -> float:
+
+        def locate(breakpoints, value):
+            value = min(max(value, breakpoints[0]), breakpoints[-1])
+            for i in range(len(breakpoints) - 2):
+                if value <= breakpoints[i + 1]:
+                    break
+            else:
+                i = len(breakpoints) - 2
+            low, high = breakpoints[i], breakpoints[i + 1]
+            return i, (value - low) / (high - low)
+
+        r, fr = locate(INJ_RPM_BP, rpm)
+        t, ft = locate(INJ_THROTTLE_BP, throttle)
+
+        table = INJ_TIMING_TABLE
+        low = table[r][t] + (table[r][t + 1] - table[r][t]) * ft
+        high = table[r + 1][t] + (table[r + 1][t + 1] - table[r + 1][t]) * ft
+
+        return low + (high - low) * fr
+
+    @staticmethod
+    def _commanded_fuel_flow(
+        rpm: float,
+        duration_ms: float,
+    ) -> float:
+
+        # Inverse of the ECU pulse-width calculation (kg/h):
+        #   duration = 1000 * fuel_per_event / q_static + dead_time
+        events_per_s = INJ_N_CYL * rpm / (60 * INJ_STROKES / 2)
+        fuel_per_event_g = (
+            max(0, duration_ms - INJ_T_DEAD_MS) * INJ_Q_STATIC_GPS / 1000
+        )
+
+        return fuel_per_event_g * events_per_s * 3600 / 1000
+
+    def _sensor_health(
+        self,
+        recent_cht: list[float] | None,
+    ) -> float | None:
+
+        # A failing CHT thermocouple reads erratically; the true head
+        # temperature cannot change that fast (time constant ~40 s).
+        # 15 points per degC of jitter beyond the healthy limit.
+        if not recent_cht or len(recent_cht) < 5:
+            return None
+
+        jitter_penalty = max(
+            0,
+            self._roughness(recent_cht) - CHT_ROUGHNESS_LIMIT,
+        ) * 15
+
+        return self._score(
+            100
+            - jitter_penalty
+        )
+
+    @staticmethod
+    def _roughness(values: list[float] | None) -> float:
+
+        # Median |x[i] - (x[i-1] + x[i+1]) / 2|: zero for straight lines
+        # and slow curves (warm-up, throttle transitions), large for
+        # sample-to-sample jitter.
+        if not values or len(values) < 3:
+            return 0.0
+
+        return median(
+            abs(values[i] - (values[i - 1] + values[i + 1]) / 2)
+            for i in range(1, len(values) - 1)
+        )
+
     @staticmethod
     def _score(value: float) -> float:
 
@@ -327,15 +579,21 @@ class DigitalTwinService:
         telemetry: TelemetryCreate,
         prediction: MLPrediction,
         recent_vibration: list[float] | None = None,
+        recent_injection: list[tuple] | None = None,
+        recent_rpm: list[float] | None = None,
+        recent_cht: list[float] | None = None,
     ) -> DigitalTwinState:
 
         health = self.calculate_health(
             telemetry,
             recent_vibration=recent_vibration,
+            recent_injection=recent_injection,
+            recent_rpm=recent_rpm,
+            recent_cht=recent_cht,
         )
 
         operating_state = self._determine_operating_state(
-            health.overall,
+            health,
             prediction,
         )
 
@@ -349,17 +607,58 @@ class DigitalTwinService:
 
     def _determine_operating_state(
         self,
-        health: float,
+        health: HealthState,
         prediction: MLPrediction,
     ) -> str:
 
-        if prediction.anomaly_score >= 0.9:
+        # A single failing subsystem must raise the state even when the
+        # other subsystems keep the overall average high.
+        weakest = min(
+            score
+            for score in (
+                health.thermal,
+                health.combustion,
+                health.lubrication,
+                health.mechanical,
+                health.electrical,
+                health.injection,
+                health.sensor,
+            )
+            if score is not None
+        )
+
+        # Anomaly score in multiples of the autoencoder threshold.
+        anomaly = prediction.anomaly_score / ANOMALY_THRESHOLD
+
+        # The autoencoder also reacts to unusual but healthy conditions
+        # (e.g. engine warm-up), so on its own it can only raise a
+        # WARNING. It escalates further only when the health indices or
+        # the fault classifier confirm a problem.
+        confirmed = (
+            weakest < 80
+            or health.overall < 80
+            or prediction.fault is not None
+        )
+
+        if (
+            health.overall < 40
+            or (weakest < 30 and anomaly >= 3)
+        ):
             return "CRITICAL"
 
-        if health < 60 or prediction.anomaly_score >= 0.7:
+        if (
+            health.overall < 60
+            or weakest < 30
+            or (confirmed and anomaly >= 2)
+        ):
             return "DEGRADED"
 
-        if health < 80 or prediction.anomaly_score >= 0.4:
+        if (
+            health.overall < 80
+            or weakest < 60
+            or anomaly >= 1
+            or prediction.fault is not None
+        ):
             return "WARNING"
 
         return "NOMINAL"

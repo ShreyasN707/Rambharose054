@@ -144,9 +144,15 @@ export default function HudSection({
         { name: "COMBUSTION", score: engineData.health.combustion, status: engineData.health.combustion < 80 ? "warn" : "ok" },
         { name: "LUBRICATION", score: engineData.health.lubrication, status: engineData.health.lubrication < 80 ? "warn" : "ok" },
         { name: "MECHANICAL", score: engineData.health.mechanical, status: engineData.health.mechanical < 80 ? "warn" : "ok" },
-        // Electrical is reported separately and is not part of overall health.
+        // Only shown when the telemetry carries these signals.
         ...(engineData.health.electrical != null
             ? [{ name: "ELECTRICAL", score: engineData.health.electrical, status: engineData.health.electrical < 80 ? "warn" : "ok" }]
+            : []),
+        ...(engineData.health.injection != null
+            ? [{ name: "INJECTION", score: engineData.health.injection, status: engineData.health.injection < 80 ? "warn" : "ok" }]
+            : []),
+        ...(engineData.health.sensor != null
+            ? [{ name: "SENSOR", score: engineData.health.sensor, status: engineData.health.sensor < 80 ? "warn" : "ok" }]
             : []),
     ];
 
@@ -344,6 +350,11 @@ export default function HudSection({
                             { id: 2, label: "OVERHEATING",       desc: "Elevated CHT, EGT and oil temperature" },
                             { id: 3, label: "OIL PRESSURE",      desc: "Progressive lubrication pressure loss" },
                             { id: 4, label: "FUEL STARVATION",   desc: "Reduced fuel supply causing engine power loss" },
+                            { id: 5, label: "INJECTOR",          desc: "Fouled injector delivers less fuel than the ECU commands" },
+                            { id: 6, label: "COOLING",           desc: "Degraded cylinder cooling: CHT creeps up while EGT stays normal" },
+                            { id: 7, label: "SENSOR DRIFT",      desc: "CHT thermocouple drifts high and reads erratically; engine itself is healthy" },
+                            { id: 8, label: "COMBUSTION",        desc: "Combustion instability: cycle-to-cycle torque variation makes RPM rough" },
+                            { id: 9, label: "VIBRATION",         desc: "Abnormal vibration from imbalance / bearing wear" },
                         ].map(({ id, label, desc }) => (
                             <button
                                 key={id}

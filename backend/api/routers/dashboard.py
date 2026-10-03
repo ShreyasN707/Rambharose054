@@ -20,7 +20,7 @@ from api.schemas import (
 from telemetry.repository import TelemetryRepository
 from twin.repository import HealthSnapshotRepository
 from twin.service import DigitalTwinService
-from twin.schemas import MLPrediction
+from twin.schemas import HealthState, MLPrediction
 
 router = APIRouter()
 
@@ -95,7 +95,7 @@ def dashboard(
     )
     if health is not None:
         operating_state = twin_service._determine_operating_state(
-            health.overall,
+            HealthState(**health.model_dump()),
             ml_prediction,
         )
 

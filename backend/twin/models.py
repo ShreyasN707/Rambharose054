@@ -60,6 +60,16 @@ class HealthSnapshot(Base):
         nullable=True,
     )
 
+    injection: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    sensor: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
     anomaly_score: Mapped[float | None] = mapped_column(
         Float,
         nullable=True,

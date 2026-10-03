@@ -21,6 +21,8 @@ const DEFAULT_HEALTH: SubsystemHealth = {
     lubrication: 94.8,
     mechanical: 88.0,
     electrical: null,
+    injection: null,
+    sensor: null,
 };
 
 const DEFAULT_PREDICTION: PredictionData = {

@@ -4,11 +4,7 @@ from pydantic import BaseModel
 
 from telemetry.models import Telemetry
 from twin.models import HealthSnapshot
-
-
-# Autoencoder reconstruction-error threshold
-# (twin/ml_models/anomaly/autoencoder_threshold.pkl).
-ANOMALY_THRESHOLD = 0.6150358457512803
+from twin.service import ANOMALY_THRESHOLD  # noqa: F401 (re-exported)
 
 
 # ---------------------------------------------------------------------------
@@ -78,8 +74,11 @@ class HealthResponse(BaseModel):
     combustion: float
     lubrication: float
     mechanical: float
-    # Reported separately; not included in `overall`.
+    # None for snapshots recorded before these signals existed.
     electrical: float | None = None
+    injection: float | None = None
+    # Instrumentation health; not part of `overall`.
+    sensor: float | None = None
 
     @classmethod
     def from_snapshot(cls, snapshot: HealthSnapshot) -> "HealthResponse":
@@ -90,6 +89,8 @@ class HealthResponse(BaseModel):
             lubrication=snapshot.lubrication,
             mechanical=snapshot.mechanical,
             electrical=snapshot.electrical,
+            injection=snapshot.injection,
+            sensor=snapshot.sensor,
         )
 
 

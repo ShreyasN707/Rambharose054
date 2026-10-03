@@ -1,11 +1,12 @@
-function results = run_telemetry_scenarios(model_name, simulation_time, profile_names)
+function results = run_telemetry_scenarios(model_name, simulation_time, profile_names, fault_ids)
 %RUN_TELEMETRY_SCENARIOS Simulate every fault ID under fixed input profiles.
 %
 %   results = run_telemetry_scenarios(model_name, simulation_time)
 %   results = run_telemetry_scenarios(model_name, simulation_time, {'steady'})
+%   results = run_telemetry_scenarios(model_name, simulation_time, [], 0:4)
 %
-%   Runs Fault_ID 0..4 under two deterministic input profiles and returns
-%   the logged telemetry_log bus for each run. Used by
+%   Runs every Fault_ID (default 0..9) under two deterministic input
+%   profiles and returns the logged telemetry_log bus for each run. Used by
 %   check_signal_regression.m to prove that model changes leave the
 %   existing telemetry signals untouched.
 %
@@ -52,7 +53,9 @@ if nargin < 3 || isempty(profile_names)
     profile_names = fieldnames(profiles);
 end
 
-fault_ids = 0:4;
+if nargin < 4 || isempty(fault_ids)
+    fault_ids = 0:9;
+end
 
 results = struct();
 

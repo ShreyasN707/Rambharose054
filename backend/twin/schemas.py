@@ -16,8 +16,12 @@ class HealthState(BaseModel):
     combustion: float
     lubrication: float
     mechanical: float
-    # Not part of `overall`; None when telemetry lacks electrical signals.
+    # None when telemetry lacks electrical / injection signals; included
+    # in `overall` whenever present.
     electrical: float | None = None
+    injection: float | None = None
+    # Instrumentation health (CHT sensor jitter). Not part of `overall`.
+    sensor: float | None = None
 
 
 class DigitalTwinState(BaseModel):

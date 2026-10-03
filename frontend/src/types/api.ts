@@ -46,8 +46,12 @@ export interface SubsystemHealth {
     combustion: number;
     lubrication: number;
     mechanical: number;
-    // Rule-based battery/alternator health; not part of `overall`.
+    // Rule-based battery/alternator and ECU injection health; included in
+    // `overall` when present, null for telemetry without these signals.
     electrical?: number | null;
+    injection?: number | null;
+    // Instrumentation health (CHT sensor); not part of `overall`.
+    sensor?: number | null;
 }
 
 export interface PredictionData {

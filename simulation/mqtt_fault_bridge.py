@@ -4,6 +4,7 @@ import paho.mqtt.client as mqtt
 BROKER = "127.0.0.1"
 PORT = 1883
 TOPIC = "engine/engine_001/fault"
+VALID_FAULT_IDS = range(0, 10)  # 0 = healthy, 1..9 = faults
 STATE_FILE = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "fault_state.txt"
@@ -20,7 +21,7 @@ def on_message(client, userdata, message):
     try:
         fault_id = int(message.payload.decode().strip())
 
-        if fault_id in (0, 1, 2, 3, 4):
+        if fault_id in VALID_FAULT_IDS:
             with open(STATE_FILE, "w") as f:
                 f.write(str(fault_id))
 

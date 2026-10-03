@@ -12,7 +12,7 @@ from telemetry.repository import TelemetryRepository
 from twin.repository import HealthSnapshotRepository
 from twin.factory import create_digital_twin_service
 from twin.ml_predictor import ModelPredictor
-from twin.schemas import MLPrediction
+from twin.schemas import HealthState, MLPrediction
 import traceback
 
 POLL_INTERVAL_SECONDS = 2
@@ -183,7 +183,7 @@ class ConnectionManager:
             if health is not None:
                 operating_state = (
                     _twin_service._determine_operating_state(
-                        health["overall"],
+                        HealthState(**health),
                         ml_prediction,
                     )
                 )

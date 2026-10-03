@@ -184,3 +184,12 @@ sat_vbatt           = [0 36];    % Battery voltage sensor range (V)
 sat_ialt            = [0 40];    % Alternator current sensor range (A)
 sat_injt            = [0 60];    % Injection timing reporting range (deg BTDC)
 sat_injd            = [0 30];    % Injection duration reporting range (ms)
+%% ========================================================================
+%  PHASE 13: FAULT PROGRESSION  -> Degradation subsystem
+%  ========================================================================
+% Every fault grows from no effect (degradation 0) at the moment it is
+% injected to full severity (degradation 1) after fault_ramp_time seconds.
+% simulink_mqtt_stream.m sets Degradation/Fault_Onset to the injection
+% time. Dataset runs should last at least fault_ramp_time so they cover
+% the whole progression.
+fault_ramp_time     = 300;       % Time from fault onset to full severity (s)

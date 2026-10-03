@@ -1,4 +1,4 @@
-from twin.schemas import MLPrediction
+from twin.schemas import HealthState, MLPrediction
 import requests
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -87,6 +87,13 @@ def get_engine(
 # Fault injection
 # ---------------------------------------------------------
 
+# Simulink Fault_ID values: 0 = healthy, 1 = misfire, 2 = overheating,
+# 3 = oil pressure failure, 4 = fuel starvation, 5 = injector abnormality,
+# 6 = cooling degradation, 7 = CHT sensor drift/failure,
+# 8 = combustion instability, 9 = abnormal vibration.
+VALID_FAULT_IDS = range(0, 10)
+
+
 @router.post("/engines/{engine_id}/fault")
 def inject_fault(
     engine_id: str,
@@ -96,10 +103,13 @@ def inject_fault(
         get_telemetry_repo
     ),
 ):
-    if fault_id not in {0, 1, 2, 3, 4}:
+    if fault_id not in VALID_FAULT_IDS:
         raise HTTPException(
             status_code=400,
-            detail="fault_id must be 0, 1, 2, 3, or 4",
+            detail=(
+                "fault_id must be one of "
+                + ", ".join(str(i) for i in VALID_FAULT_IDS)
+            ),
         )
 
     if engine_id not in telemetry_repo.get_distinct_engines(
@@ -318,7 +328,7 @@ def engine_health(
 
     operating_state = (
         twin_service._determine_operating_state(
-            health.overall,
+            HealthState(**health.model_dump()),
             ml_prediction,
         )
     )

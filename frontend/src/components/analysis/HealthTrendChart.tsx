@@ -42,10 +42,21 @@ const series = [
         color: "#c084fc",
     },
     {
-        // Not part of OVERALL; gaps where older snapshots have no value.
+        // Gaps where older snapshots have no value.
         key: "electrical",
         label: "ELECTRICAL",
         color: "#34d399",
+    },
+    {
+        key: "injection",
+        label: "INJECTION",
+        color: "#f472b6",
+    },
+    {
+        // Instrumentation health; not part of OVERALL.
+        key: "sensor",
+        label: "SENSOR",
+        color: "#94a3b8",
     },
 ] as const;
 

@@ -148,5 +148,24 @@ states — and therefore signals 1–9 — bit-identical to the original model.
 |---|---|
 | Database (`telemetry` table) | Stored as nullable `FLOAT` columns (migration `7c2e9a41b5d3`) |
 | ML (autoencoder, XGBoost, RUL GRU) | **No.** Models receive exactly their original feature sets |
-| Digital Twin health | `battery_voltage` + `alternator_current` → `health.electrical` (rule-based, reported separately, **not** included in `health.overall`) |
+| Digital Twin health | `battery_voltage` + `alternator_current` → `health.electrical`; `injection_timing` + `injection_duration` → `health.injection` (median signed mismatch between the fuel flow the ECU pulse commands and the measured fuel flow, plus timing vs. the ECU map). Both rule-based and averaged into `health.overall` when present. `health.sensor` (CHT jitter) is reported but kept out of `health.overall`; every subsystem drives the operating state |
 | API / WebSocket | Returned in every telemetry object (`latest`, dashboard, mission telemetry, replay, WebSocket) |
+
+## Simulated faults (`Fault_ID`)
+
+Every fault grows from no effect at injection to full severity after
+`fault_ramp_time` (300 s, `simulation/engine_params.m`). The live stream
+restarts the progression at each injection (`Degradation/Fault_Onset`).
+
+| ID | Fault | Main signature | Rule-based health index |
+|---|---|---|---|
+| 0 | Healthy | — | — |
+| 1 | Misfire | Torque −35 %, RPM ↓, EGT ↓ | combustion |
+| 2 | Overheating | Heat input ×4: CHT, EGT, oil temp ↑ | thermal |
+| 3 | Oil pressure failure | Oil pressure → 20 %, oil temp ↑ | lubrication |
+| 4 | Fuel starvation | Fuel → 20 %, RPM ↓↓, bus voltage ↓ | combustion, lubrication, electrical |
+| 5 | Injector abnormality | Delivered fuel → 70 % of commanded; ECU pulse unchanged | injection |
+| 6 | Cooling degradation | Cooling → 40 %: CHT creeps up, EGT unchanged | thermal |
+| 7 | CHT sensor drift/failure | Reported CHT +40 °C and erratic (σ 6 °C); engine unaffected | sensor |
+| 8 | Combustion instability | Cycle-to-cycle torque variation (σ 20 %): rough RPM | combustion (RPM roughness) |
+| 9 | Abnormal vibration | Vibration amplitude ×4 (imbalance / bearing wear) | mechanical (vibration RMS) |

@@ -5,6 +5,7 @@ clc;
 
 model_name = "AeroPistonEngineSimulator";
 fault_block = model_name + "/Fault_ID";
+onset_block = model_name + "/Degradation/Fault_Onset";
 
 %% Load model + params
 
@@ -41,10 +42,17 @@ u = [
 % Fault IDs:
 %
 % 0 = Healthy
-% 1 = Fault 1
-% 2 = Fault 2
-% 3 = Fault 3
-% 4 = Fault 4
+% 1 = Misfire
+% 2 = Overheating
+% 3 = Oil pressure failure
+% 4 = Fuel starvation
+% 5 = Injector abnormality
+% 6 = Cooling degradation
+% 7 = CHT sensor drift / failure
+% 8 = Combustion instability
+% 9 = Abnormal vibration
+
+valid_faults = 0:9;
 
 current_fault = 0;
 
@@ -52,6 +60,12 @@ set_param( ...
     fault_block, ...
     "Value", ...
     num2str(current_fault));
+
+% Fault progression restarts from zero at each injection.
+set_param( ...
+    onset_block, ...
+    "Value", ...
+    "0");
 
 %% Connect to MQTT
 
@@ -88,7 +102,7 @@ fprintf("LIVE SIMULATION STARTED\n");
 fprintf("========================================\n");
 fprintf("Fault commands: MQTT\n");
 fprintf("Fault topic: %s\n", fault_topic);
-fprintf("Allowed fault IDs: 0, 1, 2, 3, 4\n");
+fprintf("Allowed fault IDs: %s\n", strjoin(string(valid_faults), ", "));
 fprintf("========================================\n\n");
 
 %% Main live loop
@@ -106,9 +120,10 @@ while next_time <= simulation_time
 
     if requested_fault ~= current_fault
 
-        if ismember(requested_fault, [0 1 2 3 4])
+        if ismember(requested_fault, valid_faults)
 
             current_fault = requested_fault;
+            fault_onset = next_time - publish_interval;
 
             setBlockParameter( ...
                 sm, ...
@@ -116,10 +131,16 @@ while next_time <= simulation_time
                 "Value", ...
                 num2str(current_fault));
 
+            setBlockParameter( ...
+                sm, ...
+                onset_block, ...
+                "Value", ...
+                num2str(fault_onset));
+
             fprintf( ...
                 "\n>>> FAULT CHANGED TO %d at t=%.0fs <<<\n\n", ...
                 current_fault, ...
-                next_time - publish_interval);
+                fault_onset);
 
         else
 
@@ -128,7 +149,8 @@ while next_time <= simulation_time
                 requested_fault);
 
             fprintf( ...
-                ">>> Allowed values: 0, 1, 2, 3, 4 <<<\n\n");
+                ">>> Allowed values: %s <<<\n\n", ...
+                strjoin(string(valid_faults), ", "));
 
         end
     end

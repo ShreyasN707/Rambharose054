@@ -449,7 +449,7 @@ export default function MissionReplay({
 
             {/* Health at replay point */}
             {currentPoint.health && (
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-2 mt-2">
+                <div className="grid grid-cols-2 md:grid-cols-8 gap-2 mt-2">
                     {[
                         ["OVERALL", currentPoint.health.overall],
                         ["THERMAL", currentPoint.health.thermal],
@@ -468,6 +468,14 @@ export default function MissionReplay({
                         [
                             "ELECTRICAL",
                             currentPoint.health.electrical,
+                        ],
+                        [
+                            "INJECTION",
+                            currentPoint.health.injection,
+                        ],
+                        [
+                            "SENSOR",
+                            currentPoint.health.sensor,
                         ],
                     ].map(([label, value]) => (
                         <div
