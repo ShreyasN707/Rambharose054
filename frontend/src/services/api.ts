@@ -182,14 +182,18 @@ export function getEngineWebSocketUrl(
 // ---------------------------------------------------------
 
 export async function startSimulation(
-    engineId: string
+    engineId: string,
+    profile: string
 ): Promise<{
     status: string;
     pid?: number;
+    profile?: string;
+    mission_id?: string;
     fault_id?: number;
 }> {
     return request(
-        `/engines/${encodeURIComponent(engineId)}/simulation/start`,
+        `/engines/${encodeURIComponent(engineId)}/simulation/start` +
+            `?profile=${encodeURIComponent(profile)}`,
         {
             method: "POST",
         }
@@ -212,6 +216,8 @@ export async function stopSimulation(
 export async function getSimulationStatus(engineId: string): Promise<{
     status: "running" | "stopped";
     pid?: number;
+    profile?: string;
+    mission_id?: string;
 }> {
     return request(
         `/engines/${encodeURIComponent(engineId)}/simulation/status`,

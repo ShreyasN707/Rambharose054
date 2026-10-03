@@ -18,7 +18,18 @@ simulation_time = 1200;   % 20 minutes
 publish_interval = 1.0;   % Publish every 1 second
 
 engine_id = "engine_001";
-mission_id = "mission_001";
+
+% Mission profile and mission ID come from the simulation controller
+% (environment variables); the defaults reproduce the original run.
+profile = string(getenv("SIM_PROFILE"));
+if profile == ""
+    profile = "cruise";
+end
+
+mission_id = string(getenv("SIM_MISSION_ID"));
+if mission_id == ""
+    mission_id = "mission_001";
+end
 
 telemetry_topic = ...
     "engine/" + engine_id + "/telemetry";
@@ -28,14 +39,9 @@ fault_topic = ...
 
 %% External inputs
 
-t = (0:0.1:simulation_time)';
-
-u = [
-    ones(size(t)), ...
-    0.5 * ones(size(t)), ...
-    zeros(size(t)), ...
-    25 * ones(size(t))
-];
+% Throttle, engine load, altitude and ambient temperature over time
+% (see mission_profile.m). The model reads t and u from the workspace.
+[t, u] = mission_profile(char(profile), simulation_time);
 
 %% Start healthy
 
@@ -86,6 +92,7 @@ fprintf("Connected to MQTT telemetry.\n");
 %% Create live Simulation object
 
 sm = simulation(model_name);
+assignin('base', 't', t);
 assignin('base', 'u', u);
 
 sm = setModelParameter( ...
@@ -100,6 +107,8 @@ fprintf("\n");
 fprintf("========================================\n");
 fprintf("LIVE SIMULATION STARTED\n");
 fprintf("========================================\n");
+fprintf("Mission profile: %s\n", profile);
+fprintf("Mission ID: %s\n", mission_id);
 fprintf("Fault commands: MQTT\n");
 fprintf("Fault topic: %s\n", fault_topic);
 fprintf("Allowed fault IDs: %s\n", strjoin(string(valid_faults), ", "));
@@ -185,10 +194,14 @@ while next_time <= simulation_time
 
     %% External input values
 
-    throttle = u(1, 1);
-    engine_load = u(1, 2);
-    altitude = u(1, 3);
-    ambient_temperature = u(1, 4);
+    input_row = min( ...
+        round(next_time / (t(2) - t(1))) + 1, ...
+        size(u, 1));
+
+    throttle = u(input_row, 1);
+    engine_load = u(input_row, 2);
+    altitude = u(input_row, 3);
+    ambient_temperature = u(input_row, 4);
 
     %% Get latest values
 

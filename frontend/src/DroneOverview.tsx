@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { TelemetryData } from "./types/api";
+import { profileFromMissionId } from "./missionProfiles";
 import Drone3DViewer from "./Drone3DViewer";
 
 interface GaugeProps {
@@ -348,8 +349,12 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
     const oilTemp = Math.round(liveTelemetry?.oil_temperature ?? 0);
     const oilPressure = String(Math.round(liveTelemetry?.oil_pressure ?? 0));
     const vibration = (liveTelemetry?.vibration ?? 0).toFixed(2);
+    // Flight conditions: the mission profile's inputs to the engine model.
+    const throttle = Math.round((liveTelemetry?.throttle ?? 0) * 100);
+    const engineLoad = Math.round((liveTelemetry?.engine_load ?? 0) * 100);
     const altitude = Math.round(liveTelemetry?.altitude ?? 0);
     const ambientTemp = (liveTelemetry?.ambient_temperature ?? 0).toFixed(1);
+    const profile = profileFromMissionId(liveTelemetry?.mission_id);
     const batteryVoltage = liveTelemetry?.battery_voltage;
     const alternatorCurrent = liveTelemetry?.alternator_current;
     const injectionTiming = liveTelemetry?.injection_timing;
@@ -405,10 +410,18 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                                         />
                                     </div>
                                 </div>
-                                <div className="col-span-2 md:col-span-3 grid grid-cols-1 md:grid-cols-4 gap-2">
+                                <div className="col-span-2 md:col-span-3 flex flex-col gap-2">
 
-                                {/* TELEMETRY */}
+                                {/* ENGINE SIGNALS: cells + RPM gauge */}
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                                 <div className="md:col-span-3 flex flex-col gap-2">
+
+                                    <div
+                                        className="text-xs font-semibold"
+                                        style={{ fontFamily: "'JetBrains Mono', monospace", color: "#c0c0c0", letterSpacing: 1 }}
+                                    >
+                                        ENGINE SIGNALS
+                                    </div>
 
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                         <TelemetryCell label="TIME" value={timeStr} unit="" color="#3b82f6" />
@@ -423,22 +436,6 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                                         <TelemetryCell label="EGT" value={egt} unit="°C" warn={egt > 850} />
                                         <TelemetryCell label="OIL TEMP" value={oilTemp} unit="°C" warn={oilTemp > 120}/>
                                         <TelemetryCell label="OIL PRESSURE" value={oilPressure} unit="psi" warn={parseFloat(oilPressure) < 40}/>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 items-center md:grid-cols-3 gap-2">
-                                        
-                                        <TelemetryCell
-                                            label="ALTITUDE"
-                                            value={altitude}
-                                            unit="m"
-                                            color="#a78bfa"
-                                        />
-                                        <TelemetryCell
-                                            label="AMBIENT TEMP"
-                                            value={ambientTemp}
-                                            unit="°C"
-                                            color="#eab308"
-                                        />
                                     </div>
 
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -491,6 +488,45 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                                         />
                                     </div>
                                 </div>
+                                </div>
+
+                                {/* FLIGHT CONDITIONS: full width */}
+                                    <div
+                                        className="mt-2 text-xs font-semibold flex flex-wrap justify-between gap-2"
+                                        style={{ fontFamily: "'JetBrains Mono', monospace", color: "#a78bfa", letterSpacing: 1 }}
+                                    >
+                                        <span>FLIGHT CONDITIONS</span>
+                                        <span style={{ color: "#c0c0c0" }}>
+                                            {profile ? `PROFILE: ${profile.label.toUpperCase()}` : ""}
+                                        </span>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                        <TelemetryCell
+                                            label="THROTTLE"
+                                            value={throttle}
+                                            unit="%"
+                                            color="#a78bfa"
+                                        />
+                                        <TelemetryCell
+                                            label="ENGINE LOAD"
+                                            value={engineLoad}
+                                            unit="%"
+                                            color="#a78bfa"
+                                        />
+                                        <TelemetryCell
+                                            label="ALTITUDE"
+                                            value={altitude}
+                                            unit="m"
+                                            color="#a78bfa"
+                                        />
+                                        <TelemetryCell
+                                            label="AMBIENT TEMP"
+                                            value={ambientTemp}
+                                            unit="°C"
+                                            color="#a78bfa"
+                                        />
+                                    </div>
 
                             </div>
                                 

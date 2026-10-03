@@ -13,6 +13,7 @@ import {
 } from "../../services/api";
 
 import { useEngineData } from "../../hooks/useEngineData";
+import { MISSION_PROFILES } from "../../missionProfiles";
 
 
 
@@ -47,6 +48,10 @@ export default function HudSection({
         "stopped" | "starting" | "running" | "stopping"
     >("stopped");
 
+    const [selectedProfile, setSelectedProfile] = useState(
+        MISSION_PROFILES[0].id
+    );
+
     useEffect(() => {
     const checkSimulationStatus = async () => {
         try {
@@ -59,6 +64,14 @@ export default function HudSection({
                     ? "running"
                     : "stopped"
             );
+
+            // Follow the run that is already in progress.
+            if (result.status === "running") {
+                if (result.profile) setSelectedProfile(result.profile);
+                if (result.mission_id) {
+                    engineData.setSelectedMission(result.mission_id);
+                }
+            }
         } catch {
             setSimulationStatus("stopped");
         }
@@ -75,7 +88,16 @@ export default function HudSection({
         setControlStatus(null);
 
         try {
-            const result = await startSimulation(engineData.selectedEngine);
+            const result = await startSimulation(
+                engineData.selectedEngine,
+                selectedProfile
+            );
+
+            // Every run is a new mission; show its telemetry.
+            if (result.mission_id) {
+                engineData.setSelectedMission(result.mission_id);
+            }
+
             engineData.setSimulationRunning(true);
             setSimulationStatus("running");
             setControlStatus(
@@ -235,6 +257,43 @@ export default function HudSection({
                         >
                             ● {simulationStatus.toUpperCase()}
                         </span>
+                    </div>
+
+                    <div className="mb-3">
+                        <label
+                            htmlFor="mission-profile"
+                            className="block text-xs mb-1.5 font-semibold"
+                            style={{
+                                color: "#c0c0c0",
+                                fontFamily: "'JetBrains Mono', monospace",
+                                letterSpacing: 1,
+                            }}
+                        >
+                            MISSION PROFILE
+                        </label>
+                        <select
+                            id="mission-profile"
+                            value={selectedProfile}
+                            onChange={(e) => setSelectedProfile(e.target.value)}
+                            disabled={simulationStatus !== "stopped"}
+                            className="px-3 py-2 text-sm"
+                            style={{
+                                background: "#151515",
+                                color: "#fff",
+                                border: "1px solid #666",
+                                fontFamily: "'JetBrains Mono', monospace",
+                                cursor:
+                                    simulationStatus !== "stopped"
+                                        ? "not-allowed"
+                                        : "pointer",
+                            }}
+                        >
+                            {MISSION_PROFILES.map((profile) => (
+                                <option key={profile.id} value={profile.id}>
+                                    {profile.label} — {profile.description}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="flex flex-wrap gap-3">
