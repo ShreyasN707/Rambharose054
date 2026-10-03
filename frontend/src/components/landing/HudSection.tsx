@@ -15,15 +15,6 @@ import {
 import { useEngineData } from "../../hooks/useEngineData";
 
 
-function useClock(): Date {
-    const [t, setT] = useState<Date>(new Date());
-    useEffect(() => {
-        const id = setInterval(() => setT(new Date()), 1000);
-        return () => clearInterval(id);
-    }, []);
-    return t;
-}
-const pad = (n: number): string => n.toString().padStart(2, "0");
 
 function RadialHealth({ value }: { value: number }) {
     const r = 42;
@@ -52,7 +43,6 @@ export default function HudSection({
 }: {
     engineData: ReturnType<typeof useEngineData>;
 }) {
-    const time = useClock();
     const [simulationStatus, setSimulationStatus] = useState<
         "stopped" | "starting" | "running" | "stopping"
     >("stopped");
