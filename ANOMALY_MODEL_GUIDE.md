@@ -66,7 +66,7 @@ These four come from the mission profile. They are **causes**, not symptoms:
 | `cht` | °C | Cylinder head temperature. Slow; noise ~±1 °C |
 | `egt` | °C | Exhaust gas temperature. Fast |
 | `oil_pressure` | psi | Follows RPM |
-| `oil_temperature` | °C | Slow; sensor range 0–200 °C |
+| `oil_temperature` | °C | Slow; sensor range 0–200 °C (can saturate at 200 in severe oil pressure failure, see §9) |
 | `vibration` | model units | A sampled **oscillation** around 0 (±2.5). Its mean is meaningless, so **use its RMS over a window** (healthy ≈ 1.5) |
 | `battery_voltage` | V | 28 V bus. Healthy 27.9–28.1, unless at low RPM (see above) |
 | `alternator_current` | A | Wanders 10–15 A when healthy (battery charging) |
@@ -143,26 +143,69 @@ The dataset uses different ramp times per fault, so faults that are dangerous in
 | 3 | Oil pressure failure | Oil pressure ×0.2; oil heat ×2 | Lubrication issues |
 | 4 | Fuel starvation | Fuel flow and torque ×0.2 | (extra) |
 | 5 | Injector abnormality | Injector delivers 70 % of the fuel the ECU commands; torque ×0.84 | Injector abnormalities |
-| 6 | Cooling degradation | Head cooling ×0.4; oil heat ×1.3 | Cooling degradation |
+| 6 | Cooling degradation | Head cooling ×0.2; oil heat ×1.3 | Cooling degradation |
 | 7 | CHT sensor drift/failure | **Sensor only:** reported CHT +40 °C, plus noise σ 6 °C. The engine is unaffected and the engine never "fails" | Sensor drift/failure |
-| 8 | Combustion instability | Cycle-to-cycle torque variation σ 20 %; torque ×0.96 | Combustion instability |
+| 8 | Combustion instability | Cycle-to-cycle torque variation σ 30 %; torque ×0.96 | Combustion instability |
 | 9 | Abnormal vibration | Vibration ×4 (imbalance / bearing wear); torque ×0.98 | Abnormal vibration patterns |
 
-### 4.3 What the signals show: early, mid and full strength
+### 4.3 How each fault degrades the signals: early, mid and full strength
 
-Measured at cruise: fault injected at 120 s, 5-minute ramp. "→" means healthy value → faulty value, compared over the same time window. *Roughness* = median |x[i] − (x[i−1]+x[i+1])/2| over 30 samples (healthy RPM ≈ 0.2–0.35, healthy CHT ≈ 0.5–0.8).
+Measured at cruise (full throttle, sea level, 25 °C), fault injected at 120 s with a 5-minute ramp. Values are window averages:
 
-| Fault | At 25 % strength (**early — where prediction happens**) | At 50 % | At 100 % |
+- **Strength windows:** 25 % = 180–210 s, 50 % = 255–285 s, 100 % = 540–600 s.
+- **Healthy row:** a healthy run over the 100 % window.
+- **Bold:** clearly different from a healthy run at the same moment. The thresholds sit above normal noise: RPM ±0.5 %, torque ±5 %, vibration RMS +25 %, roughness ×2, everything else ±3 %.
+
+How the derived columns are computed:
+
+- **Fuel ratio** = measured ÷ commanded fuel (§5.3).
+- **Vib RMS** = root-mean-square of the vibration signal.
+- **Roughness** = median |x[i] − (x[i−1]+x[i+1])/2| over the window. Healthy RPM roughness is ≈ 0.2–0.4, healthy CHT roughness ≈ 0.5–0.8.
+
+| Fault | Strength | RPM | Torque (N·m) | Fuel (kg/h) | Fuel ratio | CHT (°C) | EGT (°C) | Oil P (psi) | Oil T (°C) | Bus (V) | Inj pulse (ms) | Vib RMS | RPM rough | CHT rough |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **0 Healthy** | — | 3994 | 10.1 | 2.88 | 0.99 | 80 | 709 | 59.3 | 105 | 28.0 | 10.47 | 1.49 | 0.2 | 0.50 |
+| 1 Misfire | 25 % | **3796** | **9.0** | **2.81** | 1.00 | 80 | **684** | **56.7** | 105 | 28.0 | 10.64 | 1.71 | **51.7** | 0.79 |
+|  | 50 % | **3591** | **8.0** | **2.68** | 0.99 | 81 | **661** | **53.5** | 105 | 28.0 | **10.83** | **1.96** | **78.3** | 0.54 |
+|  | 100 % | **3195** | **6.8** | **2.50** | 1.00 | **84** | **613** | **47.5** | 105 | 28.0 | **11.27** | **2.66** | **68.7** | 0.50 |
+| 2 Overheating | 25 % | 3994 | 9.9 | 2.90 | 1.00 | **101** | **782** | 59.7 | **113** | 28.0 | 10.47 | 1.50 | 0.4 | 0.79 |
+|  | 50 % | 3994 | 9.7 | 2.87 | 0.99 | **139** | **857** | 59.5 | **123** | 28.0 | 10.47 | 1.47 | 0.2 | 0.54 |
+|  | 100 % | 3994 | 10.1 | 2.88 | 0.99 | **243** | **1009** | 59.3 | **145** | 28.0 | 10.47 | 1.49 | 0.2 | 0.50 |
+| 3 Oil pressure | 25 % | 3994 | 9.9 | 2.90 | 1.00 | 79 | 709 | **47.8** | **122** | 28.0 | 10.47 | 1.50 | 0.4 | 0.79 |
+|  | 50 % | 3994 | 9.7 | 2.87 | 0.99 | 79 | 709 | **35.7** | **141** | 28.0 | 10.47 | 1.47 | 0.2 | 0.54 |
+|  | 100 % | 3994 | 10.1 | 2.88 | 0.99 | 80 | 709 | **11.5** | **185** | 28.0 | 10.47 | 1.49 | 0.2 | 0.50 |
+| 4 Fuel starvation | 25 % | **3549** | **8.0** | **2.16** | 1.00 | **75** | **578** | **53.0** | 105 | 28.0 | **8.87** | 1.62 | 0.4 | 0.79 |
+|  | 50 % | **3030** | **5.9** | **1.44** | 0.99 | **67** | **448** | **45.0** | 105 | 28.0 | **7.23** | 1.30 | 0.2 | 0.54 |
+|  | 100 % | **1524** | **2.3** | **0.27** | **0.94** | **42** | **195** | **22.4** | 105 | **24.8** | **3.36** | 1.48 | 0.2 | 0.50 |
+| 5 Injector | 25 % | **3909** | 9.5 | **2.64** | **0.92** | 77 | **666** | 58.4 | 105 | 28.0 | 10.54 | 1.34 | 0.4 | 0.79 |
+|  | 50 % | **3820** | **8.9** | **2.37** | **0.84** | **74** | **625** | **56.9** | 105 | 28.0 | 10.62 | 1.26 | 0.2 | 0.54 |
+|  | 100 % | **3633** | **8.5** | **1.89** | **0.69** | **65** | **542** | **53.9** | 105 | 28.0 | **10.79** | 1.48 | 0.2 | 0.50 |
+| 6 Cooling | 25 % | 3994 | 9.9 | 2.90 | 1.00 | **84** | 709 | 59.7 | **110** | 28.0 | 10.47 | 1.50 | 0.4 | 0.79 |
+|  | 50 % | 3994 | 9.7 | 2.87 | 0.99 | **94** | 709 | 59.5 | **116** | 28.0 | 10.47 | 1.47 | 0.2 | 0.54 |
+|  | 100 % | 3994 | 10.1 | 2.88 | 0.99 | **155** | 709 | 59.3 | **129** | 28.0 | 10.47 | 1.49 | 0.2 | 0.50 |
+| 7 CHT sensor | 25 % | 3994 | 9.9 | 2.90 | 1.00 | **89** | 709 | 59.7 | 105 | 28.0 | 10.47 | 1.50 | 0.4 | 1.08 |
+|  | 50 % | 3994 | 9.7 | 2.87 | 0.99 | **100** | 709 | 59.5 | 105 | 28.0 | 10.47 | 1.47 | 0.2 | **1.74** |
+|  | 100 % | 3994 | 10.1 | 2.88 | 0.99 | **120** | 709 | 59.3 | 105 | 28.0 | 10.47 | 1.49 | 0.2 | **4.79** |
+| 8 Instability | 25 % | 3977 | 9.8 | 2.89 | 1.00 | 79 | 707 | 59.4 | 105 | 28.0 | 10.48 | 1.50 | **10.3** | 0.79 |
+|  | 50 % | **3951** | 9.5 | 2.85 | 0.99 | 80 | 703 | 58.8 | 105 | 28.0 | 10.51 | 1.25 | **16.4** | 0.54 |
+|  | 100 % | **3906** | 9.6 | 2.84 | 0.99 | 80 | 698 | 58.0 | 105 | 28.0 | 10.54 | 1.50 | **38.8** | 0.50 |
+| 9 Vibration | 25 % | 3983 | 9.9 | 2.90 | 1.00 | 79 | 708 | 59.5 | 105 | 28.0 | 10.48 | **2.43** | 0.4 | 0.79 |
+|  | 50 % | **3973** | 9.6 | 2.86 | 0.99 | 80 | 706 | 59.1 | 105 | 28.0 | 10.49 | **2.43** | 0.2 | 0.54 |
+|  | 100 % | **3951** | 9.9 | 2.86 | 0.99 | 80 | 704 | 58.7 | 105 | 28.0 | 10.50 | **4.68** | 0.2 | 0.50 |
+
+**What to look for first (the early, 25 % signature):**
+
+| Fault | First clear sign | Also changes | Stays normal |
 |---|---|---|---|
-| 1 Misfire | RPM 3994→3796, **RPM roughness 0.35→52**, EGT 709→684, vibration RMS 1.50→1.71 | RPM →3591, roughness →78, EGT →661, oil pressure 59.5→53.5 | RPM →3195, torque 10.1→6.8, EGT →613, oil pressure →47.5, vibration RMS →2.66, roughness →69 |
-| 2 Overheating | **CHT 79→101**, EGT 709→782, oil temperature 105→113 | CHT →139, EGT →857, oil temperature →123 | CHT →243, EGT →1009, oil temperature →145 |
-| 3 Oil pressure | **Oil pressure 59.7→47.8**, oil temperature 105→122 | Oil pressure →35.7, oil temperature →141 | Oil pressure →11.5, oil temperature →185 |
-| 4 Fuel starvation | **Fuel 2.90→2.16**, RPM →3549, EGT →578, CHT 79→75, injector pulse 10.47→8.87 ms | Fuel →1.44, RPM →3030, EGT →448, oil pressure →45 | Fuel →0.27, RPM →1524, EGT →195, CHT →42, oil pressure →22, **bus 28.0→24.8 V**, alternator 13.9→3.5 A |
-| 5 Injector | **Fuel 2.90→2.64 while the pulse stays the same**, EGT 709→666 | Fuel →2.37, RPM →3820, EGT →625, CHT →74 | Fuel →1.89, RPM →3633, EGT →542, CHT →65, pulse 10.47→**10.79** ms (rises: the ECU asks for more) |
-| 6 Cooling | **CHT 79→84**, oil temperature 105→110 (EGT unchanged) | CHT →94, oil temperature →116 | CHT →155 (still rising), oil temperature →129 |
-| 7 CHT sensor | **CHT 79→89**, CHT roughness 0.79→1.08 (nothing else changes) | CHT →100, roughness →1.74 | CHT →120, **roughness →4.79** |
-| 8 Instability | **RPM roughness 0.35→10.3** (averages unchanged) | Roughness →16.4 | Roughness →38.8, torque 10.1→9.6 |
-| 9 Vibration | **Vibration RMS 1.50→2.43** (nothing else) | RMS →2.43 | RMS →4.68 |
+| 1 Misfire | RPM roughness ×150 | RPM, EGT, oil pressure ↓; vibration ↑ | CHT, oil temperature, fuel ratio |
+| 2 Overheating | CHT +21 °C | EGT ↑, oil temperature ↑ | RPM, fuel, oil pressure |
+| 3 Oil pressure | Oil pressure −20 % | Oil temperature ↑ | Everything else |
+| 4 Fuel starvation | Fuel −25 %, RPM −11 % | EGT, CHT, oil pressure, injector pulse ↓ | Fuel ratio (≈1: the ECU commands less fuel too) |
+| 5 Injector | Fuel ratio 0.99 → 0.92 | Fuel, EGT ↓; injector pulse slowly ↑ | Bus voltage |
+| 6 Cooling | CHT +5 °C, oil temperature +5 °C | — | **EGT** (separates it from overheating) |
+| 7 CHT sensor | CHT +10 °C | CHT roughness ↑ (clear from 50 %) | **EGT, oil temperature** (the engine is fine) |
+| 8 Instability | RPM roughness ×30 | — | Average RPM, EGT, vibration |
+| 9 Vibration | Vibration RMS +60 % | — | Everything else |
 
 Every fault is visible by 25 % strength, if you look at the right feature. That's what makes early detection achievable.
 
@@ -244,7 +287,20 @@ The dataset also has the backend's subsystem health scores (`health_thermal`, `h
 
 ## 6. Dataset
 
-Generated by the dataset generator (`simulation/`, not yet written at the time of this guide). It's written to `data/sim_v2/`. A **pilot** of ~50 runs (1 per profile × fault) comes first so you can build the pipeline; the **full** set of ~300 runs (6 per profile × fault) follows.
+The dataset is written to `data/sim_v2/`. It's too large for git (ignored), so it's shared separately. Three steps produce it:
+
+```matlab
+% 1. Simulate (MATLAB, from simulation/). Resumable: finished runs are skipped.
+generate_sim_dataset('../data/sim_v2', 1:6)      % seeds 1-6 x 5 profiles x 10 faults = 300 runs
+```
+```bash
+# 2. Add expected values, health, failure and labels (from the repo root)
+python ai/dataset/label_dataset.py data/sim_v2
+# 3. Sanity checks + failure summary
+python ai/dataset/check_dataset.py data/sim_v2
+```
+
+A **pilot** of 50 runs (seed 1: one run per profile × fault) comes first so you can build your pipeline. The **full** set of 300 runs (seeds 1–6) follows. Each run takes ~30 s to simulate.
 
 ### 6.1 Structure
 
@@ -278,6 +334,28 @@ Fault 0 runs are healthy throughout.
 Most rows are healthy: warm-up, pre-onset, fault 0 runs. Use class weights or balanced sampling for the classifier, and report per-class metrics, not plain accuracy.
 
 ---
+
+### 6.5 What the rows look like
+
+Real rows from two pilot runs, both cruise variants (seed 1): one healthy, one overheating fault (onset 249 s, ramp 246 s, failure 403 s). Only some columns are shown.
+
+| Row | sim_time | throttle | altitude | ambient_temperature | rpm | cht | expected_cht | egt | expected_egt | oil_temperature | health_thermal | fault_id | severity | failed | rul_seconds |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Healthy run, mid-flight | 600 | 0.79 | 294 | 18.9 | 3502 | 60.0 | 59.9 | 553 | 554 | 91.1 | 98.0 | 0 | 0.00 | 0 | 600 |
+| Healthy run, later | 900 | 0.79 | 294 | 18.9 | 3502 | 60.2 | 60.2 | 551 | 553 | 93.3 | 98.3 | 0 | 0.00 | 0 | 600 |
+| Overheating run, before onset | 239 | 0.91 | 1078 | 8.6 | 3630 | 63.8 | 63.5 | 594 | 593 | 100.5 | 97.5 | 0 | 0.00 | 0 | 600 |
+| Overheating, just after onset | 250 | 0.91 | 1078 | 8.6 | 3630 | 64.0 | 63.5 | 590 | 593 | 100.1 | 98.4 | 2 | 0.00 | 0 | 153 |
+| Overheating, 25 % | 309 | 0.91 | 1078 | 8.6 | 3630 | 81.3 | 63.6 | 666 | 593 | 109.4 | 79.5 | 2 | 0.24 | 0 | 94 |
+| Overheating, ~50 % | 373 | 0.91 | 1078 | 8.6 | 3630 | 119.0 | 63.6 | 740 | 593 | 120.5 | 7.7 | 2 | 0.50 | 0 | 30 |
+| Overheating, failure | 403 | 0.91 | 1078 | 8.6 | 3630 | 137.5 | 63.6 | 778 | 593 | 127.1 | 0.0 | 2 | 0.63 | 1 | 0 |
+| Overheating, after failure | 433 | 0.91 | 1078 | 8.6 | 3630 | 157.1 | 63.6 | 815 | 593 | 131.8 | 0.0 | 2 | 0.75 | 1 | 0 |
+
+Things to notice:
+
+- **Residuals tell the story:** in the healthy run `cht` ≈ `expected_cht`. In the overheating run, CHT climbs from 64 to 157 °C while `expected_cht` stays at 63.6, because the flight conditions didn't change.
+- **The fault label switches at onset,** but the signals only drift visibly ~30–60 s later. That's the early-detection window.
+- **`rul_seconds` stays 600 until onset** (the fault doesn't exist yet), then counts down to failure.
+- **`health_thermal` falls through 30 shortly before `failed` turns 1,** because failure uses the 90 s average.
 
 ## 7. Algorithms (recommended)
 
@@ -350,7 +428,9 @@ Include one plot per fault showing anomaly score and class probability over time
 - **Low-power runs have weaker faults** (§4.4). Make sure the test set covers endurance and high altitude.
 - **Electrical sag at low RPM is healthy** in rapid throttle (bus down to ~25.3 V). The baseline expects it, so trust the residual.
 - **Leakage:** never feed time, severity, labels or run identifiers (§5.5), and never split by row.
-- **Simulator randomness:** the Simulink noise and misfire generators have fixed seeds, so the live demo always replays the same noise. The dataset generator gives every run its own noise seeds, so no two runs share a noise pattern, and the splits keep each profile seed in one split only.
+- **Simulator randomness:** the Simulink noise and misfire generators have fixed seeds, so the live demo always replays the same noise. The dataset generator gives each of the model's 16 noise sources its own random seed in every run, so no two runs share a noise pattern. The splits keep each seed in one split only.
+- **Fixed during generation:** eight sensor-noise sources (RPM, fuel flow, torque, oil temperature, oil pressure, CHT, EGT and the vibration source) used to share one seed. Their noise was therefore perfectly correlated, which a model could have learned as a fake relationship. They now have separate seeds, in the model and in every dataset run.
+- **Oil temperature can saturate at 200 °C** (the sensor's range limit) in severe oil pressure failure, mostly on hot or high-power flights. Treat 200 as "200 or more". The oil pressure signal still shows the fault clearly.
 
 ---
 
