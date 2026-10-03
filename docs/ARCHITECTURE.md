@@ -3,6 +3,7 @@
 Architecture of the aero-piston engine digital twin for MALE UAVs (SIH 2026). This document maps the system to the problem statement's required capabilities (sections A–F), describes each layer and its interfaces, and lists the known limitations of the prototype.
 
 Related documents:
+- [`PROBLEM_STATEMENT.md`](PROBLEM_STATEMENT.md): the SIH problem statement this answers.
 - [`telemetry-schema.md`](telemetry-schema.md): telemetry fields and fault catalogue.
 - [`DEPLOYMENT_ROADMAP.md`](DEPLOYMENT_ROADMAP.md): path from this prototype to test rigs, the GCS and fleets.
 - [`../ANOMALY_MODEL_GUIDE.md`](../ANOMALY_MODEL_GUIDE.md) and [`../RUL_MODEL_GUIDE.md`](../RUL_MODEL_GUIDE.md): ML training.
