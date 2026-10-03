@@ -93,9 +93,9 @@ Faults are injected from the dashboard (or `POST /api/engines/{engine_id}/fault?
 | 3 | Oil pressure failure | Oil pressure drops to 20 %, oil temperature rises |
 | 4 | Fuel starvation | Fuel flow drops to 20 %: RPM, temperatures, oil pressure and bus voltage fall |
 | 5 | Injector abnormality | Injector delivers 70 % of the fuel the ECU commands |
-| 6 | Cooling degradation | Cooling drops to 40 %: CHT creeps up, EGT unchanged |
+| 6 | Cooling degradation | Cooling drops to 20 %: CHT creeps up, EGT unchanged |
 | 7 | CHT sensor drift | Reported CHT reads +40 °C high and noisy; engine unaffected |
-| 8 | Combustion instability | 20 % cycle-to-cycle torque variation: rough RPM |
+| 8 | Combustion instability | 30 % cycle-to-cycle torque variation: rough RPM |
 | 9 | Abnormal vibration | Vibration ×4 (imbalance / bearing wear) |
 
 ## API overview

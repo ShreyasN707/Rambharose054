@@ -167,7 +167,7 @@ restarts the progression at each injection (`Degradation/Fault_Onset`).
 | 3 | Oil pressure failure | Oil pressure → 20 %, oil temp ↑ | lubrication |
 | 4 | Fuel starvation | Fuel → 20 %, RPM ↓↓, CHT/EGT ↓, oil pressure ↓ (with RPM), bus voltage ↓; oil temperature stays normal | combustion, lubrication, electrical |
 | 5 | Injector abnormality | Delivered fuel → 70 % of commanded; ECU pulse unchanged | injection |
-| 6 | Cooling degradation | Cooling → 40 %: CHT creeps up, EGT unchanged | thermal |
+| 6 | Cooling degradation | Cooling → 20 %: CHT creeps up, EGT unchanged | thermal |
 | 7 | CHT sensor drift/failure | Reported CHT +40 °C and erratic (σ 6 °C); engine unaffected | sensor |
-| 8 | Combustion instability | Cycle-to-cycle torque variation (σ 20 %): rough RPM | combustion (RPM roughness) |
+| 8 | Combustion instability | Cycle-to-cycle torque variation (σ 30 %): rough RPM | combustion (RPM roughness) |
 | 9 | Abnormal vibration | Vibration amplitude ×4 (imbalance / bearing wear) | mechanical (vibration RMS) |

@@ -67,7 +67,7 @@ Each row of the dataset (`data/sim_v2/runs/<run_id>.csv`, see the anomaly guide 
 
 | Column | Meaning |
 |---|---|
-| `rul_seconds` | **Training target.** `min(600, failure_s − sim_time)`; 0 at and after failure |
+| `rul_seconds` | **Training target.** 600 before the fault's onset; from onset `min(600, failure_s − sim_time)`; 0 at and after failure |
 | `failed` | 1 from the failure moment on |
 | `severity` | Fault strength 0–1 (ground truth; evaluation only) |
 | `fault_id` | 0 before onset, then the fault's ID |
@@ -85,15 +85,26 @@ Far from failure, the exact number of seconds is unknowable and doesn't matter. 
 The resulting label looks like this:
 
 ```
+Slow fault (onset → failure longer than 600 s):
+
 rul_seconds
- 600 ─────────────────────────╮
-                              │╲            (falls 1 s per second)
-                              │  ╲
-   0                          │    ╲______  (0 after failure)
-     engine start   onset   failure − 600 s   failure
+ 600 ───────────────────────────────────╮
+                                        │╲        (falls 1 s per second)
+                                        │  ╲
+   0                                    │    ╲____ (0 after failure)
+     engine start      onset      failure − 600 s   failure
+
+Fast fault (onset → failure shorter than 600 s):
+
+ 600 ──────────────╮
+                   │
+                   ╰╲                    (drops at onset to the true time left,
+                     ╲                    then falls 1 s per second)
+   0                   ╲____
+     engine start    onset   failure
 ```
 
-For fast faults (oil pressure, fuel starvation), onset → failure is shorter than 600 s, so the label already starts below 600 at onset.
+**Before onset the label is always 600,** even if failure comes within 10 minutes of that moment. The fault doesn't exist yet, so no signal can reveal it. Counting down there would teach the model noise. The drop at onset for fast faults is the honest "fault just appeared" moment. The model can't see it instantly, so expect the largest errors in the first 30–60 s after onset, and report them (§7).
 
 ### 4.2 Rows to drop or weight
 
@@ -194,6 +205,7 @@ The asymmetric score comes from the NASA PHM'08 prognostics challenge. Overestim
 - **Sensor fault 7:** CHT looks alarming, but the label is 600 throughout. The model must learn to ignore a sensor that disagrees with EGT, oil temperature and the rest.
 - **Warm-up:** the first 60 s are dropped; health is not defined there.
 - **Split by run, never by row:** neighbouring windows overlap almost completely.
+- **Fixed during generation:** the first version of the labelling script started the countdown up to 10 minutes *before* the fault began. That's impossible to predict, and is now fixed (600 until onset, §4.1). Separately, eight sensor-noise sources in the Simulink model shared one seed, giving perfectly correlated noise. They now have separate seeds, and every dataset run uses its own random seeds.
 - **The old RUL pipeline is obsolete.** `ai/RUL/` and the current `rul_model.pt` were trained on an older dataset, with labels from a synthetic damage-accumulation health index (failure at HI ≤ 0.1, output in hours). Don't mix those labels with the new ones. The new label is `rul_seconds` from the shared failure definition.
 
 ---
