@@ -422,11 +422,11 @@ class DigitalTwinService:
             sum(value * value for value in samples) / len(samples)
         )
 
-        # 33 points per unit of RMS beyond the healthy limit.
+        # 40 points per unit of RMS beyond the healthy limit.
         vibration_penalty = max(
             0,
             vibration_rms - VIBRATION_RMS_LIMIT,
-        ) * 33
+        ) * 40
 
         return self._score(
             100
