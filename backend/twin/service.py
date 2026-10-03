@@ -314,11 +314,11 @@ class DigitalTwinService:
         ) * 0.10
 
         # Combustion instability: cycle-to-cycle torque variation makes
-        # the RPM rough (2.5 points per RPM beyond the healthy limit).
+        # the RPM rough (3.5 points per RPM beyond the healthy limit).
         roughness_penalty = max(
             0,
             self._roughness(recent_rpm) - RPM_ROUGHNESS_LIMIT,
-        ) * 2.5
+        ) * 3.5
 
         return self._score(
             100
@@ -370,11 +370,11 @@ class DigitalTwinService:
             sum(value * value for value in samples) / len(samples)
         )
 
-        # 25 points per unit of RMS beyond the healthy limit.
+        # 33 points per unit of RMS beyond the healthy limit.
         vibration_penalty = max(
             0,
             vibration_rms - VIBRATION_RMS_LIMIT,
-        ) * 25
+        ) * 33
 
         return self._score(
             100
@@ -474,7 +474,7 @@ class DigitalTwinService:
             abs(median(timing_errors)) - INJ_TIMING_TOLERANCE_DEG,
         ) * 10
 
-        # 2 points per percent of the commanded flow beyond tolerance.
+        # 4.5 points per percent of the commanded flow beyond tolerance.
         commanded = max(median(commanded_fuel), INJ_FUEL_NOISE_KGPH)
         fuel_tolerance = max(
             INJ_FUEL_TOLERANCE * commanded,
@@ -483,7 +483,7 @@ class DigitalTwinService:
         fuel_penalty = max(
             0,
             abs(median(fuel_errors)) - fuel_tolerance,
-        ) / commanded * 200
+        ) / commanded * 450
 
         return self._score(
             100
@@ -538,14 +538,14 @@ class DigitalTwinService:
 
         # A failing CHT thermocouple reads erratically; the true head
         # temperature cannot change that fast (time constant ~40 s).
-        # 15 points per degC of jitter beyond the healthy limit.
+        # 27 points per degC of jitter beyond the healthy limit.
         if not recent_cht or len(recent_cht) < 5:
             return None
 
         jitter_penalty = max(
             0,
             self._roughness(recent_cht) - CHT_ROUGHNESS_LIMIT,
-        ) * 15
+        ) * 27
 
         return self._score(
             100
