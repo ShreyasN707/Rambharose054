@@ -1,0 +1,222 @@
+# Remaining Useful Life (RUL) Model — Training Guide
+
+This guide is for whoever trains the RUL model of the aero-piston engine digital twin. It covers what the model must predict, how failure is defined, how the labels are built, which algorithms to use, how to evaluate, and how to hand the model back so the live system can run it.
+
+It shares the simulator, mission profiles, faults and dataset with the anomaly model. **Read [`ANOMALY_MODEL_GUIDE.md`](ANOMALY_MODEL_GUIDE.md) sections 2–6 first.** They describe the engine, the 12 signals and 4 flight conditions, what a healthy engine reads in each mission profile, what every fault does to the signals, and the features (residuals, roughness, fuel ratio). This guide only repeats what matters specifically for RUL.
+
+All numbers were measured from the current Simulink model (commit `7c0528f`, October 2026). They are simulator values, not certified engine limits.
+
+---
+
+## 1. What the model has to do
+
+The problem statement asks for **estimating degradation trends and remaining useful life**, **predicting probable failures before occurrence**, and **predictive maintenance recommendations**. The RUL model answers:
+
+> **"If this keeps going, how many seconds until the engine fails?"**
+
+The anomaly model says *what* is wrong; the RUL model says *how urgent* it is. Together they drive the maintenance advisory, e.g. "Oil pressure failure developing — about 90 s to failure — land or reduce power".
+
+The model has to:
+
+- predict **"far from failure"** for a healthy engine, in every mission profile, without false countdowns;
+- start a **countdown** once a fault begins degrading the engine;
+- infer **how fast** the fault is progressing from the signal trend. The same fault can take 8 or 15 minutes to develop, and the model can't know which in advance;
+- become **more accurate as failure approaches**, which is where it matters most.
+
+---
+
+## 2. What "failure" means
+
+Failure is defined once, in `backend/twin/failure.py`, and used both for the training labels and by the live dashboard:
+
+> The engine has failed when the health of its **weakest engine subsystem** (thermal, combustion, lubrication, mechanical, electrical or injection), **averaged over the last 90 s**, drops below **30 / 100** and stays below until the end of the run.
+
+- **Health scores** (0–100) come from `DigitalTwinService.calculate_health()` in `backend/twin/service.py`. They compare each signal with what a healthy engine should read in the same flight conditions, so a high-altitude or hot-day flight doesn't count as degradation.
+- **Sensor health is excluded.** A failing CHT sensor (fault 7) makes a reading untrustworthy but doesn't shorten engine life, so it never starts a countdown.
+- **Healthy engines never fail.** All 40 healthy test flights across every profile stayed at health ≥ 80.
+
+---
+
+## 3. How faults progress toward failure
+
+Every fault starts with zero effect at its onset and grows linearly to full strength over its ramp time. Where along that ramp the engine fails depends on the fault (measured at cruise, 5-minute ramp):
+
+| Fault | Fails at (fault strength) | Ramp in dataset | Approx. onset → failure in dataset |
+|---|---|---|---|
+| 1 Misfire | 33 % | 3–6 min | ~1–2 min |
+| 2 Overheating | 56 % | 3–6 min | ~1.5–3.5 min |
+| 3 Oil pressure failure | 61 % | 1–3 min | ~0.5–2 min |
+| 4 Fuel starvation | 86 % | 1–3 min | ~1–2.5 min |
+| 5 Injector abnormality | 91 % | 8–15 min | ~7–14 min |
+| 6 Cooling degradation | after full strength (CHT keeps creeping up) | 8–15 min | ~9–17 min |
+| 7 CHT sensor drift | never (sensor fault) | 8–15 min | no failure |
+| 8 Combustion instability | 89 % | 8–15 min | ~7–13 min |
+| 9 Abnormal vibration | 90 % | 8–15 min | ~7–14 min |
+
+The last column is an estimate (fail-at strength × ramp time). Thermal lag shifts it a little for different ramp times, so the dataset's `failure_s` column is the truth.
+
+**At low power, some faults never reach failure.** In the endurance profile, cooling degradation, combustion instability and abnormal vibration stay above the threshold: less heat to shed, less vibration at lower RPM. Faults that do fail there take 20–25 % longer than at cruise. So the model must learn that the *same* fault is more or less urgent depending on how the engine is being flown.
+
+**The time scale is compressed:** real engines degrade over hours, here over minutes. Treat seconds as "simulator seconds" and say so in the demo.
+
+---
+
+## 4. Labels
+
+Each row of the dataset (`data/sim_v2/runs/<run_id>.csv`, see the anomaly guide §6) has:
+
+| Column | Meaning |
+|---|---|
+| `rul_seconds` | **Training target.** `min(600, failure_s − sim_time)`; 0 at and after failure |
+| `failed` | 1 from the failure moment on |
+| `severity` | Fault strength 0–1 (ground truth; evaluation only) |
+| `fault_id` | 0 before onset, then the fault's ID |
+
+`runs.csv` also gives `onset_s`, `ramp_s` and `failure_s` per run. `failure_s` is empty if the run never fails.
+
+### 4.1 Why the label is capped at 600 s
+
+Far from failure, the exact number of seconds is unknowable and doesn't matter. "Fails in 40 minutes" and "fails in 60 minutes" call for the same action. The cap:
+
+- makes healthy flights and faults that never fail well-defined: **600 throughout**, meaning "10 minutes or more";
+- concentrates the model on the last 10 minutes, where the countdown matters;
+- is the standard approach in engine-RUL research (e.g. NASA's C-MAPSS turbofan dataset uses a capped, piecewise-linear target).
+
+The resulting label looks like this:
+
+```
+rul_seconds
+ 600 ─────────────────────────╮
+                              │╲            (falls 1 s per second)
+                              │  ╲
+   0                          │    ╲______  (0 after failure)
+     engine start   onset   failure − 600 s   failure
+```
+
+For fast faults (oil pressure, fuel starvation), onset → failure is shorter than 600 s, so the label already starts below 600 at onset.
+
+### 4.2 Rows to drop or weight
+
+- **First 60 s of every run (warm-up):** the backend doesn't score health before 60 samples. Drop them.
+- **Rows after failure:** keep up to 60 s (label 0) so the model learns "failed now", then the run ends.
+- **Imbalance:** most rows are 600 (healthy, pre-onset, never-failing). Down-sample them or give rows with `rul_seconds < 600` higher loss weight. Otherwise the model learns to always say 600.
+
+---
+
+## 5. Inputs
+
+Use the same building blocks as the anomaly model (anomaly guide §5), but over a **longer history**: RUL depends on the *trend*, not just the current state.
+
+| Input | Why it matters for RUL |
+|---|---|
+| **Residuals** (signal − `expected_*`) for RPM, EGT, CHT, oil pressure, oil temperature, bus voltage, alternator current | How far the engine has drifted from healthy |
+| **Health scores** `health_thermal … health_injection` | Failure is defined on these, so their trend is the most direct RUL signal |
+| **Weakest engine health**, raw and 90 s-averaged (sensor excluded) | Exactly the quantity the failure definition thresholds |
+| Roughness of RPM, CHT, torque; vibration RMS; fuel ratio | Needed for misfire, instability, vibration and injector faults, whose health is driven by these |
+| Torque, fuel flow, injection timing/duration (raw) | Signals without a baseline |
+| Flight conditions (throttle, load, altitude, ambient) | The same fault is more or less urgent at different power (§3) |
+
+**Sequence length:** 180–300 s at 1 Hz. The live backend can provide up to 1200 samples per call. Shorter windows can't see the trend of slow faults; longer ones add little.
+
+**Never use as input:** `sim_time`, `severity`, `failed`, `fault_id`, `rul_seconds`, `onset_s`, `ramp_s`, `failure_s`, run/mission IDs, profile name or seed. These leak the answer or don't exist live.
+
+**Optional — fault probabilities from the anomaly classifier:** knowing *which* fault is developing helps, because faults progress differently. If you use them, train on **out-of-fold** classifier predictions (generated by a classifier that never saw that run). Otherwise the RUL model learns from unrealistically perfect labels.
+
+---
+
+## 6. Algorithms
+
+### 6.1 Build the baseline first: health extrapolation
+
+Before any ML, implement this (about 20 lines):
+
+1. Take the weakest engine health, averaged over 90 s, for the last ~120 s.
+2. Fit a straight line. If it's falling, extrapolate to where it would cross 30. That time is the RUL estimate.
+3. If it's flat or rising: RUL = 600.
+
+It's physics-transparent and uses exactly the failure definition, so it's a fair benchmark. **Your ML model must beat it**, especially early in a fault, where health is still near 100 and its slope says little.
+
+### 6.2 Main model: GRU (recommended)
+
+| | Recommendation |
+|---|---|
+| Architecture | 2-layer GRU, 64–96 hidden units, dropout 0.15–0.2 → dense layer → one output. The existing class in `backend/twin/ml_models/rul/model.py` (`GRURULRegressor`: GRU → LayerNorm → 64-unit GELU layer → output) already has this shape. Reuse it with the new `n_features`, but swap its final Softplus for a sigmoid (or clamp the output to 0–1) to match the scaled target |
+| Input | Sequence of 180–300 × N features (§5), standardised with training-set means and stds |
+| Target | `rul_seconds / 600` (0–1); output through a sigmoid, then × 600 |
+| Loss | Huber, with extra weight on rows where `rul_seconds < 600` |
+| Training samples | Sliding windows, stride 5–10 s, from **train** runs; split by run (seeds 1–4 train, 5 val, 6 test) |
+| Training | Adam, lr 1e-3, early stopping on validation RMSE (in-horizon rows) |
+
+**Why a GRU:** RUL is about how the state *evolves*. Recurrent models read trends naturally, and a GRU is lighter than an LSTM, which suits onboard / edge use (an innovation point in the PS).
+
+### 6.3 Alternatives
+
+| Option | When to use |
+|---|---|
+| **XGBoost / LightGBM** on window features (means, slopes and roughness over several horizons, e.g. last 30/90/300 s) | Quick strong baseline. Often competitive, and explainable with SHAP |
+| **1D-CNN or temporal convolution** | If the GRU is slow to train or unstable |
+| **Quantile outputs** (predict the 10th, 50th and 90th percentile of RUL with pinball loss) | Recommended extra: gives a confidence band ("failure in 90 s, likely 60–130 s"). Very useful for the maintenance advisory and for judges |
+
+### 6.4 Post-processing
+
+- **Clamp:** keep the output in 0–600.
+- **Smooth:** an exponential average over ~5 s stops the countdown jittering.
+- **Monotonic countdown (display only):** once a fault is confirmed, the displayed RUL shouldn't jump up by more than a small margin. Keep raw predictions for evaluation.
+
+---
+
+## 7. Evaluation (what to report)
+
+Evaluate on the **test** runs. Report everything **overall, per fault and per mission profile**.
+
+| Metric | Definition | Target to aim for |
+|---|---|---|
+| **RMSE, in-horizon** | RMSE on rows with true RUL < 600 | Lower than the §6.1 baseline everywhere |
+| **RMSE, last 120 s** | Rows within 2 minutes of failure | Small: this is when decisions are made |
+| **Accuracy along the fault** | Error at 25 %, 50 % and 75 % of each run's onset → failure interval | Error shrinks as failure approaches |
+| **Warning timeliness** | Time of the first prediction below 300 s vs the true moment RUL reached 300 s | Within ±30 s; late is worse than early |
+| **Asymmetric score** | Σ over rows of `exp(−d/13) − 1` if d < 0 (early) and `exp(d/10) − 1` if d > 0 (late), with d = (predicted − true) / 10 s | Lower is better; punishes predicting failure *later* than reality |
+| **False countdowns** | Share of healthy and never-failing rows predicted below 400 s | ≈ 0 |
+| **Never-failing faults** | Faults 6/8/9 at low power and fault 7 everywhere: predictions should stay near 600 | Report separately |
+
+The asymmetric score comes from the NASA PHM'08 prognostics challenge. Overestimating remaining life is dangerous; underestimating only costs an early landing.
+
+**Plots to include:** predicted vs true RUL over time for one run per fault, with the quantile band if you have one, and onset and failure marked. This is the picture that shows judges the system predicts failure before it happens.
+
+---
+
+## 8. Pitfalls
+
+- **Raw values across profiles:** a healthy high-altitude flight looks "degraded" in raw terms. Use residuals and health scores.
+- **Always predicting 600:** the imbalance makes this the easy minimum. Weight in-horizon rows (§4.2) and watch in-horizon RMSE, not overall RMSE.
+- **Learning the clock:** never input `sim_time`. The dataset randomises onset (120–300 s) and ramp time so the model can't learn "failure happens N seconds after start".
+- **Learning the ramp:** ramp times are random within each fault's range, so the model must read the *rate* of degradation from the signals. Don't add features that encode the ramp.
+- **Sensor fault 7:** CHT looks alarming, but the label is 600 throughout. The model must learn to ignore a sensor that disagrees with EGT, oil temperature and the rest.
+- **Warm-up:** the first 60 s are dropped; health is not defined there.
+- **Split by run, never by row:** neighbouring windows overlap almost completely.
+- **The old RUL pipeline is obsolete.** `ai/RUL/` and the current `rul_model.pt` were trained on an older dataset, with labels from a synthetic damage-accumulation health index (failure at HI ≤ 0.1, output in hours). Don't mix those labels with the new ones. The new label is `rul_seconds` from the shared failure definition.
+
+---
+
+## 9. Handing the model back
+
+The live backend (`backend/twin/ml_predictor.py` → `backend/twin/ml_models/rul/predictor.py`) will call your model once per second with the recent history of the current mission: up to 1200 samples, oldest first. Each sample is a dict with the column names of the anomaly guide §6.1, minus the labels.
+
+**Deliver:**
+
+1. `predict_rul(history: list[dict]) -> dict | None`, returning
+   ```python
+   {"rul_seconds": float,          # 0-600; 600 = "10 min or more"
+    "rul_p10": float, "rul_p90": float}   # optional quantile band
+   ```
+   Return `None` if there are fewer samples than the model needs.
+2. **Weights** as a PyTorch `state_dict` (`.pt`), plus the model class (or reuse `GRURULRegressor`), or XGBoost `save_model("*.json")`.
+3. **Input scaling** as **JSON** (means / stds per feature), not an sklearn pickle. The backend runs scikit-learn 1.6.1, and pickles break between versions.
+4. **The feature list and sequence length** as JSON, so the backend builds inputs in the same order.
+5. **A short results note** with the §7 metrics and plots, including the comparison with the §6.1 baseline.
+
+**Constraints:**
+- **Speed:** under 50 ms per call on a laptop CPU.
+- **Size:** ideally under 10 MB.
+
+The backend and dashboard currently show RUL in hours (`rul_hours`, with a correction factor in `ml_predictor.py`). They'll be switched to the new seconds-based output when the model is integrated. That's on our side, not yours.
