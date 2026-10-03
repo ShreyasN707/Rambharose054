@@ -39,23 +39,26 @@ Failure is defined once, in `backend/twin/failure.py`, and used both for the tra
 
 ## 3. How faults progress toward failure
 
-Every fault starts with zero effect at its onset and grows linearly to full strength over its ramp time. Where along that ramp the engine fails depends on the fault (measured at cruise, 5-minute ramp):
+Every fault starts with zero effect at its onset and grows linearly to full strength over its ramp time. Where along that ramp the engine fails depends on the fault and on how hard the engine is working. The table shows:
 
-| Fault | Fails at (fault strength) | Ramp in dataset | Approx. onset → failure in dataset |
+- **Fails at:** fault strength at failure, from reference runs at cruise and in endurance with a 5-minute ramp.
+- **Onset → failure:** measured in the 50-run pilot dataset, one run per mission profile, with the dataset's random ramp times.
+
+| Fault | Fails at (cruise / endurance) | Ramp in dataset | Onset → failure in pilot dataset |
 |---|---|---|---|
-| 1 Misfire | 33 % | 3–6 min | ~1–2 min |
-| 2 Overheating | 56 % | 3–6 min | ~1.5–3.5 min |
-| 3 Oil pressure failure | 61 % | 1–3 min | ~0.5–2 min |
-| 4 Fuel starvation | 86 % | 1–3 min | ~1–2.5 min |
-| 5 Injector abnormality | 91 % | 8–15 min | ~7–14 min |
-| 6 Cooling degradation | after full strength (CHT keeps creeping up) | 8–15 min | ~9–17 min |
+| 1 Misfire | 33 % / 39 % | 3–6 min | 88–158 s (median 100) |
+| 2 Overheating | 56 % / 70 % | 3–6 min | 148–219 s (median 180) |
+| 3 Oil pressure failure | 61 % / 73 % | 1–3 min | 97–140 s (median 110) |
+| 4 Fuel starvation | 86 % / after full strength | 1–3 min | 109–206 s (median 142) |
+| 5 Injector abnormality | 88 % / after full strength | 8–15 min | 457–683 s (median 522) |
+| 6 Cooling degradation | after full strength (CHT keeps creeping up) | 8–15 min | 544–855 s (median 790) |
 | 7 CHT sensor drift | never (sensor fault) | 8–15 min | no failure |
-| 8 Combustion instability | 89 % | 8–15 min | ~7–13 min |
-| 9 Abnormal vibration | 90 % | 8–15 min | ~7–14 min |
+| 8 Combustion instability | 55 % / 99 % | 8–15 min | 278–1082 s (median 531) |
+| 9 Abnormal vibration | after full strength | 8–15 min | 493–1063 s (median 707) |
 
-The last column is an estimate (fail-at strength × ramp time). Thermal lag shifts it a little for different ramp times, so the dataset's `failure_s` column is the truth.
+With short ramps, oil pressure failure and fuel starvation usually fail right at the end of the ramp: the 90 s health average lags a fast collapse. The dataset's `failure_s` column is the truth for every run.
 
-**At low power, some faults never reach failure.** In the endurance profile, cooling degradation, combustion instability and abnormal vibration stay above the threshold: less heat to shed, less vibration at lower RPM. Faults that do fail there take 20–25 % longer than at cruise. So the model must learn that the *same* fault is more or less urgent depending on how the engine is being flown.
+**Low power slows faults down.** In the endurance profile, faults reach failure 20–70 % later than at cruise, and several only after reaching full strength: less heat to shed, less vibration at lower RPM. So the model must learn that the *same* fault is more or less urgent depending on how the engine is being flown.
 
 **The time scale is compressed:** real engines degrade over hours, here over minutes. Treat seconds as "simulator seconds" and say so in the demo.
 
@@ -188,7 +191,7 @@ Evaluate on the **test** runs. Report everything **overall, per fault and per mi
 | **Warning timeliness** | Time of the first prediction below 300 s vs the true moment RUL reached 300 s | Within ±30 s; late is worse than early |
 | **Asymmetric score** | Σ over rows of `exp(−d/13) − 1` if d < 0 (early) and `exp(d/10) − 1` if d > 0 (late), with d = (predicted − true) / 10 s | Lower is better; punishes predicting failure *later* than reality |
 | **False countdowns** | Share of healthy and never-failing rows predicted below 400 s | ≈ 0 |
-| **Never-failing faults** | Faults 6/8/9 at low power and fault 7 everywhere: predictions should stay near 600 | Report separately |
+| **Never-failing runs** | Fault 7 (sensor drift) everywhere, plus any engine-fault run whose `failure_s` is empty: predictions should stay near 600 | Report separately |
 
 The asymmetric score comes from the NASA PHM'08 prognostics challenge. Overestimating remaining life is dangerous; underestimating only costs an early landing.
 
