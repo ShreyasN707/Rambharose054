@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException
 import subprocess
 import os
@@ -13,7 +14,17 @@ MQTT_BROKER = "127.0.0.1"
 MQTT_PORT = 1883
 FAULT_TOPIC = "engine/engine_001/fault"
 
+# Mission profiles defined in simulation/mission_profile.m.
+MISSION_PROFILES = (
+    "cruise",
+    "high_altitude",
+    "hot_weather",
+    "endurance",
+    "rapid_throttle",
+)
+
 simulation_process = None
+current_run = {}
 
 
 def reset_fault():
@@ -57,7 +68,8 @@ def simulation_status():
     if simulation_process.poll() is None:
         return {
             "status": "running",
-            "pid": simulation_process.pid
+            "pid": simulation_process.pid,
+            **current_run,
         }
 
     simulation_process = None
@@ -68,8 +80,17 @@ def simulation_status():
 
 
 @app.post("/simulation/start")
-def start_simulation():
-    global simulation_process
+def start_simulation(profile: str = "cruise"):
+    global simulation_process, current_run
+
+    if profile not in MISSION_PROFILES:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Unknown mission profile '{profile}'. "
+                f"Valid: {', '.join(MISSION_PROFILES)}"
+            ),
+        )
 
     # Already running
     if (
@@ -78,8 +99,17 @@ def start_simulation():
     ):
         return {
             "status": "already_running",
-            "pid": simulation_process.pid
+            "pid": simulation_process.pid,
+            **current_run,
         }
+
+    # Every run is its own mission, named after its start time and profile.
+    mission_id = (
+        "mission_"
+        + datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        + "_"
+        + profile
+    )
 
     # Reset engine to healthy before starting
     try:
@@ -95,7 +125,12 @@ def start_simulation():
         simulation_process = subprocess.Popen(
             START_COMMAND,
             cwd=SIMULINK_DIR,
-            start_new_session=True
+            start_new_session=True,
+            env={
+                **os.environ,
+                "SIM_PROFILE": profile,
+                "SIM_MISSION_ID": mission_id,
+            },
         )
 
     except Exception as exc:
@@ -104,9 +139,15 @@ def start_simulation():
             detail=f"Failed to start simulation: {exc}",
         )
 
+    current_run = {
+        "profile": profile,
+        "mission_id": mission_id,
+    }
+
     return {
         "status": "started",
         "pid": simulation_process.pid,
+        **current_run,
         "fault_id": 0,
     }
 

@@ -162,17 +162,28 @@ SIMULATION_CONTROLLER_URL = "http://host.docker.internal:9000"
 @router.post("/engines/{engine_id}/simulation/start")
 def start_simulation(
     engine_id: str,
+    profile: str = "cruise",
     session: Session = Depends(get_session),
     telemetry_repo: TelemetryRepository = Depends(
         get_telemetry_repo
     ),
 ):
 
+    # The controller validates the profile name and returns the new
+    # mission ID for this run.
     try:
         response = requests.post(
             f"{SIMULATION_CONTROLLER_URL}/simulation/start",
+            params={"profile": profile},
             timeout=5,
         )
+
+        if response.status_code == 422:
+            raise HTTPException(
+                status_code=422,
+                detail=response.json().get("detail"),
+            )
+
 
         response.raise_for_status()
 
