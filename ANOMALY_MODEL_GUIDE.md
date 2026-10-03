@@ -4,7 +4,7 @@ This guide is for whoever trains the anomaly / fault model of the aero-piston en
 
 The RUL (remaining useful life) model has its own guide. The two models share the same dataset.
 
-All numbers below were measured from the current Simulink model (commit `7c0528f`, October 2026). They are simulator values, not certified engine limits.
+All numbers below were measured from the Simulink model the dataset was generated with (commit `c6764ed`, October 2026). They are simulator values, not certified engine limits.
 
 ---
 
@@ -287,7 +287,7 @@ The dataset also has the backend's subsystem health scores (`health_thermal`, `h
 
 ## 6. Dataset
 
-The dataset is written to `data/sim_v2/`. It's too large for git (ignored), so it's shared separately. Three steps produce it:
+**The dataset is complete:** 299 runs (6 seeds × 5 profiles × 10 faults; one rapid-throttle vibration run, seed 4, was skipped because it crashed the simulator). It's shared as **`data/sim_v2_dataset.zip`** (17 MB; 57 MB unzipped). It's too large for git (ignored). Unzipped, it gives `sim_v2/runs.csv` and `sim_v2/runs/`. To regenerate or extend it (e.g. seeds 7–12), three steps:
 
 ```matlab
 % 1. Simulate (MATLAB, from simulation/). Resumable: finished runs are skipped.
@@ -300,7 +300,7 @@ python ai/dataset/label_dataset.py data/sim_v2
 python ai/dataset/check_dataset.py data/sim_v2
 ```
 
-A **pilot** of 50 runs (seed 1: one run per profile × fault) comes first so you can build your pipeline. The **full** set of 300 runs (seeds 1–6) follows. Each run takes ~30 s to simulate.
+Splits: seeds 1–4 train (199 runs), 5 val (50), 6 test (50).
 
 ### 6.1 Structure
 
@@ -337,7 +337,7 @@ Most rows are healthy: warm-up, pre-onset, fault 0 runs. Use class weights or ba
 
 ### 6.5 What the rows look like
 
-Real rows from two pilot runs, both cruise variants (seed 1): one healthy, one overheating fault (onset 249 s, ramp 246 s, failure 403 s). Only some columns are shown.
+Real rows from two runs, both cruise variants (seed 1): one healthy, one overheating fault (onset 249 s, ramp 246 s, failure 403 s). Only some columns are shown.
 
 | Row | sim_time | throttle | altitude | ambient_temperature | rpm | cht | expected_cht | egt | expected_egt | oil_temperature | health_thermal | fault_id | severity | failed | rul_seconds |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|

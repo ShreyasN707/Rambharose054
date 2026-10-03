@@ -4,7 +4,7 @@ This guide is for whoever trains the RUL model of the aero-piston engine digital
 
 It shares the simulator, mission profiles, faults and dataset with the anomaly model. **Read [`ANOMALY_MODEL_GUIDE.md`](ANOMALY_MODEL_GUIDE.md) sections 2–6 first.** They describe the engine, the 12 signals and 4 flight conditions, what a healthy engine reads in each mission profile, what every fault does to the signals, and the features (residuals, roughness, fuel ratio). This guide only repeats what matters specifically for RUL.
 
-All numbers were measured from the current Simulink model (commit `7c0528f`, October 2026). They are simulator values, not certified engine limits.
+All numbers were measured from the Simulink model the dataset was generated with (commit `c6764ed`, October 2026). They are simulator values, not certified engine limits.
 
 ---
 
