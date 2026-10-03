@@ -1,0 +1,113 @@
+{
+  "_comment": "Maintenance advisory rules per fault family (backend/twin/advisory.py). do_now is keyed by urgency level; maintenance applies after landing. Prototype guidance based on general piston-engine practice, not certified procedures.",
+  "oil_pressure": {
+    "title": "Oil pressure failure developing",
+    "do_now": {
+      "MONITOR": ["Monitor oil pressure and oil temperature closely."],
+      "CAUTION": ["Reduce power to lower bearing load.", "Plan to end the mission early."],
+      "WARNING": ["Reduce power immediately.", "Abort the mission and return to base."],
+      "CRITICAL": ["Land as soon as possible: bearing seizure risk."]
+    },
+    "maintenance": ["Check oil level and look for leaks.", "Inspect the oil pump, oil filter and pressure relief valve.", "Verify the oil pressure sender against a mechanical gauge."]
+  },
+  "overheating": {
+    "title": "Engine overheating",
+    "do_now": {
+      "MONITOR": ["Monitor CHT and EGT trends."],
+      "CAUTION": ["Reduce power and, if possible, descend into cooler air."],
+      "WARNING": ["Reduce power to the minimum needed to hold altitude.", "Abort the mission and return to base."],
+      "CRITICAL": ["Land as soon as possible: detonation and piston damage risk."]
+    },
+    "maintenance": ["Check ignition timing and fuel mixture (a lean mixture raises EGT and CHT).", "Inspect the cooling path and the exhaust system.", "Borescope the cylinder for heat damage."]
+  },
+  "cooling": {
+    "title": "Cooling degradation",
+    "do_now": {
+      "MONITOR": ["Monitor CHT and oil temperature trends."],
+      "CAUTION": ["Reduce power and, if possible, descend into cooler air."],
+      "WARNING": ["Reduce power and abort the mission."],
+      "CRITICAL": ["Land as soon as possible: the engine cannot shed heat."]
+    },
+    "maintenance": ["Inspect cooling fins for dirt or damage.", "Check baffles, shrouds and cowling seals.", "Check the oil cooler for blockage."]
+  },
+  "fuel_starvation": {
+    "title": "Fuel starvation",
+    "do_now": {
+      "MONITOR": ["Monitor fuel flow and RPM."],
+      "CAUTION": ["Check the fuel supply: tank selection, pump and fuel quantity."],
+      "WARNING": ["Prepare for loss of power: head for the nearest safe landing area."],
+      "CRITICAL": ["Land immediately: the engine is losing power."]
+    },
+    "maintenance": ["Inspect the fuel filter, fuel pump and fuel lines.", "Drain and check fuel for water or contamination.", "Check tank venting."]
+  },
+  "injector": {
+    "title": "Injector abnormality",
+    "do_now": {
+      "MONITOR": ["Monitor EGT and fuel flow versus commanded fuel."],
+      "CAUTION": ["Avoid sustained high power.", "Plan maintenance after this mission."],
+      "WARNING": ["Reduce power and abort the mission."],
+      "CRITICAL": ["Land as soon as possible: lean running damages the engine."]
+    },
+    "maintenance": ["Clean or replace the injector.", "Flow-test the injector and check the spray pattern.", "Check the fuel rail pressure regulator."]
+  },
+  "misfire": {
+    "title": "Misfire",
+    "do_now": {
+      "MONITOR": ["Monitor RPM stability and vibration."],
+      "CAUTION": ["Reduce power and avoid rapid throttle changes."],
+      "WARNING": ["Abort the mission and return to base."],
+      "CRITICAL": ["Land as soon as possible: engine power is unreliable."]
+    },
+    "maintenance": ["Inspect and gap the spark plugs.", "Check ignition leads and the ignition module.", "Run a compression test."]
+  },
+  "instability": {
+    "title": "Combustion instability",
+    "do_now": {
+      "MONITOR": ["Monitor RPM stability."],
+      "CAUTION": ["Reduce power and avoid rapid throttle changes."],
+      "WARNING": ["Abort the mission and return to base."],
+      "CRITICAL": ["Land as soon as possible: combustion is erratic."]
+    },
+    "maintenance": ["Check ignition timing.", "Check fuel quality and the injector spray pattern.", "Inspect the intake for air leaks."]
+  },
+  "vibration": {
+    "title": "Abnormal vibration",
+    "do_now": {
+      "MONITOR": ["Monitor the vibration trend."],
+      "CAUTION": ["Reduce RPM to lower vibration loads."],
+      "WARNING": ["Reduce RPM and abort the mission."],
+      "CRITICAL": ["Land as soon as possible: risk of structural or bearing failure."]
+    },
+    "maintenance": ["Balance the propeller and inspect it for damage.", "Inspect engine mounts and isolators.", "Check crankshaft bearings for wear."]
+  },
+  "electrical": {
+    "title": "Electrical system fault",
+    "do_now": {
+      "MONITOR": ["Monitor bus voltage and alternator current."],
+      "CAUTION": ["Shed non-essential electrical loads.", "Keep RPM high enough for the alternator to carry the bus."],
+      "WARNING": ["Shed non-essential loads and abort the mission: running on battery."],
+      "CRITICAL": ["Land as soon as possible: avionics power is at risk."]
+    },
+    "maintenance": ["Check the alternator drive and output.", "Test the voltage regulator.", "Check the battery state and terminals."]
+  },
+  "cht_sensor": {
+    "title": "CHT sensor drift or failure",
+    "do_now": {
+      "MONITOR": ["Cross-check CHT against EGT and oil temperature."],
+      "CAUTION": ["Don't act on CHT alone: EGT and oil temperature are normal, so the engine is likely fine."],
+      "WARNING": ["Treat CHT as unavailable; fly on EGT and oil temperature."],
+      "CRITICAL": ["Treat CHT as unavailable; fly on EGT and oil temperature."]
+    },
+    "maintenance": ["Replace or recalibrate the CHT thermocouple.", "Inspect the sensor wiring and connector."]
+  },
+  "unclassified": {
+    "title": "Unclassified anomaly",
+    "do_now": {
+      "MONITOR": ["Monitor the affected subsystem."],
+      "CAUTION": ["Reduce power and monitor the affected subsystem."],
+      "WARNING": ["Abort the mission and return to base."],
+      "CRITICAL": ["Land as soon as possible."]
+    },
+    "maintenance": ["Inspect the affected subsystem."]
+  }
+}

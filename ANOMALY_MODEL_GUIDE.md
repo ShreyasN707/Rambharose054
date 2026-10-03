@@ -257,7 +257,7 @@ Use **residual = measured − expected** as features. Healthy residuals hover ne
 The backend gives your model the **last 60 samples (60 s)**. Compute per window:
 
 - for each residual and each raw signal without a baseline (torque, fuel flow, injection timing/duration): **mean, std, slope** (least-squares over the window), **min, max**;
-- **roughness** (§4.3) of `rpm`, `cht` and `torque`;
+- **roughness** (§4.3) of the **RPM residual** (`rpm − expected_rpm`), `cht` and `torque`. Use the residual for RPM: raw RPM is legitimately jagged during fast throttle steps, which the baseline follows, so raw-RPM roughness gives false alarms in the rapid-throttle profile (the twin's own health scoring had exactly this bug, fixed while generating the dataset);
 - **vibration RMS** (never the mean);
 - the **fuel ratio** (§5.3);
 - the window mean of the four flight conditions, as context.
@@ -430,22 +430,31 @@ Include one plot per fault showing anomaly score and class probability over time
 - **Leakage:** never feed time, severity, labels or run identifiers (§5.5), and never split by row.
 - **Simulator randomness:** the Simulink noise and misfire generators have fixed seeds, so the live demo always replays the same noise. The dataset generator gives each of the model's 16 noise sources its own random seed in every run, so no two runs share a noise pattern. The splits keep each seed in one split only.
 - **Fixed during generation:** eight sensor-noise sources (RPM, fuel flow, torque, oil temperature, oil pressure, CHT, EGT and the vibration source) used to share one seed. Their noise was therefore perfectly correlated, which a model could have learned as a fake relationship. They now have separate seeds, in the model and in every dataset run.
+- **CHT can read 0 °C** (the sensor's lower limit) when a lean injector fault meets very cold air at high altitude (2 runs). Treat it like any clipped reading.
 - **Oil temperature can saturate at 200 °C** (the sensor's range limit) in severe oil pressure failure, mostly on hot or high-power flights. Treat 200 as "200 or more". The oil pressure signal still shows the fault clearly.
 
 ---
 
 ## 10. Handing the model back
 
-The live backend (`backend/twin/ml_predictor.py`) will call your model once per second with a window of recent samples. Each sample is a dict with the column names of §6.1, minus the labels.
+The interface your model plugs into is already in place: `backend/twin/predictor.py`. Today the live system runs a rule-based stand-in (`RuleFaultModel`) through the same interface, so the dashboard, advisory and mission reports already work. Integrating your model means implementing one class and returning it from `create_predictors()`.
+
+Once per second, the backend calls `predict(window)` with the **last 60 samples** (oldest first). Each sample is a dict with the column names of §6.1 (flight conditions, signals, `expected_*`, `health_*`), minus the labels.
 
 **Deliver:**
 
-1. `predict(window: list[dict]) -> dict`, returning
+1. A class with `predict(window: list[dict]) -> FaultResult` (see `predictor.py`), returning
    ```python
-   {"anomaly_score": float, "is_anomaly": bool,
-    "fault_id": int, "fault_confidence": float,          # 0-1
-    "probabilities": {fault_id: float, ...},
-    "top_features": [(name, contribution), ...]}        # optional, from SHAP
+   FaultResult(
+       anomaly_score=...,   # normalised: 1.0 = your detection threshold (divide by it)
+       is_anomaly=...,      # anomaly_score >= 1.0, after your persistence rule
+       fault_id=...,        # 0 healthy, 1-9 faults (predictor.FAULTS)
+       fault_family=...,    # predictor.FAULTS[fault_id][0]
+       fault=...,           # predictor.FAULTS[fault_id][1]
+       confidence=...,      # 0-1, probability of fault_id
+       top_features=[("oil_pressure", 0.42), ...],   # optional, e.g. from SHAP
+       source="xgboost-v1", # your model's name, shown on the dashboard
+   )
    ```
 2. **Model files:**
    - XGBoost / LightGBM: `save_model("*.json")`
@@ -459,4 +468,4 @@ The live backend (`backend/twin/ml_predictor.py`) will call your model once per 
 - **Speed:** under 50 ms per call on a laptop CPU.
 - **Size:** ideally under 10 MB. Lightweight models suit onboard / edge deployment, which the PS lists as an innovation area.
 
-The current files in `backend/twin/ml_models/anomaly/` and `anomalyModel/` were trained on an older 20-run dataset (faults 0–4 only, no mission profiles). Treat them as references for the interface, not as models to keep.
+The current files in `backend/twin/ml_models/anomaly/`, `ml_predictor.py` and `anomalyModel/` were trained on an older 20-run dataset (faults 0–4 only, no mission profiles) and are no longer loaded by the backend. Treat them as references only.

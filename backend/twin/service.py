@@ -8,8 +8,14 @@ from telemetry.repository import TelemetryRepository
 from telemetry.schemas import TelemetryCreate
 
 from twin import baseline
-from twin.ml import MLPredictor
+from twin.advisory import AdvisoryEngine
 from twin.models import HealthSnapshot
+from twin.predictor import (
+    RUL_HISTORY_SAMPLES,
+    WINDOW_SAMPLES,
+    FaultModel,
+    RULModel,
+)
 from twin.repository import HealthSnapshotRepository
 from twin.schemas import (
     DigitalTwinState,
@@ -34,11 +40,16 @@ CRUISE_REFERENCE = {
 }
 
 
-# Autoencoder reconstruction-error threshold
-# (twin/ml_models/anomaly/autoencoder_threshold.pkl). The anomaly score is
-# the raw reconstruction error, so it is unbounded: compare it with this
-# threshold, not with fixed 0-1 levels.
-ANOMALY_THRESHOLD = 0.6150358457512803
+# Subsystem health scores, in the order the model samples carry them.
+HEALTH_FIELDS = (
+    "thermal",
+    "combustion",
+    "lubrication",
+    "mechanical",
+    "electrical",
+    "injection",
+    "sensor",
+)
 
 
 # Electrical health limits. They mirror the Simulink Electrical_Model
@@ -102,11 +113,14 @@ class DigitalTwinService:
         self,
         repository: HealthSnapshotRepository,
         telemetry_repository: TelemetryRepository,
-        predictor: MLPredictor,
+        fault_model: FaultModel,
+        rul_model: RULModel,
     ):
         self.repository = repository
         self.telemetry_repository = telemetry_repository
-        self.predictor = predictor
+        self.fault_model = fault_model
+        self.rul_model = rul_model
+        self.advisor = AdvisoryEngine()
 
     def process(
         self,
@@ -130,9 +144,10 @@ class DigitalTwinService:
 
         telemetry_records = history_records[-60:]
 
-        # A shorter history than requested covers the whole mission, so
-        # the baseline can follow the engine from a cold start.
-        expected = baseline.expected(
+        # Expected healthy readings for every sample. A shorter history
+        # than requested covers the whole mission, so the baseline can
+        # follow the engine from a cold start.
+        expected_rows = baseline.expected_series(
             [
                 {
                     "throttle": item.throttle,
@@ -146,28 +161,7 @@ class DigitalTwinService:
                 len(history_records) < baseline.HISTORY_SAMPLES
             ),
         )
-
-        telemetry_window = [
-            {
-                "rpm": item.rpm,
-                "cht": item.cht,
-                "egt": item.egt,
-                "oil_pressure": item.oil_pressure,
-                "torque": item.torque,
-                "oil_temperature": item.oil_temperature,
-                "fuel_flow": item.fuel_flow,
-                "vibration": item.vibration,
-                "throttle": item.throttle,
-                "engine_load": item.engine_load,
-                "altitude": item.altitude,
-                "ambient_temperature": item.ambient_temperature,
-            }
-            for item in telemetry_records
-        ]
-
-        prediction = self.predictor.predict(
-            telemetry_window,
-        )
+        expected = expected_rows[-1] if expected_rows else None
 
         # get_latest_window() returns samples oldest first, so the last
         # samples here are the most recent readings.
@@ -190,14 +184,80 @@ class DigitalTwinService:
             for item in recent_records
         ]
 
-        state = self.build_state(
+        # RPM roughness is measured on the deviation from the expected
+        # healthy RPM, so fast but healthy throttle transients (which the
+        # baseline follows) don't count as rough running.
+        if expected_rows:
+            recent_rpm = [
+                item.rpm - row["rpm"]
+                for item, row in zip(
+                    roughness_records,
+                    expected_rows[-len(roughness_records):],
+                )
+            ]
+        else:
+            recent_rpm = [item.rpm for item in roughness_records]
+
+        health = self.calculate_health(
             telemetry,
-            prediction,
             recent_vibration=recent_vibration,
             recent_injection=recent_injection,
-            recent_rpm=[item.rpm for item in roughness_records],
+            recent_rpm=recent_rpm,
             recent_cht=[item.cht for item in roughness_records],
             expected=expected,
+        )
+
+        # Fault and RUL predictions (trained models or rule stand-ins,
+        # twin/predictor.py) on dataset-shaped samples.
+        samples = self._model_samples(
+            session,
+            history_records[-RUL_HISTORY_SAMPLES:],
+            expected_rows[-RUL_HISTORY_SAMPLES:] if expected_rows else None,
+            health,
+        )
+        fault = self.fault_model.predict(samples[-WINDOW_SAMPLES:])
+        rul = self.rul_model.predict(samples)
+
+        prediction = MLPrediction(
+            anomaly_score=fault.anomaly_score,
+            is_anomaly=fault.is_anomaly,
+            fault_id=fault.fault_id,
+            fault=fault.fault if fault.fault_id != 0 else None,
+            confidence=fault.confidence,
+            rul_seconds=rul.rul_seconds if rul else None,
+            rul_low=rul.rul_low if rul else None,
+            rul_high=rul.rul_high if rul else None,
+            top_features=fault.top_features,
+            source=f"{fault.source}+{rul.source}" if rul else fault.source,
+        )
+
+        state = DigitalTwinState(
+            engine_id=telemetry.engine_id,
+            mission_id=telemetry.mission_id,
+            operating_state=self._determine_operating_state(
+                health,
+                prediction,
+            ),
+            health=health,
+            prediction=prediction,
+        )
+
+        state.advisory = self.advisor.update(
+            telemetry,
+            health,
+            fault,
+            rul,
+            expected=expected,
+            recent_rpm=recent_rpm,
+            recent_vibration=recent_vibration,
+            commanded_fuel=(
+                self._commanded_fuel_flow(
+                    telemetry.rpm,
+                    telemetry.injection_duration,
+                )
+                if telemetry.injection_duration is not None
+                else None
+            ),
         )
 
         self.save_health_snapshot(
@@ -207,6 +267,56 @@ class DigitalTwinService:
         )
 
         return state
+
+    def _model_samples(
+        self,
+        session: Session,
+        records: list,
+        expected_rows: list[dict] | None,
+        current_health: HealthState,
+    ) -> list[dict]:
+        """Model input samples (dataset columns), oldest first.
+
+        Health comes from the stored snapshots; the newest sample uses the
+        health just computed (its snapshot isn't saved yet).
+        """
+
+        snapshots = self.repository.get_recent(
+            session,
+            records[-1].engine_id,
+            records[-1].mission_id,
+            len(records),
+        )
+        health_at = {snapshot.time: snapshot for snapshot in snapshots}
+
+        samples = []
+        for i, item in enumerate(records):
+            sample = {
+                name: getattr(item, name)
+                for name in (
+                    "throttle", "engine_load", "altitude",
+                    "ambient_temperature", "rpm", "torque", "fuel_flow",
+                    "cht", "egt", "oil_pressure", "oil_temperature",
+                    "vibration", "battery_voltage", "alternator_current",
+                    "injection_timing", "injection_duration",
+                )
+            }
+            if expected_rows:
+                for name, value in expected_rows[i].items():
+                    sample[f"expected_{name}"] = value
+
+            source = (
+                current_health if i == len(records) - 1
+                else health_at.get(item.time)
+            )
+            for name in HEALTH_FIELDS:
+                sample[f"health_{name}"] = (
+                    getattr(source, name) if source is not None else None
+                )
+
+            samples.append(sample)
+
+        return samples
 
     def calculate_health(
         self,
@@ -299,10 +409,21 @@ class DigitalTwinService:
             sensor=state.health.sensor,
 
             anomaly_score=state.prediction.anomaly_score,
-            is_anomaly=state.prediction.anomaly_score >= ANOMALY_THRESHOLD,
+            is_anomaly=state.prediction.is_anomaly,
+            fault_id=state.prediction.fault_id,
             fault=state.prediction.fault,
             confidence=state.prediction.confidence,
-            rul_hours=state.prediction.rul_hours,
+            rul_seconds=state.prediction.rul_seconds,
+            rul_low=state.prediction.rul_low,
+            rul_high=state.prediction.rul_high,
+            top_features=[list(f) for f in state.prediction.top_features],
+            prediction_source=state.prediction.source,
+
+            advisory=(
+                state.advisory.model_dump()
+                if state.advisory is not None
+                else None
+            ),
         )
 
         return self.repository.save(
@@ -366,6 +487,8 @@ class DigitalTwinService:
 
         # Combustion instability: cycle-to-cycle torque variation makes
         # the RPM rough (3.5 points per RPM beyond the healthy limit).
+        # recent_rpm is the deviation from the expected RPM when the
+        # baseline is available, so throttle transients don't count.
         roughness_penalty = max(
             0,
             self._roughness(recent_rpm) - RPM_ROUGHNESS_LIMIT,
@@ -637,41 +760,8 @@ class DigitalTwinService:
             2,
         )
 
-    def build_state(
-        self,
-        telemetry: TelemetryCreate,
-        prediction: MLPrediction,
-        recent_vibration: list[float] | None = None,
-        recent_injection: list[tuple] | None = None,
-        recent_rpm: list[float] | None = None,
-        recent_cht: list[float] | None = None,
-        expected: dict[str, float] | None = None,
-    ) -> DigitalTwinState:
-
-        health = self.calculate_health(
-            telemetry,
-            recent_vibration=recent_vibration,
-            recent_injection=recent_injection,
-            recent_rpm=recent_rpm,
-            recent_cht=recent_cht,
-            expected=expected,
-        )
-
-        operating_state = self._determine_operating_state(
-            health,
-            prediction,
-        )
-
-        return DigitalTwinState(
-            engine_id=telemetry.engine_id,
-            mission_id=telemetry.mission_id,
-            operating_state=operating_state,
-            health=health,
-            prediction=prediction,
-        )
-
+    @staticmethod
     def _determine_operating_state(
-        self,
         health: HealthState,
         prediction: MLPrediction,
     ) -> str:
@@ -692,17 +782,19 @@ class DigitalTwinService:
             if score is not None
         )
 
-        # Anomaly score in multiples of the autoencoder threshold.
-        anomaly = prediction.anomaly_score / ANOMALY_THRESHOLD
+        # Anomaly score in multiples of the detector's threshold
+        # (predictors return it normalised).
+        anomaly = prediction.anomaly_score
+        fault_found = prediction.fault_id not in (None, 0)
 
-        # The autoencoder also reacts to unusual but healthy conditions
+        # An anomaly detector also reacts to unusual but healthy conditions
         # (e.g. engine warm-up), so on its own it can only raise a
         # WARNING. It escalates further only when the health indices or
         # the fault classifier confirm a problem.
         confirmed = (
             weakest < 80
             or health.overall < 80
-            or prediction.fault is not None
+            or fault_found
         )
 
         if (
@@ -722,7 +814,7 @@ class DigitalTwinService:
             health.overall < 80
             or weakest < 60
             or anomaly >= 1
-            or prediction.fault is not None
+            or fault_found
         ):
             return "WARNING"
 

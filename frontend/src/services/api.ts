@@ -8,6 +8,7 @@ import type {
     AlertData,
     DashboardResponse,
     MissionReplayResponse,
+    MissionReport,
 } from "../types/api";
 
 const BASE_URL = "http://localhost:8000/api";
@@ -111,6 +112,14 @@ export async function getMissions(): Promise<{
     missions: MissionItem[];
 }> {
     return request<{ missions: MissionItem[] }>("/missions");
+}
+
+export async function getMissionReport(
+    missionId: string
+): Promise<MissionReport> {
+    return request<MissionReport>(
+        `/missions/${encodeURIComponent(missionId)}/report`
+    );
 }
 
 export async function getMission(

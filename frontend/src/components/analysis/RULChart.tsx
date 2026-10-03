@@ -24,9 +24,12 @@ export default function RULChart({
         .map((point, index) => ({
             index,
             time: new Date(point.timestamp).toLocaleTimeString(),
-            rul_hours: point.prediction?.rul_hours ?? null,
+            rul_minutes:
+                point.prediction?.rul_seconds != null
+                    ? Math.round((point.prediction.rul_seconds / 60) * 10) / 10
+                    : null,
         }))
-        .filter((point) => point.rul_hours !== null);
+        .filter((point) => point.rul_minutes !== null);
 
     return (
         <div
@@ -51,8 +54,14 @@ export default function RULChart({
                     className="text-xl font-bold"
                     style={{ color: "#fff" }}
                 >
-                    ESTIMATED RUL
+                    ESTIMATED TIME TO FAILURE
                 </h3>
+                <div
+                    className="text-xs mt-1"
+                    style={{ color: "#777", fontFamily: "'JetBrains Mono', monospace" }}
+                >
+                    10 = 10 minutes or more (no failure ahead)
+                </div>
             </div>
 
             {chartData.length === 0 ? (
@@ -87,7 +96,7 @@ export default function RULChart({
                                 fontSize: 11,
                             }}
                             label={{
-                                value: "HOURS",
+                                value: "MINUTES",
                                 angle: -90,
                                 position: "insideLeft",
                                 fill: "#777",
@@ -114,7 +123,7 @@ export default function RULChart({
 
                         <Line
                             type="monotone"
-                            dataKey="rul_hours"
+                            dataKey="rul_minutes"
                             stroke="#C6FF3D"
                             strokeWidth={2}
                             dot={false}

@@ -5,22 +5,20 @@ from api.dependencies import (
     get_session,
     get_telemetry_repo,
     get_health_snapshot_repo,
-    get_twin_service,
 )
 from api.exceptions import EngineNotFoundError
 from api.schemas import (
-    ANOMALY_THRESHOLD,
     DashboardResponse,
     TelemetryResponse,
+    AdvisoryResponse,
     HealthResponse,
     PredictionResponse,
     AlertResponse,
     HealthHistoryPoint,
+    operating_state_of,
 )
 from telemetry.repository import TelemetryRepository
 from twin.repository import HealthSnapshotRepository
-from twin.service import DigitalTwinService
-from twin.schemas import HealthState, MLPrediction
 
 router = APIRouter()
 
@@ -35,7 +33,6 @@ def dashboard(
     session: Session = Depends(get_session),
     telemetry_repo: TelemetryRepository = Depends(get_telemetry_repo),
     health_repo: HealthSnapshotRepository = Depends(get_health_snapshot_repo),
-    twin_service: DigitalTwinService = Depends(get_twin_service),
 ):
     latest_row = telemetry_repo.get_latest(session, engine_id, mission_id)
     if latest_row is None:
@@ -43,61 +40,26 @@ def dashboard(
 
     latest_telemetry = TelemetryResponse.from_row(latest_row)
 
-    snapshots = health_repo.get_by_engine(session, engine_id)
-    snapshots = [s for s in snapshots if s.mission_id == mission_id]
+    # The telemetry service stores health, prediction and advisory with
+    # every snapshot; the dashboard only reads them.
+    snapshots = health_repo.get_recent(session, engine_id, mission_id, 20)
 
-    health = None
-    operating_state = None
+    health = prediction = advisory = operating_state = None
     recent_health_history = []
 
     if snapshots:
         latest_snapshot = snapshots[-1]
         health = HealthResponse.from_snapshot(latest_snapshot)
+        prediction = PredictionResponse.from_snapshot(latest_snapshot)
+        advisory = AdvisoryResponse.from_snapshot(latest_snapshot)
+        operating_state = operating_state_of(latest_snapshot)
         recent_health_history = [
             HealthHistoryPoint(
                 timestamp=s.time,
                 health=HealthResponse.from_snapshot(s),
             )
-            for s in snapshots[-20:]
+            for s in snapshots
         ]
-
-    window = telemetry_repo.get_latest_window(session, engine_id, mission_id)
-    if len(window) < 60:
-        ml_prediction = MLPrediction(
-            anomaly_score=0.0, fault=None, confidence=0.0, rul_hours=None
-        )
-    else:
-        telemetry_window = [
-            {
-                "rpm": t.rpm,
-                "cht": t.cht,
-                "egt": t.egt,
-                "oil_pressure": t.oil_pressure,
-                "torque": t.torque,
-                "oil_temperature": t.oil_temperature,
-                "fuel_flow": t.fuel_flow,
-                "vibration": t.vibration,
-                "throttle": t.throttle,
-                "engine_load": t.engine_load,
-                "altitude": t.altitude,
-                "ambient_temperature": t.ambient_temperature,
-            }
-            for t in window
-        ]
-        ml_prediction = twin_service.predictor.predict(telemetry_window)
-
-    prediction = PredictionResponse(
-        anomaly_score=ml_prediction.anomaly_score,
-        is_anomaly=ml_prediction.anomaly_score >= ANOMALY_THRESHOLD,
-        fault=ml_prediction.fault,
-        confidence=ml_prediction.confidence,
-        rul_hours=ml_prediction.rul_hours,
-    )
-    if health is not None:
-        operating_state = twin_service._determine_operating_state(
-            HealthState(**health.model_dump()),
-            ml_prediction,
-        )
 
     alerts: list[AlertResponse] = []
     for s in snapshots:
@@ -134,6 +96,7 @@ def dashboard(
         health=health,
         prediction=prediction,
         operating_state=operating_state,
+        advisory=advisory,
         alerts=alerts,
         recent_health_history=recent_health_history,
     )

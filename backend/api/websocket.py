@@ -3,23 +3,21 @@ import asyncio
 from fastapi import WebSocket, WebSocketDisconnect
 
 from api.schemas import (
-    ANOMALY_THRESHOLD,
+    AdvisoryResponse,
     HealthResponse,
+    PredictionResponse,
     TelemetryResponse,
+    operating_state_of,
 )
 from telemetry.database import SessionLocal
 from telemetry.repository import TelemetryRepository
 from twin.repository import HealthSnapshotRepository
-from twin.factory import create_digital_twin_service
-from twin.ml_predictor import ModelPredictor
-from twin.schemas import HealthState, MLPrediction
 import traceback
 
 POLL_INTERVAL_SECONDS = 2
 
 _telemetry_repo = TelemetryRepository()
 _health_repo = HealthSnapshotRepository()
-_twin_service = create_digital_twin_service(ModelPredictor())
 
 
 class ConnectionManager:
@@ -109,84 +107,27 @@ class ConnectionManager:
                 latest_row
             ).model_dump(mode="json")
 
-            snapshots = _health_repo.get_by_engine(
-                session,
-                engine_id,
-            )
-
-            snapshots = [
-                s
-                for s in snapshots
-                if s.mission_id == mission_id
-            ]
-
-            health = None
-
-            if snapshots:
-                snapshot = snapshots[-1]
-
-                health = HealthResponse.from_snapshot(
-                    snapshot
-                ).model_dump(mode="json")
-
-            window = _telemetry_repo.get_latest_window(
+            # Health, prediction and advisory are computed once per
+            # sample by the telemetry service and stored with the snapshot.
+            snapshot = _health_repo.get_latest(
                 session,
                 engine_id,
                 mission_id,
             )
 
-            if len(window) < 60:
-                ml_prediction = MLPrediction(
-                    anomaly_score=0.0,
-                    fault=None,
-                    confidence=0.0,
-                    rul_hours=None,
-                )
+            health = prediction = advisory = operating_state = None
 
-            else:
-                telemetry_window = [
-                    {
-                        "rpm": t.rpm,
-                        "cht": t.cht,
-                        "egt": t.egt,
-                        "oil_pressure": t.oil_pressure,
-                        "oil_temperature": t.oil_temperature,
-                        "fuel_flow": t.fuel_flow,
-                        "vibration": t.vibration,
-                        "torque": t.torque,
-                        
-                        "throttle": t.throttle,
-                        "engine_load": t.engine_load,
-                        "altitude": t.altitude,
-                        "ambient_temperature": t.ambient_temperature,
-                    }
-                    for t in window
-                ]
-                ml_prediction = (
-                    _twin_service.predictor.predict(
-                        telemetry_window
-                    )
-                )
-
-            prediction = {
-                "anomaly_score": ml_prediction.anomaly_score,
-                "is_anomaly": (
-                    ml_prediction.anomaly_score >= ANOMALY_THRESHOLD
-                ),
-                "fault": ml_prediction.fault,
-                "confidence": ml_prediction.confidence,
-                "rul_hours": ml_prediction.rul_hours,
-            }
-
-            operating_state = None
-
-            if health is not None:
-                operating_state = (
-                    _twin_service._determine_operating_state(
-                        HealthState(**health),
-                        ml_prediction,
-                    )
-                )
+            if snapshot is not None:
+                health = HealthResponse.from_snapshot(
+                    snapshot
+                ).model_dump(mode="json")
+                prediction = PredictionResponse.from_snapshot(
+                    snapshot
+                ).model_dump(mode="json")
+                latest_advisory = AdvisoryResponse.from_snapshot(snapshot)
+                if latest_advisory is not None:
+                    advisory = latest_advisory.model_dump(mode="json")
+                operating_state = operating_state_of(snapshot)
 
             return {
                 "type": "engine_update",
@@ -196,6 +137,7 @@ class ConnectionManager:
                 "health": health,
                 "prediction": prediction,
                 "operating_state": operating_state,
+                "advisory": advisory,
             }
 
         finally:

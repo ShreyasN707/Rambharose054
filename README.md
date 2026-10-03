@@ -32,9 +32,9 @@ An AI-enabled, real-time digital twin of a single-cylinder aero-piston (drone) e
 | Fault bridge | `simulation/mqtt_fault_bridge.py` | Relays fault commands from MQTT to the running simulation |
 | Simulation controller | `simulation/simulation_controller.py` | Small HTTP service that starts/stops the MATLAB simulation |
 | Telemetry service | `backend/telemetry/` | MQTT subscriber: validates, stores, and runs the digital twin analysis |
-| Digital twin | `backend/twin/` | Subsystem health indices, autoencoder anomaly score, XGBoost fault classifier, GRU RUL estimate |
+| Digital twin | `backend/twin/` | Healthy baseline, subsystem health indices, fault and RUL predictors (trained models plug into `predictor.py`; rule-based stand-ins until then), maintenance advisory, mission reports |
 | API | `backend/api/` | REST endpoints and a live WebSocket feed |
-| Dashboard | `frontend/` | Live overview, 3D engine view, fault injection, mission analysis and replay |
+| Dashboard | `frontend/` | Live overview, mission profile selection, maintenance advisory, efficiency index, 3D engine view, fault injection, mission analysis, replay and downloadable health reports |
 | Model training | `anomalyModel/`, `ai/RUL/`, `data/` | Training code and data for the ML models |
 
 ## Prerequisites
@@ -60,7 +60,7 @@ An AI-enabled, real-time digital twin of a single-cylinder aero-piston (drone) e
 
    This starts Mosquitto, TimescaleDB, the telemetry service, the API and the frontend in Docker, plus the fault bridge and simulation controller on the host. Database migrations run automatically when the backend containers start.
 
-3. Open the dashboard at <http://localhost:5173> and start the simulation from there. You can also run it directly with `simulation/start_simulation.sh`.
+3. Open the dashboard at <http://localhost:5173>, pick a mission profile and start the simulation from there. You can also run it directly with `simulation/start_simulation.sh` (`SIM_PROFILE` selects the profile).
 
 | Service | URL |
 |---|---|
@@ -80,6 +80,8 @@ The simulator publishes to `engine/{engine_id}/telemetry` once per second. Each 
 - **Simulation clock:** time since the run started.
 
 The field list, units, sensor models and an example payload are in [`docs/telemetry-schema.md`](docs/telemetry-schema.md).
+
+The architecture, its mapping to the problem statement and the known limitations are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); the path to test rigs, GCS deployment and fleets is in [`docs/DEPLOYMENT_ROADMAP.md`](docs/DEPLOYMENT_ROADMAP.md). ML training guides: [`ANOMALY_MODEL_GUIDE.md`](ANOMALY_MODEL_GUIDE.md), [`RUL_MODEL_GUIDE.md`](RUL_MODEL_GUIDE.md).
 
 ## Fault modes
 
@@ -108,9 +110,10 @@ All REST routes are under `/api`.
 | `GET /engines/{id}/telemetry/latest` | Latest telemetry sample |
 | `GET /engines/{id}/health`, `/health/history`, `/alerts` | Digital twin health state, history and alerts |
 | `POST /engines/{id}/fault` | Inject a fault |
-| `POST /engines/{id}/simulation/start`, `/stop`, `GET /simulation/status` | Control the simulation |
+| `POST /engines/{id}/simulation/start?profile=…`, `/stop`, `GET /simulation/status` | Start a mission with a mission profile (cruise, high_altitude, hot_weather, endurance, rapid_throttle); stop; status |
 | `GET /dashboard/{id}` | Everything the dashboard needs in one call |
 | `GET /missions`, `/missions/{id}/telemetry`, `/missions/{id}/replay` | Mission history and replay |
+| `GET /missions/{id}/report` | Mission-wise health report (outcome, faults, advisories, maintenance) |
 | `WS /ws/engines/{id}?mission_id=…` | Live telemetry and health stream |
 
 ## Development

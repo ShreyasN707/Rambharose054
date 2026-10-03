@@ -57,17 +57,16 @@ export interface SubsystemHealth {
 }
 
 export interface PredictionData {
-
-    anomaly_score: number;
-
+    anomaly_score: number;          // 1.0 = the detector's threshold
     is_anomaly: boolean;
-
-    fault: string | null;
-
-    confidence: number;
-
-    rul_hours: number | null;
-
+    fault_id?: number | null;       // 0 healthy, 1-9 faults
+    fault: string | null;           // null when healthy
+    confidence: number;             // 0-1
+    rul_seconds: number | null;     // time to failure; 600 = "10 min or more"
+    rul_low?: number | null;
+    rul_high?: number | null;
+    top_features?: [string, number][];   // signals behind the fault call
+    source?: string | null;         // e.g. "rules+health-trend" or a model name
 }
 
 export interface EngineHealthResponse {
@@ -98,6 +97,17 @@ export interface AlertData {
     timestamp: string;
 }
 
+// Maintenance advisory from the digital twin (backend/twin/advisory.py).
+export interface AdvisoryData {
+    level: "MONITOR" | "CAUTION" | "WARNING" | "CRITICAL";
+    fault_family: string;
+    title: string;
+    eta_seconds: number | null;    // estimated time to failure (s)
+    evidence: string[];
+    do_now: string[];
+    maintenance: string[];
+}
+
 export interface DashboardResponse {
     engine_id: string;
     mission_id: string;
@@ -105,6 +115,7 @@ export interface DashboardResponse {
     health: SubsystemHealth | null;
     prediction: PredictionData;
     operating_state: "NOMINAL" | "WARNING" | "DEGRADED" | "CRITICAL";
+    advisory?: AdvisoryData | null;
     alerts: AlertData[];
     recent_health_history: HealthHistoryPoint[];
 }
@@ -127,6 +138,41 @@ export interface MissionReplayResponse {
     points: ReplayPoint[];
 }
 
+// Mission-wise health report (GET /missions/{id}/report).
+export interface MissionReport {
+    mission_id: string;
+    engine_id: string;
+    profile: string | null;
+    start_time: string;
+    end_time: string;
+    duration_s: number;
+    samples: number;
+    max_altitude_m: number;
+    ambient_min_c: number;
+    ambient_max_c: number;
+    mean_throttle: number;
+    efficiency_mean: number | null;
+    efficiency_min: number | null;
+    outcome: "NOMINAL" | "DEGRADED" | "FAILURE" | "NO HEALTH DATA";
+    failure_at_s: number | null;
+    final_health: number | null;
+    min_health: number | null;
+    min_health_at_s: number | null;
+    weakest_subsystem: string | null;
+    weakest_subsystem_health: number | null;
+    weakest_subsystem_at_s: number | null;
+    min_time_to_failure_s: number | null;
+    faults: { fault: string; first_detected_at_s: number; seconds_detected: number }[];
+    advisories: {
+        at_s: number;
+        level: string;
+        title: string;
+        eta_seconds: number | null;
+        do_now: string[];
+    }[];
+    maintenance: string[];
+}
+
 export interface WebSocketUpdateMessage {
     type: "engine_update";
     engine_id: string;
@@ -135,4 +181,5 @@ export interface WebSocketUpdateMessage {
     health: SubsystemHealth | null;
     prediction: PredictionData;
     operating_state: "NOMINAL" | "WARNING" | "DEGRADED" | "CRITICAL";
+    advisory?: AdvisoryData | null;
 }

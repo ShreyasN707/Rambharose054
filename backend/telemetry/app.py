@@ -8,14 +8,11 @@ from schemas import TelemetryCreate
 from service import TelemetryService
 
 from twin.factory import create_digital_twin_service
-from twin.ml_predictor import ModelPredictor
 
 repository = TelemetryRepository()
 service = TelemetryService(repository)
 
-twin_service = create_digital_twin_service(
-    ModelPredictor()
-)
+twin_service = create_digital_twin_service()
 
 
 def on_connect(

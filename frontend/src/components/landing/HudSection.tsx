@@ -14,13 +14,112 @@ import {
 
 import { useEngineData } from "../../hooks/useEngineData";
 import { MISSION_PROFILES } from "../../missionProfiles";
+import type { AdvisoryData } from "../../types/api";
+
+const ADVISORY_COLOR: Record<AdvisoryData["level"], string> = {
+    MONITOR: "#7fd4ff",
+    CAUTION: "#eab308",
+    WARNING: "#f97316",
+    CRITICAL: "#e8543f",
+};
+
+// Pretty name of a signal in top_features.
+const SIGNAL_LABEL: Record<string, string> = {
+    rpm: "RPM",
+    egt: "EGT",
+    cht: "CHT",
+    oil_pressure: "oil pressure",
+    oil_temperature: "oil temperature",
+    battery_voltage: "bus voltage",
+    alternator_current: "alternator current",
+    rpm_roughness: "RPM roughness",
+    cht_roughness: "CHT jitter",
+    vibration_rms: "vibration",
+};
+
+function formatDuration(seconds: number): string {
+    const m = Math.floor(seconds / 60);
+    const s = Math.round(seconds % 60);
+    return m > 0 ? `${m} min ${s} s` : `${s} s`;
+}
+
+function formatRul(prediction: {
+    rul_seconds: number | null;
+    rul_low?: number | null;
+    rul_high?: number | null;
+}): string {
+    const rul = prediction.rul_seconds;
+    if (rul == null) return "N/A";
+    if (rul >= 600) return "> 10 min";
+    if (rul <= 0) return "FAILURE";
+    const band =
+        prediction.rul_low != null && prediction.rul_high != null
+            ? ` (${formatDuration(prediction.rul_low)} – ${formatDuration(prediction.rul_high)})`
+            : "";
+    return `~${formatDuration(rul)}${band}`;
+}
+
+function formatEta(seconds: number | null): string | null {
+    if (seconds == null) return null;
+    if (seconds <= 0) return "failure threshold reached";
+    if (seconds >= 600) return "> 10 min to failure";
+    const m = Math.floor(seconds / 60);
+    const s = Math.round(seconds % 60);
+    return m > 0 ? `~${m} min ${s} s to failure` : `~${s} s to failure`;
+}
+
+function AdvisoryPanel({ advisory }: { advisory: AdvisoryData | null }) {
+    const mono = { fontFamily: "'JetBrains Mono', monospace" };
+
+    if (!advisory) {
+        return (
+            <div className="mb-6 px-4 py-2 text-xs" style={{ ...mono, border: "1px solid #2a2a2a", color: "#7fe0a0" }}>
+                MAINTENANCE ADVISORY: none active (engine nominal)
+            </div>
+        );
+    }
+
+    const color = ADVISORY_COLOR[advisory.level];
+    const eta = formatEta(advisory.eta_seconds);
+
+    return (
+        <div className="mb-6" style={{ border: `1px solid ${color}`, background: "rgba(255,255,255,0.02)" }}>
+            <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3" style={{ borderBottom: `1px solid ${color}55`, ...mono }}>
+                <span className="text-sm font-bold" style={{ color }}>
+                    ⚠ {advisory.level} — {advisory.title}
+                </span>
+                {eta && <span className="text-sm font-semibold" style={{ color }}>{eta}</span>}
+            </div>
+            <div className="grid md:grid-cols-3 gap-4 px-4 py-3 text-sm">
+                <div>
+                    <div className="text-xs mb-1.5 font-semibold" style={{ ...mono, color: "#c0c0c0", letterSpacing: 1 }}>EVIDENCE</div>
+                    <ul className="flex flex-col gap-1" style={{ color: "#d8d8d8" }}>
+                        {advisory.evidence.map((line) => <li key={line}>{line}</li>)}
+                    </ul>
+                </div>
+                <div>
+                    <div className="text-xs mb-1.5 font-semibold" style={{ ...mono, color, letterSpacing: 1 }}>DO NOW</div>
+                    <ul className="flex flex-col gap-1" style={{ color: "#fff" }}>
+                        {advisory.do_now.map((line) => <li key={line}>{line}</li>)}
+                    </ul>
+                </div>
+                <div>
+                    <div className="text-xs mb-1.5 font-semibold" style={{ ...mono, color: "#c0c0c0", letterSpacing: 1 }}>MAINTENANCE AFTER LANDING</div>
+                    <ul className="flex flex-col gap-1" style={{ color: "#d8d8d8" }}>
+                        {advisory.maintenance.map((line) => <li key={line}>{line}</li>)}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 
 
-function RadialHealth({ value }: { value: number }) {
+function RadialHealth({ value }: { value: number | null }) {
     const r = 42;
     const c = 2 * Math.PI * r;
-    const offset = c - (value / 100) * c;
+    const offset = c - ((value ?? 0) / 100) * c;
     return (
         <svg width="100" height="100" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r={r} stroke="#2a2a2a" strokeWidth="6" fill="none" />
@@ -30,7 +129,7 @@ function RadialHealth({ value }: { value: number }) {
                 transform="rotate(-90 50 50)"
             />
             <text x="50" y="47" textAnchor="middle" fontSize="20" fontWeight="600" fill="#fff" fontFamily="'Space Grotesk', sans-serif">
-                {value}%
+                {value == null ? "--" : `${value}%`}
             </text>
             <text x="50" y="63" textAnchor="middle" fontSize="8" fill="#888" fontFamily="'JetBrains Mono', monospace">
                 HEALTH
@@ -150,6 +249,8 @@ export default function HudSection({
             setIsInjectingFault(false);
         }
     };
+
+    const noData = !engineData.hasData;
 
     const subsystems = [
         { name: "THERMAL", score: engineData.health.thermal, status: engineData.health.thermal < 80 ? "warn" : "ok" },
@@ -437,29 +538,33 @@ export default function HudSection({
                     </div>
                 )}
 
+                <AdvisoryPanel advisory={engineData.advisory} />
+
                 <div className="grid md:grid-cols-5 gap-8">
                     <div className="md:col-span-2 flex flex-col gap-6">
                         <div style={{ border: "1px solid #3a3a3a", background: "#0e0e0e" }}>
                             <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid #3a3a3a", fontFamily: "'JetBrains Mono', monospace" }}>
                                 <span className="text-base font-bold" style={{ color: "#fff" }}>UNIT &mdash; {engineData.selectedEngine}</span>
-                                <span className="text-sm font-semibold" style={{ color: statusColor[engineData.operatingState === "NOMINAL" ? "ok" : "warn"] }}>
-                                    {engineData.operatingState}
+                                <span className="text-sm font-semibold" style={{ color: noData ? "#888" : statusColor[engineData.operatingState === "NOMINAL" ? "ok" : "warn"] }}>
+                                    {noData ? "NO DATA" : engineData.operatingState}
                                 </span>
                             </div>
 
                             <div className="p-5 flex gap-4 items-center">
-                        <RadialHealth value={Math.round(engineData.health.overall)} />
+                        <RadialHealth value={noData ? null : Math.round(engineData.health.overall)} />
 
                                 <div className="flex-1">
                                     <div
                                         className="font-bold text-base tracking-tight"
                                         style={{ color: "#fff" }}
                                     >
-                                        {engineData.health.overall > 90
-                                            ? "NOMINAL"
-                                            : engineData.health.overall > 75
-                                                ? "GOOD"
-                                                : "DEGRADED"}
+                                        {noData
+                                            ? "NO DATA"
+                                            : engineData.health.overall > 90
+                                                ? "NOMINAL"
+                                                : engineData.health.overall > 75
+                                                    ? "GOOD"
+                                                    : "DEGRADED"}
                                     </div>
 
                                     <div
@@ -471,7 +576,21 @@ export default function HudSection({
                                     >
                                         FAULT:{" "}
                                         <span style={{ color: "#fff" }}>
-                                            {engineData.prediction.fault ?? "NONE DETECTED"}
+                                            {noData ? "--" : engineData.prediction.fault ?? "NONE DETECTED"}
+                                        </span>
+                                    </div>
+
+                                    <div
+                                        className="text-sm mt-1"
+                                        style={{
+                                            color: "#c0c0c0",
+                                            fontFamily: "'JetBrains Mono', monospace",
+                                        }}
+                                        title="Power per unit of fuel; 100 = warmed-up healthy engine"
+                                    >
+                                        EFFICIENCY:{" "}
+                                        <span style={{ color: engineData.efficiency != null && engineData.efficiency < 90 ? "#e8c34a" : "#fff" }}>
+                                            {engineData.efficiency == null ? "--" : `${Math.round(engineData.efficiency)} / 100`}
                                         </span>
                                     </div>
                                 </div>
@@ -515,7 +634,7 @@ export default function HudSection({
                                                     : "#7fe0a0",
                                             }}
                                         >
-                                            {engineData.prediction.anomaly_score.toFixed(2)}
+                                            {noData ? "--" : engineData.prediction.anomaly_score.toFixed(2)}
                                         </div>
                                     </div>
 
@@ -532,9 +651,11 @@ export default function HudSection({
                                                     : "#7fe0a0",
                                             }}
                                         >
-                                            {engineData.prediction.is_anomaly
-                                                ? "ANOMALOUS"
-                                                : "NORMAL"}
+                                            {noData
+                                                ? "--"
+                                                : engineData.prediction.is_anomaly
+                                                    ? "ANOMALOUS"
+                                                    : "NORMAL"}
                                         </div>
                                     </div>
 
@@ -547,7 +668,7 @@ export default function HudSection({
                                             className="mt-1 font-bold text-sm"
                                             style={{ color: "#fff" }}
                                         >
-                                            {engineData.prediction.fault ?? "NONE"}
+                                            {noData ? "--" : engineData.prediction.fault ?? "NONE"}
                                         </div>
                                     </div>
 
@@ -560,7 +681,7 @@ export default function HudSection({
                                             className="mt-1 font-bold text-sm"
                                             style={{ color: "#fff" }}
                                         >
-                                            {(engineData.prediction.confidence * 100).toFixed(2)}%
+                                            {noData ? "--" : `${(engineData.prediction.confidence * 100).toFixed(2)}%`}
                                         </div>
                                     </div>
 
@@ -573,10 +694,34 @@ export default function HudSection({
                                             className="mt-1 font-bold text-base"
                                             style={{ color: "#C6FF3D" }}
                                         >
-                                            {engineData.prediction.rul_hours !== null
-                                                ? `${engineData.prediction.rul_hours.toFixed(2)} hrs`
-                                                : "N/A"}
+                                            {noData ? "--" : formatRul(engineData.prediction)}
                                         </div>
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <div style={{ color: "#777" }}>
+                                            SIGNALS BEHIND THE CALL
+                                        </div>
+
+                                        <div
+                                            className="mt-1 text-sm"
+                                            style={{ color: "#fff" }}
+                                        >
+                                            {noData || !engineData.prediction.top_features?.length
+                                                ? "--"
+                                                : engineData.prediction.top_features
+                                                    .map(([name]) => SIGNAL_LABEL[name] ?? name)
+                                                    .join(", ")}
+                                        </div>
+
+                                        {!noData && engineData.prediction.source && (
+                                            <div className="mt-2 text-xs" style={{ color: "#666" }}>
+                                                SOURCE: {engineData.prediction.source.toUpperCase()}
+                                                {engineData.prediction.source.startsWith("rules")
+                                                    ? " (RULE-BASED STAND-IN UNTIL TRAINED MODELS ARE INTEGRATED)"
+                                                    : ""}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -592,13 +737,13 @@ export default function HudSection({
                                     <div key={idx} className="text-sm">
                                         <div className="flex justify-between items-center mb-1.5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                                             <span style={{ color: "#e0e0e0", fontWeight: 600 }}>{sub.name}</span>
-                                            <span style={{ color: sub.status === "warn" ? "#e8c34a" : "#fff", fontWeight: 700 }}>{sub.score}%</span>
+                                            <span style={{ color: !noData && sub.status === "warn" ? "#e8c34a" : "#fff", fontWeight: 700 }}>{noData ? "--" : `${sub.score}%`}</span>
                                         </div>
                                         <div className="w-full h-2 rounded-full" style={{ background: "#333" }}>
                                             <div
                                                 className="h-full rounded-full"
                                                 style={{
-                                                    width: `${sub.score}%`,
+                                                    width: noData ? "0%" : `${sub.score}%`,
                                                     background: sub.status === "warn" ? "#e8c34a" : "#7fe0a0",
                                                 }}
                                             />
