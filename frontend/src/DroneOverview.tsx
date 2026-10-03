@@ -639,15 +639,9 @@ function TelemetryCell({
 
 export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?: TelemetryData }) {
     const [tick, setTick] = useState(0);
-    const [elapsedSec, setElapsedSec] = useState(0);
 
     useEffect(() => {
         const id = setInterval(() => setTick(t => t + 1), 60);
-        return () => clearInterval(id);
-    }, []);
-
-    useEffect(() => {
-        const id = setInterval(() => setElapsedSec(s => s + 1), 1000);
         return () => clearInterval(id);
     }, []);
 
@@ -668,10 +662,16 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
     const injectionDuration = liveTelemetry?.injection_duration;
 
 
-    const hrs = String(Math.floor(elapsedSec / 3600)).padStart(2, "0");
-    const mins = String(Math.floor((elapsedSec % 3600) / 60)).padStart(2, "0");
-    const secs = String(elapsedSec % 60).padStart(2, "0");
-    const timeStr = `${hrs}:${mins}:${secs}`;
+    // Simulink simulation clock, the time base fault onset/progression uses.
+    const simTime = liveTelemetry?.sim_time;
+    let timeStr = "--:--:--";
+    if (simTime != null) {
+        const elapsedSec = Math.floor(simTime);
+        const hrs = String(Math.floor(elapsedSec / 3600)).padStart(2, "0");
+        const mins = String(Math.floor((elapsedSec % 3600) / 60)).padStart(2, "0");
+        const secs = String(elapsedSec % 60).padStart(2, "0");
+        timeStr = `${hrs}:${mins}:${secs}`;
+    }
 
     return (
         <section style={{ background: "#0a0a0a", fontFamily: "'Space Grotesk', sans-serif" }} className="relative overflow-hidden">

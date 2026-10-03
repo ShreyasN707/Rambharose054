@@ -39,6 +39,7 @@ rejected (`extra="forbid"`), so the backend schema must be updated
 | alternator_current | float | A | No | signal11 (`Sensor_AlternatorCurrent`) | Alternator output current |
 | injection_timing | float | ° BTDC | No | signal12 (`Sensor_InjectionTiming`) | Start of injection, crank degrees before top dead centre |
 | injection_duration | float | ms | No | signal13 (`Sensor_InjectionDuration`) | Injector pulse width per injection event |
+| sim_time | float | s | No | simulation clock (`simulink_mqtt_stream.m`) | Simulation time since the run started; fault onset and progression are timed on it. Shown as the dashboard TIME field |
 
 `signal7` is the `Fault_ID` ground-truth label. It is logged by Simulink for
 dataset generation only and is **not** published.
@@ -138,7 +139,8 @@ states — and therefore signals 1–9 — bit-identical to the original model.
   "battery_voltage": 28.012,
   "alternator_current": 14.987,
   "injection_timing": 14.651,
-  "injection_duration": 10.472
+  "injection_duration": 10.472,
+  "sim_time": 412.0
 }
 ```
 
@@ -160,10 +162,10 @@ restarts the progression at each injection (`Degradation/Fault_Onset`).
 | ID | Fault | Main signature | Rule-based health index |
 |---|---|---|---|
 | 0 | Healthy | — | — |
-| 1 | Misfire | Torque −35 %, RPM ↓, EGT ↓ | combustion |
+| 1 | Misfire | Intermittent missed combustion events (up to 35 % of 50 ms windows produce no torque): rough RPM, RPM ↓, EGT ↓, vibration ×2; fuel flow follows RPM | combustion (RPM drop + roughness), mechanical (mild) |
 | 2 | Overheating | Heat input ×4: CHT, EGT, oil temp ↑ | thermal |
 | 3 | Oil pressure failure | Oil pressure → 20 %, oil temp ↑ | lubrication |
-| 4 | Fuel starvation | Fuel → 20 %, RPM ↓↓, bus voltage ↓ | combustion, lubrication, electrical |
+| 4 | Fuel starvation | Fuel → 20 %, RPM ↓↓, CHT/EGT ↓, oil pressure ↓ (with RPM), bus voltage ↓; oil temperature stays normal | combustion, lubrication, electrical |
 | 5 | Injector abnormality | Delivered fuel → 70 % of commanded; ECU pulse unchanged | injection |
 | 6 | Cooling degradation | Cooling → 40 %: CHT creeps up, EGT unchanged | thermal |
 | 7 | CHT sensor drift/failure | Reported CHT +40 °C and erratic (σ 6 °C); engine unaffected | sensor |

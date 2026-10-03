@@ -32,6 +32,7 @@ class TelemetryRepository:
             alternator_current=telemetry.alternator_current,
             injection_timing=telemetry.injection_timing,
             injection_duration=telemetry.injection_duration,
+            sim_time=telemetry.sim_time,
         )
 
         statement = statement.on_conflict_do_nothing(

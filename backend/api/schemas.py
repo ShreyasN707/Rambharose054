@@ -38,6 +38,9 @@ class TelemetryResponse(BaseModel):
     injection_timing: float | None = None       # deg BTDC
     injection_duration: float | None = None     # ms
 
+    # Simulink simulation clock; None for telemetry recorded before it existed
+    sim_time: float | None = None               # s
+
     @classmethod
     def from_row(cls, row: Telemetry) -> "TelemetryResponse":
         return cls(
@@ -60,6 +63,7 @@ class TelemetryResponse(BaseModel):
             alternator_current=row.alternator_current,
             injection_timing=row.injection_timing,
             injection_duration=row.injection_duration,
+            sim_time=row.sim_time,
         )
 
 

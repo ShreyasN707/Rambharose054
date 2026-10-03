@@ -38,6 +38,8 @@ export interface TelemetryData {
     // ECU injection parameters
     injection_timing?: number | null;      // degrees crank angle BTDC
     injection_duration?: number | null;    // ms per injection event
+    // Simulink simulation clock (null for telemetry recorded before it existed)
+    sim_time?: number | null;              // s since the run started
 }
 
 export interface SubsystemHealth {
