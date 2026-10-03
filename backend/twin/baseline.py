@@ -134,21 +134,39 @@ def _model() -> dict | None:
     }
 
 
-def expected(
+def expected_series(
     history: list[dict],
     from_engine_start: bool,
-) -> dict[str, float] | None:
-    """Expected healthy readings now, or None without a fitted model."""
+) -> list[dict[str, float]] | None:
+    """Expected healthy readings for every sample of `history`.
+
+    None without a fitted model.
+    """
 
     model = _model()
 
     if model is None or not history:
         return None
 
-    z = expand(features(history, from_engine_start))
+    z = expand(feature_series(history, from_engine_start))
     z = (z - model["mean"]) / model["std"]
-
-    return {
-        name: float(z @ model["coef"][name] + model["intercept"][name])
+    values = {
+        name: z @ model["coef"][name] + model["intercept"][name]
         for name in TARGETS
     }
+
+    return [
+        {name: float(values[name][i]) for name in TARGETS}
+        for i in range(len(history))
+    ]
+
+
+def expected(
+    history: list[dict],
+    from_engine_start: bool,
+) -> dict[str, float] | None:
+    """Expected healthy readings now, or None without a fitted model."""
+
+    series = expected_series(history, from_engine_start)
+
+    return series[-1] if series else None

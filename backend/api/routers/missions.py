@@ -16,8 +16,10 @@ from api.schemas import (
     ReplayPoint,
     HealthResponse,
     PredictionResponse,
+    MissionReportResponse,
 )
 from telemetry.repository import TelemetryRepository
+from twin.report import build_report
 from twin.repository import HealthSnapshotRepository
 
 
@@ -66,6 +68,30 @@ def get_mission(
         end_time=rows[-1].time,
         sample_count=len(rows),
     )
+
+
+@router.get(
+    "/missions/{mission_id}/report",
+    response_model=MissionReportResponse,
+)
+def mission_report(
+    mission_id: str,
+    session: Session = Depends(get_session),
+    telemetry_repo: TelemetryRepository = Depends(get_telemetry_repo),
+    health_repo: HealthSnapshotRepository = Depends(get_health_snapshot_repo),
+):
+    rows = telemetry_repo.get_by_mission(session, mission_id)
+
+    if not rows:
+        raise MissionNotFoundError(mission_id)
+
+    snapshots = health_repo.get_by_mission(
+        session,
+        rows[0].engine_id,
+        mission_id,
+    )
+
+    return MissionReportResponse(**build_report(mission_id, rows, snapshots))
 
 
 @router.get(
@@ -134,16 +160,11 @@ def mission_replay(
 
     engine_id = rows[0].engine_id
 
-    snapshots = health_repo.get_by_engine(
+    snapshots = health_repo.get_by_mission(
         session,
         engine_id,
+        mission_id,
     )
-
-    snapshots = [
-        snapshot
-        for snapshot in snapshots
-        if snapshot.mission_id == mission_id
-    ]
 
     health_by_time = {
         snapshot.time: snapshot
@@ -167,13 +188,7 @@ def mission_replay(
                 and snapshot.is_anomaly is not None
                 and snapshot.confidence is not None
             ):
-                prediction = PredictionResponse(
-                    anomaly_score=snapshot.anomaly_score,
-                    is_anomaly=snapshot.is_anomaly,
-                    fault=snapshot.fault,
-                    confidence=snapshot.confidence,
-                    rul_hours=snapshot.rul_hours,
-                )
+                prediction = PredictionResponse.from_snapshot(snapshot)
 
         points.append(
             ReplayPoint(

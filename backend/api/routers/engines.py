@@ -1,4 +1,3 @@
-from twin.schemas import HealthState, MLPrediction
 import requests
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -7,24 +6,23 @@ from api.dependencies import (
     get_session,
     get_telemetry_repo,
     get_health_snapshot_repo,
-    get_twin_service,
 )
 from api.exceptions import EngineNotFoundError
 from api.schemas import (
-    ANOMALY_THRESHOLD,
     EngineListResponse,
     EngineSummary,
     TelemetryResponse,
     EngineHealthResponse,
+    AdvisoryResponse,
     HealthResponse,
     PredictionResponse,
     HealthHistoryResponse,
     HealthHistoryPoint,
     AlertResponse,
+    operating_state_of,
 )
 from telemetry.repository import TelemetryRepository
 from twin.repository import HealthSnapshotRepository
-from twin.service import DigitalTwinService
 
 import paho.mqtt.client as mqtt
 
@@ -261,95 +259,28 @@ def engine_health(
     engine_id: str,
     mission_id: str,
     session: Session = Depends(get_session),
-    telemetry_repo: TelemetryRepository = Depends(
-        get_telemetry_repo
-    ),
     health_repo: HealthSnapshotRepository = Depends(
         get_health_snapshot_repo
     ),
-    twin_service: DigitalTwinService = Depends(
-        get_twin_service
-    ),
 ):
-    snapshots = health_repo.get_by_engine(
-        session,
-        engine_id,
-    )
-
-    snapshots = [
-        s for s in snapshots
-        if s.mission_id == mission_id
-    ]
-
-    if not snapshots:
-        raise EngineNotFoundError(engine_id)
-
-    latest_snapshot = snapshots[-1]
-
-    health = HealthResponse.from_snapshot(latest_snapshot)
-
-    window = telemetry_repo.get_latest_window(
+    # Health, prediction and advisory are stored with every snapshot by
+    # the telemetry service.
+    latest_snapshot = health_repo.get_latest(
         session,
         engine_id,
         mission_id,
     )
 
-    if len(window) < 60:
-
-        ml_prediction = MLPrediction(
-            anomaly_score=0.0,
-            fault=None,
-            confidence=0.0,
-            rul_hours=None,
-        )
-
-    else:
-
-        telemetry_window = [
-            {
-                "rpm": t.rpm,
-                "cht": t.cht,
-                "egt": t.egt,
-                "oil_pressure": t.oil_pressure,
-                "torque": t.torque,
-                "oil_temperature": t.oil_temperature,
-                "fuel_flow": t.fuel_flow,
-                "vibration": t.vibration,
-                "throttle": t.throttle,
-                "engine_load": t.engine_load,
-                "altitude": t.altitude,
-                "ambient_temperature": t.ambient_temperature,
-            }
-            for t in window
-        ]
-
-        ml_prediction = (
-            twin_service.predictor.predict(
-                telemetry_window
-            )
-        )
-
-    prediction = PredictionResponse(
-        anomaly_score=ml_prediction.anomaly_score,
-        is_anomaly=ml_prediction.anomaly_score >= ANOMALY_THRESHOLD,
-        fault=ml_prediction.fault,
-        confidence=ml_prediction.confidence,
-        rul_hours=ml_prediction.rul_hours,
-    )
-
-    operating_state = (
-        twin_service._determine_operating_state(
-            HealthState(**health.model_dump()),
-            ml_prediction,
-        )
-    )
+    if latest_snapshot is None:
+        raise EngineNotFoundError(engine_id)
 
     return EngineHealthResponse(
         engine_id=engine_id,
         mission_id=mission_id,
-        operating_state=operating_state,
-        health=health,
-        prediction=prediction,
+        operating_state=operating_state_of(latest_snapshot),
+        health=HealthResponse.from_snapshot(latest_snapshot),
+        prediction=PredictionResponse.from_snapshot(latest_snapshot),
+        advisory=AdvisoryResponse.from_snapshot(latest_snapshot),
     )
 
 
@@ -369,15 +300,11 @@ def health_history(
         get_health_snapshot_repo
     ),
 ):
-    snapshots = health_repo.get_by_engine(
+    snapshots = health_repo.get_by_mission(
         session,
         engine_id,
+        mission_id,
     )
-
-    snapshots = [
-        s for s in snapshots
-        if s.mission_id == mission_id
-    ]
 
     if not snapshots:
         raise EngineNotFoundError(engine_id)
@@ -416,15 +343,11 @@ def engine_alerts(
 ):
     alerts: list[AlertResponse] = []
 
-    snapshots = health_repo.get_by_engine(
+    snapshots = health_repo.get_by_mission(
         session,
         engine_id,
+        mission_id,
     )
-
-    snapshots = [
-        s for s in snapshots
-        if s.mission_id == mission_id
-    ]
 
     for s in snapshots:
 

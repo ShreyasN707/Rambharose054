@@ -42,23 +42,23 @@ Failure is defined once, in `backend/twin/failure.py`, and used both for the tra
 Every fault starts with zero effect at its onset and grows linearly to full strength over its ramp time. Where along that ramp the engine fails depends on the fault and on how hard the engine is working. The table shows:
 
 - **Fails at:** fault strength at failure, from reference runs at cruise and in endurance with a 5-minute ramp.
-- **Onset → failure:** measured in the 50-run pilot dataset, one run per mission profile, with the dataset's random ramp times.
+- **Onset → failure:** measured in the full dataset (299 runs, 6 per fault and profile), with its random ramp times.
 
-| Fault | Fails at (cruise / endurance) | Ramp in dataset | Onset → failure in pilot dataset |
+| Fault | Fails at (cruise / endurance) | Ramp in dataset | Onset → failure in the dataset (runs failing) |
 |---|---|---|---|
-| 1 Misfire | 33 % / 39 % | 3–6 min | 88–158 s (median 100) |
-| 2 Overheating | 56 % / 70 % | 3–6 min | 148–219 s (median 180) |
-| 3 Oil pressure failure | 61 % / 73 % | 1–3 min | 97–140 s (median 110) |
-| 4 Fuel starvation | 86 % / after full strength | 1–3 min | 109–206 s (median 142) |
-| 5 Injector abnormality | 88 % / after full strength | 8–15 min | 457–683 s (median 522) |
-| 6 Cooling degradation | after full strength (CHT keeps creeping up) | 8–15 min | 544–855 s (median 790) |
-| 7 CHT sensor drift | never (sensor fault) | 8–15 min | no failure |
-| 8 Combustion instability | 55 % / 99 % | 8–15 min | 278–1082 s (median 531) |
-| 9 Abnormal vibration | after full strength | 8–15 min | 493–1063 s (median 707) |
+| 1 Misfire | 33 % / 39 % | 3–6 min | 85–177 s, median 101 (30/30) |
+| 2 Overheating | 56 % / 70 % | 3–6 min | 141–241 s, median 176 (30/30) |
+| 3 Oil pressure failure | 61 % / 73 % | 1–3 min | 94–140 s, median 110 (30/30) |
+| 4 Fuel starvation | 86 % / after full strength | 1–3 min | 106–206 s, median 147 (30/30) |
+| 5 Injector abnormality | 88 % / after full strength | 8–15 min | 430–1137 s, median 581 (25/30; 5 low-power runs never fail) |
+| 6 Cooling degradation | after full strength (CHT keeps creeping up) | 8–15 min | 501–949 s, median 694 (30/30) |
+| 7 CHT sensor drift | never (sensor fault) | 8–15 min | no failure (0/30) |
+| 8 Combustion instability | 55 % / 99 % | 8–15 min | 292–1082 s, median 531 (29/30) |
+| 9 Abnormal vibration | after full strength | 8–15 min | 425–1063 s, median 650 (29/29) |
 
 With short ramps, oil pressure failure and fuel starvation usually fail right at the end of the ramp: the 90 s health average lags a fast collapse. The dataset's `failure_s` column is the truth for every run.
 
-**Low power slows faults down.** In the endurance profile, faults reach failure 20–70 % later than at cruise, and several only after reaching full strength: less heat to shed, less vibration at lower RPM. So the model must learn that the *same* fault is more or less urgent depending on how the engine is being flown.
+**Low power slows faults down.** In the endurance profile, faults reach failure 20–70 % later than at cruise, and several only after reaching full strength: less heat to shed, less vibration at lower RPM. A few low-power runs never reach failure at all (5 injector runs in endurance and high altitude, 1 combustion-instability run in rapid throttle); their `failure_s` is empty and `rul_seconds` stays 600. So the model must learn that the *same* fault is more or less urgent depending on how the engine is being flown.
 
 **The time scale is compressed:** real engines degrade over hours, here over minutes. Treat seconds as "simulator seconds" and say so in the demo.
 
@@ -215,14 +215,19 @@ The asymmetric score comes from the NASA PHM'08 prognostics challenge. Overestim
 
 ## 9. Handing the model back
 
-The live backend (`backend/twin/ml_predictor.py` → `backend/twin/ml_models/rul/predictor.py`) will call your model once per second with the recent history of the current mission: up to 1200 samples, oldest first. Each sample is a dict with the column names of the anomaly guide §6.1, minus the labels.
+The interface your model plugs into is already in place: `backend/twin/predictor.py`. Today the live system runs the §6.1 health-extrapolation baseline (`HealthTrendRULModel`) through the same interface, so the dashboard countdown, advisory and mission reports already work. Integrating your model means implementing one class and returning it from `create_predictors()`.
+
+Once per second, the backend calls `predict(history)` with the **last 300 samples** of the current mission (oldest first; tell us if you need more, up to 1200). Each sample is a dict with the column names of the anomaly guide §6.1, minus the labels.
 
 **Deliver:**
 
-1. `predict_rul(history: list[dict]) -> dict | None`, returning
+1. A class with `predict(history: list[dict]) -> RULResult | None` (see `predictor.py`), returning
    ```python
-   {"rul_seconds": float,          # 0-600; 600 = "10 min or more"
-    "rul_p10": float, "rul_p90": float}   # optional quantile band
+   RULResult(
+       rul_seconds=...,     # 0-600; 600 = "10 min or more"
+       rul_low=..., rul_high=...,   # optional band (e.g. 10th / 90th percentile)
+       source="gru-v1",     # your model's name, shown on the dashboard
+   )
    ```
    Return `None` if there are fewer samples than the model needs.
 2. **Weights** as a PyTorch `state_dict` (`.pt`), plus the model class (or reuse `GRURULRegressor`), or XGBoost `save_model("*.json")`.
@@ -234,4 +239,4 @@ The live backend (`backend/twin/ml_predictor.py` → `backend/twin/ml_models/rul
 - **Speed:** under 50 ms per call on a laptop CPU.
 - **Size:** ideally under 10 MB.
 
-The backend and dashboard currently show RUL in hours (`rul_hours`, with a correction factor in `ml_predictor.py`). They'll be switched to the new seconds-based output when the model is integrated. That's on our side, not yours.
+The backend, API and dashboard already use seconds (`rul_seconds`, shown as "~2 min 30 s"). The old hours-based GRU in `backend/twin/ml_models/rul/` and `ml_predictor.py` is no longer loaded.

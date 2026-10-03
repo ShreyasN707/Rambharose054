@@ -4,6 +4,7 @@ import type {
     SubsystemHealth,
     PredictionData,
     AlertData,
+    AdvisoryData,
     HealthHistoryPoint,
     WebSocketUpdateMessage,
 } from "../types/api";
@@ -13,44 +14,33 @@ import {
     getDashboard,
     getEngineWebSocketUrl,
 } from "../services/api";
+import { efficiencyIndex } from "../efficiency";
 
+// Live efficiency: the WebSocket delivers every POLL_INTERVAL (2 s) sample,
+// so 30 samples span about 60 s, like the analysis chart's window.
+const EFFICIENCY_BUFFER = 30;
+
+// Shown until the first real health data arrives (hasData is false
+// meanwhile, and the dashboard renders "NO DATA" / "--").
 const DEFAULT_HEALTH: SubsystemHealth = {
-    overall: 82.0,
-    thermal: 97.5,
-    combustion: 76.2,
-    lubrication: 94.8,
-    mechanical: 88.0,
+    overall: 0,
+    thermal: 0,
+    combustion: 0,
+    lubrication: 0,
+    mechanical: 0,
     electrical: null,
     injection: null,
     sensor: null,
 };
 
 const DEFAULT_PREDICTION: PredictionData = {
-    anomaly_score: 0.28,
+    anomaly_score: 0,
     is_anomaly: false,
-    fault: "Misfire detected",
-    confidence: 94,
-    rul_hours: null,
+    fault: null,
+    confidence: 0,
+    rul_seconds: null,
 };
 
-const DEFAULT_ALERTS: AlertData[] = [
-    {
-        engine_id: "ENG-TEST",
-        mission_id: "MISSION-1",
-        severity: "DEGRADED",
-        message: "Combustion efficiency dropped below 80%",
-        source: "operating_state",
-        timestamp: "03:25:00Z",
-    },
-    {
-        engine_id: "ENG-TEST",
-        mission_id: "MISSION-1",
-        severity: "WARNING",
-        message: "Ingestion event: TELEMETRY_GAP (2 dropped packets)",
-        source: "ingestion_event",
-        timestamp: "03:26:00Z",
-    },
-];
 
 const ZERO_TELEMETRY: TelemetryData = {
     timestamp: new Date().toISOString(),
@@ -101,56 +91,25 @@ export function useEngineData() {
     const [operatingState, setOperatingState] =
         useState<
             "NOMINAL" | "WARNING" | "DEGRADED" | "CRITICAL"
-        >("WARNING");
+        >("NOMINAL");
+
+    const [advisory, setAdvisory] =
+        useState<AdvisoryData | null>(null);
 
     const [alerts, setAlerts] =
-        useState<AlertData[]>(DEFAULT_ALERTS);
+        useState<AlertData[]>([]);
 
     const [healthHistory, setHealthHistory] =
-        useState<HealthHistoryPoint[]>([
-            {
-                timestamp: "03:20:00Z",
-                health: {
-                    ...DEFAULT_HEALTH,
-                    overall: 99.1,
-                },
-            },
-            {
-                timestamp: "03:21:00Z",
-                health: {
-                    ...DEFAULT_HEALTH,
-                    overall: 96.5,
-                },
-            },
-            {
-                timestamp: "03:22:00Z",
-                health: {
-                    ...DEFAULT_HEALTH,
-                    overall: 91.0,
-                },
-            },
-            {
-                timestamp: "03:23:00Z",
-                health: {
-                    ...DEFAULT_HEALTH,
-                    overall: 86.1,
-                },
-            },
-            {
-                timestamp: "03:24:00Z",
-                health: {
-                    ...DEFAULT_HEALTH,
-                    overall: 83.9,
-                },
-            },
-            {
-                timestamp: "03:25:00Z",
-                health: {
-                    ...DEFAULT_HEALTH,
-                    overall: 82.0,
-                },
-            },
-        ]);
+        useState<HealthHistoryPoint[]>([]);
+
+    // Recent telemetry for the live efficiency index.
+    const efficiencyBufferRef = useRef<TelemetryData[]>([]);
+    const [efficiency, setEfficiency] =
+        useState<number | null>(null);
+
+    // True once real health data has arrived for the current mission.
+    const [hasData, setHasData] =
+        useState<boolean>(false);
 
     const [isConnected, setIsConnected] =
         useState<boolean>(false);
@@ -188,6 +147,10 @@ export function useEngineData() {
             engine_id: selectedEngine,
             mission_id: selectedMission,
         });
+        setAdvisory(null);
+        setHasData(false);
+        efficiencyBufferRef.current = [];
+        setEfficiency(null);
     }, [selectedEngine, selectedMission]);
 
     /*
@@ -267,8 +230,13 @@ export function useEngineData() {
 
             if (data.health) {
                 setHealth(data.health);
+                setHasData(true);
                 setIsWarmup(false);
             } else {
+                // New mission without health yet: don't keep showing
+                // the previous mission's values.
+                setHealth(DEFAULT_HEALTH);
+                setHasData(false);
                 setIsWarmup(true);
             }
 
@@ -279,6 +247,8 @@ export function useEngineData() {
             if (data.operating_state) {
                 setOperatingState(data.operating_state);
             }
+
+            setAdvisory(data.advisory ?? null);
 
             if (Array.isArray(data.alerts)) {
                 setAlerts(data.alerts);
@@ -346,6 +316,20 @@ export function useEngineData() {
                                 ...prev,
                                 ...data.telemetry,
                             }));
+
+                            const buffer = efficiencyBufferRef.current;
+                            if (
+                                buffer.length === 0 ||
+                                buffer[buffer.length - 1].timestamp !== data.telemetry.timestamp
+                            ) {
+                                buffer.push(data.telemetry);
+                                if (buffer.length > EFFICIENCY_BUFFER) buffer.shift();
+                                setEfficiency(
+                                    buffer.length >= EFFICIENCY_BUFFER / 2
+                                        ? efficiencyIndex(buffer)
+                                        : null
+                                );
+                            }
                         }
 
                         /*
@@ -354,6 +338,7 @@ export function useEngineData() {
                          */
                         if (data.health) {
                             setHealth(data.health);
+                            setHasData(true);
                             setIsWarmup(false);
                         }
 
@@ -368,6 +353,10 @@ export function useEngineData() {
                                 data.operating_state
                             );
                         }
+
+                        // null when the engine is nominal, so a
+                        // cleared advisory disappears.
+                        setAdvisory(data.advisory ?? null);
                     }
                 } catch (error) {
                     console.error(
@@ -419,6 +408,9 @@ export function useEngineData() {
         health,
         prediction,
         operatingState,
+        advisory,
+        hasData,
+        efficiency,
         alerts,
         healthHistory,
 

@@ -22,6 +22,10 @@ import HealthTrendChart from "./components/analysis/HealthTrendChart";
 import MissionReplay from "./components/analysis/MissionReplay";''
 import AnomalyChart from "./components/analysis/AnomalyChart";
 import RULChart from "./components/analysis/RULChart";
+import EfficiencyChart from "./components/analysis/EfficiencyChart";
+import MissionReport from "./components/analysis/MissionReport";
+import { getMissionReport } from "./services/api";
+import type { MissionReport as MissionReportData } from "./types/api";
 
 export default function AnalysisPage() {
     const [replayIndex, setReplayIndex] = useState(0);
@@ -31,6 +35,7 @@ export default function AnalysisPage() {
     const [mission, setMission] = useState<MissionSummary | null>(null);
     const [telemetry, setTelemetry] = useState<TelemetryData[]>([]);
     const [replay, setReplay] = useState<MissionReplayResponse | null>(null);
+    const [report, setReport] = useState<MissionReportData | null>(null);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -76,6 +81,7 @@ export default function AnalysisPage() {
                     telemetryData,
                     replayData,
                     healthHistoryData,
+                    reportData,
                 ] = await Promise.all([
                     getMissionTelemetry(selectedMission),
                     getMissionReplay(selectedMission),
@@ -83,6 +89,8 @@ export default function AnalysisPage() {
                         missionData.engine_id,
                         selectedMission
                     ),
+                    // A mission without health data still has a report.
+                    getMissionReport(selectedMission).catch(() => null),
                 ]);
 
                 setMission(missionData);
@@ -90,6 +98,7 @@ export default function AnalysisPage() {
                 setReplay(replayData);
                 setReplayIndex(0);
                 setHealthHistory(healthHistoryData.history);
+                setReport(reportData);
             } catch (err) {
                 setError(
                     err instanceof Error
@@ -338,6 +347,8 @@ export default function AnalysisPage() {
                     </div>
                 )}
 
+                <MissionReport report={report} />
+
                 {/* Temporary sections */}
                 <section className="mb-8">
                     <div className="flex items-center justify-between mb-4">
@@ -382,12 +393,15 @@ export default function AnalysisPage() {
                             replayIndex={replayIndex}
                         />
 
-                        <div className="xl:col-span-2 xl:w-1/2 xl:justify-self-center">
-                            <LubricationChart
-                                data={telemetry}
-                                replayIndex={replayIndex}
-                            />
-                        </div>
+                        <LubricationChart
+                            data={telemetry}
+                            replayIndex={replayIndex}
+                        />
+
+                        <EfficiencyChart
+                            data={telemetry}
+                            replayIndex={replayIndex}
+                        />
 
                         <TelemetryChart
                             title="ELECTRICAL SYSTEM"

@@ -5,13 +5,11 @@ from sqlalchemy.orm import Session
 from telemetry.database import SessionLocal
 from telemetry.repository import TelemetryRepository
 from twin.factory import create_digital_twin_service
-from twin.ml_predictor import ModelPredictor
 from twin.repository import HealthSnapshotRepository
 from twin.service import DigitalTwinService
 
-# Stateless — built once at import time, reused across every request.
-_predictor = ModelPredictor()
-_twin_service = create_digital_twin_service(_predictor)
+# Built once at import time, reused across every request.
+_twin_service = create_digital_twin_service()
 
 
 def get_session() -> Generator[Session, None, None]:
