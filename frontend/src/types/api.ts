@@ -173,6 +173,17 @@ export interface MissionReport {
     maintenance: string[];
 }
 
+// Expected healthy readings per mission sample (GET /missions/{id}/baseline).
+export interface MissionBaseline {
+    mission_id: string;
+    signals: string[];                       // empty without a fitted baseline
+    expected: Record<string, number>[];      // one per telemetry sample
+    roughness_window: number;
+    vibration_rms_limit: number;
+    rpm_roughness_limit: number;
+    cht_roughness_limit: number;
+}
+
 export interface WebSocketUpdateMessage {
     type: "engine_update";
     engine_id: string;

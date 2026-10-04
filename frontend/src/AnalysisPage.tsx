@@ -1,41 +1,67 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { ArrowLeft, Clock3 } from "lucide-react";
-import EnginePerformanceChart from "./components/analysis/EnginePerformanceChart";
-import ThermalChart from "./components/analysis/ThermalChart";
-import LubricationChart from "./components/analysis/LubricationChart";
-import TelemetryChart from "./components/analysis/TelemetryChart";
 import {
     getMissions,
     getMission,
     getMissionTelemetry,
     getMissionReplay,
+    getMissionReport,
+    getMissionBaseline,
 } from "./services/api";
 import type {
     MissionItem,
     MissionSummary,
     TelemetryData,
     MissionReplayResponse,
+    MissionBaseline,
+    MissionReport as MissionReportData,
 } from "./types/api";
-import { getEngineHealthHistory } from "./services/api";
-import type { HealthHistoryPoint } from "./types/api";
-import HealthTrendChart from "./components/analysis/HealthTrendChart";
-import MissionReplay from "./components/analysis/MissionReplay";''
-import AnomalyChart from "./components/analysis/AnomalyChart";
-import RULChart from "./components/analysis/RULChart";
-import EfficiencyChart from "./components/analysis/EfficiencyChart";
-import MissionReport from "./components/analysis/MissionReport";
-import { getMissionReport } from "./services/api";
-import type { MissionReport as MissionReportData } from "./types/api";
+import { HealthTab, SignalsTab, SummaryTab, type SignalsSub } from "./components/analysis/AnalysisTabs";
+import ReplayTab from "./components/analysis/ReplayTab";
+import {
+    SUBSYSTEMS,
+    buildMissionModel,
+    clock,
+    weakestSubsystem,
+    type SubsystemKey,
+} from "./components/analysis/missionData";
+
+const TABS = [
+    { key: "summary", label: "SUMMARY" },
+    { key: "signals", label: "SIGNALS" },
+    { key: "health", label: "HEALTH & RUL" },
+    { key: "replay", label: "REPLAY" },
+] as const;
+type TabKey = typeof TABS[number]["key"];
+
+const SIGNAL_SUBS: SignalsSub[] = [...SUBSYSTEMS.map((s) => s.key), "efficiency"];
 
 export default function AnalysisPage() {
-    const [replayIndex, setReplayIndex] = useState(0);
-    const [healthHistory, setHealthHistory] = useState<HealthHistoryPoint[]>([]);
+    // Mission, tab and signals sub-tab live in the URL so views are linkable.
+    const [params, setParams] = useSearchParams();
+    const selectedMission = params.get("mission") ?? "";
+    const tab: TabKey = (TABS.find((t) => t.key === params.get("tab"))?.key) ?? "summary";
+    const subParam = params.get("sub") as SignalsSub | null;
+
+    const setParam = useCallback((updates: Record<string, string | null>) => {
+        setParams((prev) => {
+            const next = new URLSearchParams(prev);
+            Object.entries(updates).forEach(([k, v]) => (v == null ? next.delete(k) : next.set(k, v)));
+            return next;
+        });
+    }, [setParams]);
+    const setSelectedMission = (id: string) => setParam({ mission: id, sub: null });
+
+    // Shared "current moment" (sample index): the replay position and the
+    // cursor line on every chart.
+    const [cursorIndex, setCursorIndex] = useState(0);
     const [missions, setMissions] = useState<MissionItem[]>([]);
-    const [selectedMission, setSelectedMission] = useState("");
     const [mission, setMission] = useState<MissionSummary | null>(null);
     const [telemetry, setTelemetry] = useState<TelemetryData[]>([]);
     const [replay, setReplay] = useState<MissionReplayResponse | null>(null);
     const [report, setReport] = useState<MissionReportData | null>(null);
+    const [baseline, setBaseline] = useState<MissionBaseline | null>(null);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -50,8 +76,8 @@ export default function AnalysisPage() {
 
                 setMissions(result.missions);
 
-                if (result.missions.length > 0) {
-                    setSelectedMission(result.missions[0].mission_id);
+                if (result.missions.length > 0 && !params.get("mission")) {
+                    setParam({ mission: result.missions[0].mission_id });
                 }
             } catch (err) {
                 setError(
@@ -65,6 +91,7 @@ export default function AnalysisPage() {
         }
 
         loadMissions();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -80,25 +107,23 @@ export default function AnalysisPage() {
                 const [
                     telemetryData,
                     replayData,
-                    healthHistoryData,
                     reportData,
+                    baselineData,
                 ] = await Promise.all([
                     getMissionTelemetry(selectedMission),
                     getMissionReplay(selectedMission),
-                    getEngineHealthHistory(
-                        missionData.engine_id,
-                        selectedMission
-                    ),
                     // A mission without health data still has a report.
                     getMissionReport(selectedMission).catch(() => null),
+                    // Charts work without expected-healthy lines.
+                    getMissionBaseline(selectedMission).catch(() => null),
                 ]);
 
                 setMission(missionData);
                 setTelemetry(telemetryData);
                 setReplay(replayData);
-                setReplayIndex(0);
-                setHealthHistory(healthHistoryData.history);
+                setCursorIndex(0);
                 setReport(reportData);
+                setBaseline(baselineData);
             } catch (err) {
                 setError(
                     err instanceof Error
@@ -112,6 +137,26 @@ export default function AnalysisPage() {
 
         loadMissionData();
     }, [selectedMission]);
+
+    const model = useMemo(
+        () => buildMissionModel(telemetry, replay?.points ?? [], baseline, report),
+        [telemetry, replay, baseline, report],
+    );
+    const sub: SignalsSub = subParam && SIGNAL_SUBS.includes(subParam)
+        ? subParam
+        : weakestSubsystem(model.rows) ?? "thermal";
+    const cursorX = model.rows[cursorIndex]?.x ?? null;
+
+    const selectX = useCallback((x: number) => {
+        const i = model.rows.findIndex((r) => r.x >= x);
+        setCursorIndex(i < 0 ? model.rows.length - 1 : i);
+    }, [model.rows]);
+
+    // From a subsystem (summary card or replay bar) to its signals.
+    const openSubsystem = (key: SubsystemKey, atX?: number) => {
+        if (atX != null) selectX(atX);
+        setParam({ tab: "signals", sub: key });
+    };
 
     if (loading && !mission) {
         return (
@@ -347,171 +392,44 @@ export default function AnalysisPage() {
                     </div>
                 )}
 
-                <MissionReport report={report} />
-
-                {/* Temporary sections */}
-                <section className="mb-8">
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <div
-                                className="text-xs mb-1"
-                                style={{
-                                    color: "#C6FF3D",
-                                    fontFamily: "'JetBrains Mono', monospace",
-                                }}
-                            >
-                                TELEMETRY HISTORY
-                            </div>
-
-                            <h2
-                                className="text-2xl font-bold"
-                                style={{ color: "#fff" }}
-                            >
-                                HISTORICAL TELEMETRY
-                            </h2>
-                        </div>
-
-                        <div
-                            className="text-xs"
+                {/* Tabs */}
+                <div className="sticky top-0 z-20 -mx-6 md:-mx-10 px-6 md:px-10 mb-6 flex flex-wrap items-center gap-1" style={{ background: "#050505", borderBottom: "1px solid #3a3a3a" }}>
+                    {TABS.map((t) => (
+                        <button
+                            key={t.key}
+                            onClick={() => setParam({ tab: t.key })}
+                            className="px-5 py-3 text-sm font-bold transition"
                             style={{
-                                color: "#666",
                                 fontFamily: "'JetBrains Mono', monospace",
+                                color: tab === t.key ? "#C6FF3D" : "#888",
+                                borderBottom: `2px solid ${tab === t.key ? "#C6FF3D" : "transparent"}`,
+                                marginBottom: -1,
                             }}
                         >
-                            {telemetry.length.toLocaleString()} SAMPLES
-                        </div>
-                    </div>
+                            {t.label}
+                        </button>
+                    ))}
+                    {tab !== "summary" && cursorX != null && (
+                        <span className="ml-auto text-xs" style={{ fontFamily: "'JetBrains Mono', monospace", color: "#888" }}>
+                            CURSOR <span style={{ color: "#fff", fontWeight: 700 }}>{clock(cursorX)}</span> · click any chart to move it
+                        </span>
+                    )}
+                </div>
 
-                    <div className="grid xl:grid-cols-2 gap-5">
-                        <ThermalChart
-                            data={telemetry}
-                            replayIndex={replayIndex}
-                        />
-
-                        <EnginePerformanceChart
-                            data={telemetry}
-                            replayIndex={replayIndex}
-                        />
-
-                        <LubricationChart
-                            data={telemetry}
-                            replayIndex={replayIndex}
-                        />
-
-                        <EfficiencyChart
-                            data={telemetry}
-                            replayIndex={replayIndex}
-                        />
-
-                        <TelemetryChart
-                            title="ELECTRICAL SYSTEM"
-                            data={telemetry}
-                            replayIndex={replayIndex}
-                            series={[
-                                {
-                                    key: "battery_voltage",
-                                    label: "BATTERY V",
-                                    unit: "V",
-                                    color: "#34d399",
-                                },
-                                {
-                                    key: "alternator_current",
-                                    label: "ALTERNATOR I",
-                                    unit: "A",
-                                    color: "#7fd4ff",
-                                    axis: "right",
-                                },
-                            ]}
-                        />
-
-                        <TelemetryChart
-                            title="FUEL INJECTION"
-                            data={telemetry}
-                            replayIndex={replayIndex}
-                            series={[
-                                {
-                                    key: "injection_timing",
-                                    label: "TIMING",
-                                    unit: "° BTDC",
-                                    color: "#e8c34a",
-                                },
-                                {
-                                    key: "injection_duration",
-                                    label: "DURATION",
-                                    unit: "ms",
-                                    color: "#c084fc",
-                                    axis: "right",
-                                },
-                            ]}
-                        />
-                    </div>
-                </section>
-
-                <section className="mb-8">
-                    <div className="mb-4">
-                        <div
-                            className="text-xs mb-1"
-                            style={{
-                                color: "#C6FF3D",
-                                fontFamily: "'JetBrains Mono', monospace",
-                            }}
-                        >
-                            ENGINE CONDITION HISTORY
-                        </div>
-
-                        <h2
-                            className="text-2xl font-bold"
-                            style={{ color: "#fff" }}
-                        >
-                            HEALTH TRENDS
-                        </h2>
-                    </div>
-                    <HealthTrendChart
-                        data={healthHistory}
-                        replayIndex={replayIndex}
+                {tab === "summary" && <SummaryTab model={model} report={report} onOpenSubsystem={openSubsystem} />}
+                {tab === "signals" && (
+                    <SignalsTab model={model} cursorX={cursorX} onSelectX={selectX} sub={sub} onSub={(next) => setParam({ sub: next })} />
+                )}
+                {tab === "health" && <HealthTab model={model} cursorX={cursorX} onSelectX={selectX} />}
+                {tab === "replay" && (
+                    <ReplayTab
+                        model={model}
+                        report={report}
+                        cursorIndex={cursorIndex}
+                        onCursorIndex={setCursorIndex}
+                        onOpenSubsystem={(key) => openSubsystem(key)}
                     />
-                </section>
-
-                <section className="mb-8">
-                    <div className="mb-4">
-                        <div
-                            className="text-xs mb-1"
-                            style={{
-                                color: "#C6FF3D",
-                                fontFamily: "'JetBrains Mono', monospace",
-                            }}
-                        >
-                            PREDICTIVE MAINTENANCE
-                        </div>
-
-                        <h2
-                            className="text-2xl font-bold"
-                            style={{ color: "#fff" }}
-                        >
-                            ML PREDICTIONS
-                        </h2>
-                    </div>
-
-                    <div className="grid xl:grid-cols-2 gap-5">
-                        <AnomalyChart
-                            data={replay?.points ?? []}
-                            replayIndex={replayIndex}
-                        />
-
-                        <RULChart
-                            data={replay?.points ?? []}
-                            replayIndex={replayIndex}
-                        />
-                    </div>
-                </section>
-
-                <section className="mb-8">
-                    <MissionReplay
-                        points={replay?.points ?? []}
-                        currentIndex={replayIndex}
-                        onIndexChange={setReplayIndex}
-                    />
-                </section>
+                )}
             </main>
         </div>
     );

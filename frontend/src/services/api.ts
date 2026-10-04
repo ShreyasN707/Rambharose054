@@ -9,6 +9,7 @@ import type {
     DashboardResponse,
     MissionReplayResponse,
     MissionReport,
+    MissionBaseline,
 } from "../types/api";
 
 const BASE_URL = "http://localhost:8000/api";
@@ -119,6 +120,14 @@ export async function getMissionReport(
 ): Promise<MissionReport> {
     return request<MissionReport>(
         `/missions/${encodeURIComponent(missionId)}/report`
+    );
+}
+
+export async function getMissionBaseline(
+    missionId: string
+): Promise<MissionBaseline> {
+    return request<MissionBaseline>(
+        `/missions/${encodeURIComponent(missionId)}/baseline`
     );
 }
 
