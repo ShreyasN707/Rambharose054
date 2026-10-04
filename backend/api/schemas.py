@@ -282,6 +282,21 @@ class ReplayResponse(BaseModel):
     points: list[ReplayPoint]
 
 
+class BaselineResponse(BaseModel):
+    """Expected healthy readings per mission sample (backend/twin/baseline.py)
+    and the limits of the derived health metrics."""
+
+    mission_id: str
+    # Signals the baseline predicts; empty without a fitted model.
+    signals: list[str]
+    # One entry per telemetry sample, oldest first.
+    expected: list[dict[str, float]]
+    roughness_window: int
+    vibration_rms_limit: float
+    rpm_roughness_limit: float
+    cht_roughness_limit: float
+
+
 # ---------------------------------------------------------------------------
 # Dashboard (aggregation)
 # ---------------------------------------------------------------------------

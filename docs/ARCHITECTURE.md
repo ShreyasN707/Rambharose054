@@ -96,7 +96,7 @@ FastAPI (`backend/api`), REST under `/api` plus a WebSocket:
 | `GET /engines/{id}/health`, `/health/history`, `/alerts` | Twin state, history, alerts |
 | `POST /engines/{id}/simulation/start?profile=…` / `stop` | Start a mission with a profile |
 | `POST /engines/{id}/fault?fault_id=N` | Inject a fault (demo) |
-| `GET /missions`, `/missions/{id}/telemetry`, `/replay`, `/report` | Mission history, replay, health report |
+| `GET /missions`, `/missions/{id}/telemetry`, `/replay`, `/report`, `/baseline` | Mission history, replay, health report, expected healthy readings |
 | `WS /ws/engines/{id}?mission_id=…` | Live telemetry, health, prediction, advisory every 2 s |
 
 ### 3.5 Dashboard

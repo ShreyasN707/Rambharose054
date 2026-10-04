@@ -34,6 +34,11 @@ HEALTHY_POWER_PER_FUEL = 1446.0
 
 # Efficiency window (samples) and minimum engine speed.
 EFFICIENCY_WINDOW = 60
+
+# A fault counts in the report once the predictor reports it for this many
+# samples (1 Hz) in a row. Startup blips last up to ~15 s; real faults
+# persist for minutes.
+MIN_FAULT_RUN = 30
 MIN_RPM = 300
 
 
@@ -132,16 +137,25 @@ def build_report(mission_id: str, rows, snapshots) -> dict:
     ]
     report["min_time_to_failure_s"] = round(min(countdowns)) if countdowns else None
 
-    # Faults the predictor reported, with first detection and duration.
+    # Faults the predictor reported for at least MIN_FAULT_RUN samples in a
+    # row, with the start of the first such run and the total time in them.
+    # Shorter blips (e.g. during engine warm-up) are not reported.
     faults: dict[str, dict] = {}
-    for s in snapshots:
-        if s.fault:
-            entry = faults.setdefault(s.fault, {
-                "fault": s.fault,
-                "first_detected_at_s": at(s.time),
-                "seconds_detected": 0,
-            })
-            entry["seconds_detected"] += 1
+    runs: list[tuple[str, int, int]] = []   # (fault, first index, length)
+    for i, s in enumerate(snapshots):
+        if s.fault and runs and runs[-1][0] == s.fault and runs[-1][1] + runs[-1][2] == i:
+            runs[-1] = (s.fault, runs[-1][1], runs[-1][2] + 1)
+        elif s.fault:
+            runs.append((s.fault, i, 1))
+    for fault, first, length in runs:
+        if length < MIN_FAULT_RUN:
+            continue
+        entry = faults.setdefault(fault, {
+            "fault": fault,
+            "first_detected_at_s": at(snapshots[first].time),
+            "seconds_detected": 0,
+        })
+        entry["seconds_detected"] += length
     report["faults"] = sorted(faults.values(), key=lambda f: f["first_detected_at_s"])
 
     # Advisory timeline: every change of level or fault.

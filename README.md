@@ -110,6 +110,7 @@ All REST routes are under `/api`.
 | `GET /dashboard/{id}` | Everything the dashboard needs in one call |
 | `GET /missions`, `/missions/{id}/telemetry`, `/missions/{id}/replay` | Mission history and replay |
 | `GET /missions/{id}/report` | Mission-wise health report (outcome, faults, advisories, maintenance) |
+| `GET /missions/{id}/baseline` | Expected healthy readings per sample (healthy baseline) and the derived-metric health limits, for the analysis charts |
 | `WS /ws/engines/{id}?mission_id=…` | Live telemetry and health stream |
 
 ## Development

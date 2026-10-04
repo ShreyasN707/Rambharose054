@@ -17,9 +17,17 @@ from api.schemas import (
     HealthResponse,
     PredictionResponse,
     MissionReportResponse,
+    BaselineResponse,
 )
 from telemetry.repository import TelemetryRepository
+from twin import baseline
 from twin.report import build_report
+from twin.service import (
+    CHT_ROUGHNESS_LIMIT,
+    ROUGHNESS_WINDOW,
+    RPM_ROUGHNESS_LIMIT,
+    VIBRATION_RMS_LIMIT,
+)
 from twin.repository import HealthSnapshotRepository
 
 
@@ -203,6 +211,52 @@ def mission_replay(
         mission_id=mission_id,
         engine_id=engine_id,
         points=points,
+    )
+
+
+@router.get(
+    "/missions/{mission_id}/baseline",
+    response_model=BaselineResponse,
+)
+def mission_baseline(
+    mission_id: str,
+    session: Session = Depends(get_session),
+    telemetry_repo: TelemetryRepository = Depends(get_telemetry_repo),
+):
+    rows = telemetry_repo.get_by_mission(
+        session,
+        mission_id,
+    )
+
+    if not rows:
+        raise MissionNotFoundError(mission_id)
+
+    # A mission starts with the engine, as in the live twin while the
+    # mission is shorter than baseline.HISTORY_SAMPLES.
+    expected = baseline.expected_series(
+        [
+            {
+                "throttle": r.throttle,
+                "engine_load": r.engine_load,
+                "altitude": r.altitude,
+                "ambient_temperature": r.ambient_temperature,
+            }
+            for r in rows
+        ],
+        from_engine_start=True,
+    ) or []
+
+    return BaselineResponse(
+        mission_id=mission_id,
+        signals=list(baseline.TARGETS) if expected else [],
+        expected=[
+            {name: round(value, 3) for name, value in row.items()}
+            for row in expected
+        ],
+        roughness_window=ROUGHNESS_WINDOW,
+        vibration_rms_limit=VIBRATION_RMS_LIMIT,
+        rpm_roughness_limit=RPM_ROUGHNESS_LIMIT,
+        cht_roughness_limit=CHT_ROUGHNESS_LIMIT,
     )
 
 
