@@ -93,7 +93,7 @@ ANOMALY_HEALTH = 80
 
 # Signal checks used to tell faults of the same subsystem apart.
 EGT_OVERHEAT_C = 40       # EGT above expected: overheating, not cooling
-OIL_SHARE = 0.25          # oil heats up with real cooling loss, not a bad CHT sensor
+OIL_SENSOR_C = 8.0        # oil above expected: real cooling loss, not a bad CHT sensor
 RPM_ROUGH = 5.0           # RPM roughness well above healthy (~0.3)
 RPM_DROP = 0.03           # RPM below expected: misfire, not instability
 ENGINE_SLOW = 0.10        # RPM this far below expected: the engine is the cause
@@ -174,11 +174,13 @@ def diagnose(sample: dict, recent_rpm: list[float]) -> str:
     if weakest == "thermal":
         if sample["egt"] - expected("egt") > EGT_OVERHEAT_C:
             return "overheating"
-        # Real cooling loss also heats the oil; a drifting CHT sensor
-        # reports a hot head while the oil stays normal.
+        # Real cooling loss also heats the oil (12+ °C above expected once
+        # thermal health is low); a drifting CHT sensor reports a hot head
+        # while the oil stays within a few degrees. Oil heats far slower
+        # than the head, so compare it to a fixed margin, not to the CHT rise.
         hot_head = sample["cht"] - expected("cht")
         hot_oil = sample["oil_temperature"] - expected("oil_temperature")
-        if hot_head > 0 and hot_oil < OIL_SHARE * hot_head:
+        if hot_head > 0 and hot_oil < OIL_SENSOR_C:
             return "cht_sensor"
         return "cooling"
     if weakest == "combustion":
