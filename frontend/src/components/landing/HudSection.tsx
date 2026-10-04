@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
     AlertTriangle,
-    RefreshCw,
     Wifi,
 } from "lucide-react";
 
@@ -257,16 +256,10 @@ export default function HudSection({
         { name: "COMBUSTION", score: engineData.health.combustion, status: engineData.health.combustion < 80 ? "warn" : "ok" },
         { name: "LUBRICATION", score: engineData.health.lubrication, status: engineData.health.lubrication < 80 ? "warn" : "ok" },
         { name: "MECHANICAL", score: engineData.health.mechanical, status: engineData.health.mechanical < 80 ? "warn" : "ok" },
-        // Only shown when the telemetry carries these signals.
-        ...(engineData.health.electrical != null
-            ? [{ name: "ELECTRICAL", score: engineData.health.electrical, status: engineData.health.electrical < 80 ? "warn" : "ok" }]
-            : []),
-        ...(engineData.health.injection != null
-            ? [{ name: "INJECTION", score: engineData.health.injection, status: engineData.health.injection < 80 ? "warn" : "ok" }]
-            : []),
-        ...(engineData.health.sensor != null
-            ? [{ name: "SENSOR", score: engineData.health.sensor, status: engineData.health.sensor < 80 ? "warn" : "ok" }]
-            : []),
+        { name: "ELECTRICAL", score: engineData.health.electrical, status: (engineData.health.electrical ?? 100) < 80 ? "warn" : "ok" },
+        { name: "INJECTION", score: engineData.health.injection, status: (engineData.health.injection ?? 100) < 80 ? "warn" : "ok" },
+        // Instrumentation health; not part of the overall score.
+        { name: "SENSOR", score: engineData.health.sensor, status: (engineData.health.sensor ?? 100) < 80 ? "warn" : "ok" },
     ];
 
     const statusColor: Record<string, string> = { ok: "#7fe0a0", warn: "#e8c34a", critical: "#e8543f" };
@@ -286,45 +279,6 @@ export default function HudSection({
                         </h2>
                     </div>
 
-                    <div className="flex items-center gap-3 flex-wrap text-sm" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                        <div className="flex items-center gap-1.5 px-3 py-2 rounded" style={{ border: "1px solid #555", background: "#151515" }}>
-                            <span style={{ color: "#ccc" }}>ENGINE:</span>
-                            <select
-                                value={engineData.selectedEngine}
-                                onChange={(e) => engineData.setSelectedEngine(e.target.value)}
-                                style={{ background: "transparent", color: "#fff", border: "none", outline: "none", cursor: "pointer" }}
-                            >
-                                {engineData.engines.map((eng) => (
-                                    <option key={eng} value={eng} style={{ background: "#111", color: "#fff" }}>
-                                        {eng}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <button
-                            onClick={() => engineData.refreshDashboard()}
-                            className="px-3 py-2 rounded hover:bg-white/10 transition"
-                            title="Refresh live telemetry"
-                            style={{ border: "1px solid #555", color: "#ddd" }}
-                        >
-                            <RefreshCw size={15} />
-                        </button>
-
-                        <span
-                            className="flex items-center gap-1.5 px-3 py-2 rounded font-semibold"
-                            style={{
-                                border: engineData.isConnected ? "1px solid #22c55e" : "1px solid #eab308",
-                                background: engineData.isConnected ? "rgba(34,197,94,0.15)" : "rgba(234,179,8,0.15)",
-                                color: engineData.isConnected ? "#22c55e" : "#eab308",
-                            }}
-                        >
-                            <span style={{ width: 8, height: 8, borderRadius: "50%", background: engineData.isConnected ? "#22c55e" : "#eab308" }} />
-                            {engineData.isConnected ? "WS LIVE" : "POLLING"}
-                        </span>
-
-                       
-                    </div>
                 </div>
 
                 <div
@@ -737,13 +691,13 @@ export default function HudSection({
                                     <div key={idx} className="text-sm">
                                         <div className="flex justify-between items-center mb-1.5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                                             <span style={{ color: "#e0e0e0", fontWeight: 600 }}>{sub.name}</span>
-                                            <span style={{ color: !noData && sub.status === "warn" ? "#e8c34a" : "#fff", fontWeight: 700 }}>{noData ? "--" : `${sub.score}%`}</span>
+                                            <span style={{ color: !noData && sub.status === "warn" ? "#e8c34a" : "#fff", fontWeight: 700 }}>{noData || sub.score == null ? "--" : `${sub.score}%`}</span>
                                         </div>
                                         <div className="w-full h-2 rounded-full" style={{ background: "#333" }}>
                                             <div
                                                 className="h-full rounded-full"
                                                 style={{
-                                                    width: noData ? "0%" : `${sub.score}%`,
+                                                    width: noData || sub.score == null ? "0%" : `${sub.score}%`,
                                                     background: sub.status === "warn" ? "#e8c34a" : "#7fe0a0",
                                                 }}
                                             />

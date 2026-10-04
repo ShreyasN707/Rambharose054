@@ -9,7 +9,6 @@ import type {
     WebSocketUpdateMessage,
 } from "../types/api";
 import {
-    getEngines,
     getMissions,
     getDashboard,
     getEngineWebSocketUrl,
@@ -68,11 +67,10 @@ const ZERO_TELEMETRY: TelemetryData = {
 };
 
 export function useEngineData() {
-    const [engines, setEngines] = useState<string[]>(["ENG-TEST"]);
     const [missions, setMissions] = useState<string[]>(["MISSION-1"]);
 
-    const [selectedEngine, setSelectedEngine] =
-        useState<string>("engine_001");
+    // The simulator publishes a single engine.
+    const selectedEngine = "engine_001";
 
     const [selectedMission, setSelectedMission] =
         useState<string>("mission_001");
@@ -109,9 +107,6 @@ export function useEngineData() {
 
     // True once real health data has arrived for the current mission.
     const [hasData, setHasData] =
-        useState<boolean>(false);
-
-    const [isConnected, setIsConnected] =
         useState<boolean>(false);
 
     const [isWarmup, setIsWarmup] =
@@ -154,38 +149,18 @@ export function useEngineData() {
     }, [selectedEngine, selectedMission]);
 
     /*
-     * Fetch available engines and missions.
+     * Fetch available missions.
      */
     useEffect(() => {
         let mounted = true;
 
         async function fetchLists() {
             try {
-                const [
-                    engRes,
-                    missRes,
-                ] = await Promise.allSettled([
-                    getEngines(),
+                const [missRes] = await Promise.allSettled([
                     getMissions(),
                 ]);
 
                 if (!mounted) return;
-
-                if (
-                    engRes.status === "fulfilled" &&
-                    engRes.value.engines?.length > 0
-                ) {
-                    const ids =
-                        engRes.value.engines.map(
-                            (e) => e.engine_id
-                        );
-
-                    setEngines(ids);
-
-                    if (!ids.includes(selectedEngine)) {
-                        setSelectedEngine(ids[0]);
-                    }
-                }
 
                 if (
                     missRes.status === "fulfilled" &&
@@ -290,10 +265,6 @@ export function useEngineData() {
             socket = new WebSocket(wsUrl);
             wsRef.current = socket;
 
-            socket.onopen = () => {
-                setIsConnected(true);
-            };
-
             socket.onmessage = (event) => {
                 console.log(
                     "[WS RECEIVED]",
@@ -366,15 +337,8 @@ export function useEngineData() {
                 }
             };
 
-            socket.onerror = () => {
-                setIsConnected(false);
-            };
-
-            socket.onclose = () => {
-                setIsConnected(false);
-            };
         } catch {
-            setIsConnected(false);
+            // No live updates; the initial dashboard fetch still shows data.
         }
 
         return () => {
@@ -389,13 +353,11 @@ export function useEngineData() {
     }, [selectedEngine, selectedMission]);
 
     return {
-        engines,
         missions,
 
         selectedEngine,
         selectedMission,
 
-        setSelectedEngine,
         setSelectedMission,
 
         telemetry,
@@ -414,10 +376,6 @@ export function useEngineData() {
         alerts,
         healthHistory,
 
-        isConnected,
         isWarmup,
-
-        refreshDashboard:
-            fetchInitialDashboard,
     };
 }
