@@ -73,22 +73,6 @@ set_param( ...
     "Value", ...
     "0");
 
-%% Connect to MQTT
-
-mqtt = py.importlib.import_module( ...
-    'paho.mqtt.client');
-
-client = mqtt.Client();
-
-client.connect( ...
-    '127.0.0.1', ...
-    int32(1883), ...
-    int32(60));
-
-client.loop_start();
-
-fprintf("Connected to MQTT telemetry.\n");
-
 %% Create live Simulation object
 
 sm = simulation(model_name);
@@ -102,6 +86,20 @@ sm = setModelParameter( ...
 %% Initialize
 
 initialize(sm);
+
+%% Connect to MQTT
+
+% Connect after initialize: compiling the model can take longer than the
+% broker's keep-alive window on a first run.
+mqtt_host = getenv("MQTT_HOST");
+if mqtt_host == ""
+    mqtt_host = "127.0.0.1";
+end
+
+client = MqttLite(mqtt_host, 1883, "simulink_" + mission_id);
+client.subscribe(fault_topic);
+
+fprintf("Connected to MQTT broker at %s.\n", mqtt_host);
 
 fprintf("\n");
 fprintf("========================================\n");
@@ -122,8 +120,11 @@ while next_time <= simulation_time
 
     %% Check MQTT fault command
 
-    requested_fault = str2double( ...
-        strtrim(fileread("fault_state.txt")));
+    % The latest command on the fault topic wins.
+    requested_fault = current_fault;
+    for msg = client.poll()
+        requested_fault = str2double(strtrim(msg.payload));
+    end
 
     %% Validate requested fault
 
@@ -274,12 +275,7 @@ while next_time <= simulation_time
         next_time);
     %% Publish telemetry
 
-    msg = client.publish( ...
-        telemetry_topic, ...
-        payload, ...
-        int32(1));
-
-    msg.wait_for_publish();
+    client.publish(telemetry_topic, payload);
 
     %% Console output
 
@@ -319,7 +315,6 @@ end
 
 %% Disconnect MQTT telemetry client
 
-client.loop_stop();
 client.disconnect();
 
 fprintf("\n");

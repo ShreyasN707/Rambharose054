@@ -66,7 +66,7 @@ The **physical engine** is represented by a Simulink model. Everything downstrea
 - **Faults:** 10 `Fault_ID`s select rows of fault × severity lookup tables. Severity ramps 0 → 1 from onset, so faults develop gradually, as real degradation does. Each fault maps to a PS fault category (`docs/telemetry-schema.md`).
 - **Inputs (mission profile):** throttle, engine load, altitude, ambient temperature. Five profiles: cruise, high altitude, hot weather, endurance, rapid throttle.
 
-The live publisher (`simulation/simulink_mqtt_stream.m`) steps the model and publishes 1 Hz JSON over MQTT. The simulation controller (`simulation/simulation_controller.py`) starts and stops it with the chosen profile; the fault bridge (`simulation/mqtt_fault_bridge.py`) relays fault commands.
+The live publisher (`simulation/simulink_mqtt_stream.m`) steps the model and publishes 1 Hz JSON over MQTT. The simulation controller (`simulation/simulation_controller.py`) starts and stops it with the chosen profile; the stream script also subscribes to the fault topic itself (through `simulation/MqttLite.m`, a small MQTT client written in plain MATLAB).
 
 ### 3.2 Ingestion
 

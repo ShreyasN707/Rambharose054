@@ -7,12 +7,11 @@ An AI-enabled, real-time digital twin of a single-cylinder aero-piston (drone) e
 ```
 ┌──────────────────────┐   engine/{id}/telemetry    ┌─────────────┐
 │ Simulink model       │ ─────────────────────────► │  Mosquitto  │
-│ (MATLAB -batch)      │                            │  MQTT :1883 │
-└──────────▲───────────┘                            └──────┬──────┘
-           │ fault_state.txt                               │
-┌──────────┴───────────┐   engine/{id}/fault               ▼
-│ mqtt_fault_bridge.py │ ◄──────────────────  ┌────────────────────────┐
-└──────────────────────┘                      │ telemetry service      │
+│ (MATLAB -batch)      │ ◄───────────────────────── │  MQTT :1883 │
+└──────────────────────┘   engine/{id}/fault        └──────┬──────┘
+                                                           ▼
+                                              ┌────────────────────────┐
+                                              │ telemetry service      │
 ┌──────────────────────┐                      │ validate → store →     │
 │ simulation_controller│ ◄── start / stop ──┐ │ health indices + ML    │
 │ (:9000)              │                    │ └───────────┬────────────┘
@@ -28,9 +27,8 @@ An AI-enabled, real-time digital twin of a single-cylinder aero-piston (drone) e
 | Component | Location | Role |
 |---|---|---|
 | Engine model | `simulation/AeroPistonEngineSimulator.slx`, `engine_params.m` | Engine core, fuel, thermal, lubrication, vibration, electrical and injection models with sensor dynamics and 10 fault modes |
-| Stream script | `simulation/simulink_mqtt_stream.m` | Steps the model and publishes one telemetry message per second; applies fault commands |
-| Fault bridge | `simulation/mqtt_fault_bridge.py` | Relays fault commands from MQTT to the running simulation |
-| Simulation controller | `simulation/simulation_controller.py` | Small HTTP service that starts/stops the MATLAB simulation |
+| Stream script | `simulation/simulink_mqtt_stream.m`, `MqttLite.m` | Steps the model, publishes one telemetry message per second and applies fault commands it receives over MQTT (plain-MATLAB MQTT client, no Python needed) |
+| Simulation controller | `simulation/simulation_controller.py` | Small HTTP service (Python standard library only) that finds MATLAB and starts/stops the simulation |
 | Telemetry service | `backend/telemetry/` | MQTT subscriber: validates, stores, and runs the digital twin analysis |
 | Digital twin | `backend/twin/` | Healthy baseline, subsystem health indices, fault and RUL predictors (trained models plug into `predictor.py`; rule-based stand-ins until then), maintenance advisory, mission reports |
 | API | `backend/api/` | REST endpoints and a live WebSocket feed |
@@ -40,27 +38,25 @@ An AI-enabled, real-time digital twin of a single-cylinder aero-piston (drone) e
 ## Prerequisites
 
 - Docker with Docker Compose
-- MATLAB with Simulink (developed on R2026a), configured to use a Python environment (`pyenv`) that has `paho-mqtt` installed
-- Python 3 on the host with `paho-mqtt`, `fastapi` and `uvicorn` (for the fault bridge and simulation controller)
+- Linux, Windows or macOS
+- Docker with Compose v2 (Docker Desktop on Windows/macOS), running
+- Python 3.8+ (standard library only; no packages to install)
+- MATLAB R2026a or newer with Simulink (the model is saved in R2026a and won't open in older releases). The launcher finds MATLAB on `PATH` or in the default install folder; otherwise set `MATLAB_PATH` in `.env`
 - Node.js, only to run the frontend outside Docker
 
 ## Getting started
 
-1. Create the environment file and set database credentials:
+1. Start everything, with the same command on every OS:
 
    ```bash
-   cp .env.example .env
+   python start.py          # Linux/macOS: python3 start.py, or ./start.sh
    ```
 
-2. Start everything:
+   This creates `.env` from `.env.example` if it's missing, starts Mosquitto, TimescaleDB, the telemetry service, the API and the frontend in Docker, and starts the simulation controller on the host. Database migrations run automatically when the backend containers start. The first run builds the Docker images and takes a while.
 
-   ```bash
-   ./start.sh
-   ```
+2. Open the dashboard at <http://localhost:5173>, pick a mission profile and start the simulation from there. MATLAB's output goes to `simulation/simulation.log`. You can also run the simulation directly from `simulation/` with `matlab -batch simulink_mqtt_stream` (`SIM_PROFILE` selects the profile).
 
-   This starts Mosquitto, TimescaleDB, the telemetry service, the API and the frontend in Docker, plus the fault bridge and simulation controller on the host. Database migrations run automatically when the backend containers start.
-
-3. Open the dashboard at <http://localhost:5173>, pick a mission profile and start the simulation from there. You can also run it directly with `simulation/start_simulation.sh` (`SIM_PROFILE` selects the profile).
+3. Stop everything with `python start.py stop`.
 
 | Service | URL |
 |---|---|

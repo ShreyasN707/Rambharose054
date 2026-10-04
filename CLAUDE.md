@@ -22,19 +22,19 @@ TimescaleDB (:5432)  ◄── api container (FastAPI, backend/api, :8000, REST 
 frontend (Vite/React, :5173) — services/api.ts, hooks/useEngineData.ts
 
 Fault injection:  dashboard → POST /api/engines/{id}/fault → MQTT engine/{id}/fault
-  → simulation/mqtt_fault_bridge.py writes simulation/fault_state.txt
-  → simulink_mqtt_stream.m polls the file each step and set_params Fault_ID + Degradation/Fault_Onset
+  → simulink_mqtt_stream.m is subscribed (MqttLite.m, plain-MATLAB MQTT over tcpclient), polls each step and set_params Fault_ID + Degradation/Fault_Onset
 Start/stop:  dashboard profile dropdown → POST /api/engines/{id}/simulation/start?profile=<id>
   → simulation/simulation_controller.py (:9000) creates mission_<UTC date>_<time>_<profile>
-  → start_simulation.sh → matlab -batch, with SIM_PROFILE / SIM_MISSION_ID env vars read by simulink_mqtt_stream.m
+  → matlab -batch simulink_mqtt_stream (output in simulation/simulation.log), with SIM_PROFILE / SIM_MISSION_ID env vars
 ```
 
-The simulator is not a container: the fault bridge and the simulation controller run on the host (`start.sh` launches them with nohup), and the controller spawns its own batch MATLAB process.
+The simulator is not a container: the simulation controller runs on the host (`start.py` launches it detached) and spawns its own batch MATLAB process. Everything host-side must stay cross-platform (Linux and Windows): `start.py` and the controller use only the Python standard library, MATLAB is found via `MATLAB_PATH` (.env) → PATH → default install folders, and MATLAB needs no Python (no paho/pyenv).
 
 ## Commands
 
 ```bash
-./start.sh                                   # docker compose up -d + fault bridge + simulation controller
+python3 start.py                             # docker compose up -d + simulation controller (same on Windows: python start.py)
+python3 start.py stop                        # stop simulation, controller and containers
 docker compose up -d mosquitto timescaledb telemetry api   # backend only (skip the frontend container)
 
 # Frontend (frontend/)

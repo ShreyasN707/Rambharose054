@@ -1,1 +1,2 @@
-entrypoint.sh text eol=lf
+# Shell scripts run inside Linux containers; CRLF from a Windows checkout breaks them.
+*.sh text eol=lf
