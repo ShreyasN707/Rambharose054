@@ -797,7 +797,11 @@ class DigitalTwinService:
             or fault_found
         )
 
-        if (
+        # A failing sensor misreads the engine but doesn't endanger it,
+        # so it never makes the state CRITICAL (the advisory caps it too).
+        sensor_fault = prediction.fault_id == 7
+
+        if not sensor_fault and (
             health.overall < 40
             or (weakest < 30 and anomaly >= 3)
         ):
