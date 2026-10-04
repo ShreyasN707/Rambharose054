@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { TelemetryData } from "./types/api";
+import type { AdvisoryData, TelemetryData } from "./types/api";
 import { profileFromMissionId } from "./missionProfiles";
 import Drone3DViewer from "./Drone3DViewer";
 
@@ -332,7 +332,7 @@ function TelemetryCell({
     );
 }
 
-export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?: TelemetryData }) {
+export default function DroneOverviewSection({ liveTelemetry, advisory }: { liveTelemetry?: TelemetryData; advisory?: AdvisoryData | null }) {
     const [tick, setTick] = useState(0);
 
     useEffect(() => {
@@ -404,8 +404,14 @@ export default function DroneOverviewSection({ liveTelemetry }: { liveTelemetry?
                                     <div style={{ width: "100%", height: 380 }}>
                                         <Drone3DViewer
                                             rpm={rpm}
-                                            vibration={parseFloat(vibration)}
+                                            throttle={throttle}
+                                            vibration={liveTelemetry?.vibration ?? 0}
                                             cht={cht}
+                                            egt={egt}
+                                            oilTemperature={oilTemp}
+                                            faultFamily={advisory?.fault_family}
+                                            advisoryLevel={advisory?.level}
+                                            advisoryTitle={advisory?.title}
                                             height={380}
                                         />
                                     </div>

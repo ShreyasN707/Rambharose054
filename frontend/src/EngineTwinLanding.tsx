@@ -51,6 +51,7 @@ export default function EngineTwinLanding() {
             <div ref={droneRef}>
                 <DroneOverviewSection
                     liveTelemetry={engineData.telemetry}
+                    advisory={engineData.advisory}
                 />
             </div>
 

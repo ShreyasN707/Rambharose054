@@ -18,9 +18,58 @@ interface Drone3DViewerProps {
     cht?: number;
     egt?: number;
     oilTemperature?: number;
+    // Maintenance advisory: the affected part pulses (see FAULT_PARTS).
+    faultFamily?: string | null;
+    advisoryLevel?: AdvisoryLevel | null;
+    advisoryTitle?: string | null;
     height?: number | string;
     onSelectPart?: (partName: string) => void;
 }
+
+type AdvisoryLevel = "MONITOR" | "CAUTION" | "WARNING" | "CRITICAL";
+
+// Engine parts of the model, each with its own material.
+type EnginePart = "engine" | "scoop" | "exhaust" | "oil" | "fuel" | "alternator" | "sensor" | "prop";
+
+// Parts to highlight per advisory fault family (backend/twin/advisory_rules.json).
+const FAULT_PARTS: Record<string, EnginePart[]> = {
+    oil_pressure:    ["oil"],
+    overheating:     ["engine", "exhaust"],
+    cooling:         ["scoop", "engine"],
+    fuel_starvation: ["fuel"],
+    injector:        ["fuel", "engine"],
+    misfire:         ["engine", "exhaust"],
+    instability:     ["engine", "exhaust"],
+    vibration:       ["prop", "engine"],
+    electrical:      ["alternator"],
+    cht_sensor:      ["sensor"],
+    unclassified:    ["engine"],
+};
+
+const LEVEL_STYLE: Record<AdvisoryLevel, { color: number; css: string; speed: number }> = {
+    MONITOR:  { color: 0xffc400, css: "#ffc400", speed: 2 },
+    CAUTION:  { color: 0xff9900, css: "#ff9900", speed: 3 },
+    WARNING:  { color: 0xff2a2a, css: "#ff4a3a", speed: 5 },
+    CRITICAL: { color: 0xff0000, css: "#ff2222", speed: 9 },
+};
+
+// Healthy vibration RMS stays <= 2.2 and a vibration fault grows it to ~6
+// (VIBRATION_RMS_LIMIT in backend/twin/service.py), over the same 30 samples.
+const VIB_RMS_HEALTHY = 2.2;
+const VIB_RMS_SEVERE = 6.0;
+const VIB_WINDOW = 30;
+
+// Cruise RPM spins the propeller at this many visual revolutions per second;
+// the real ~67 rev/s would alias into a standing or backwards prop at 60 fps.
+const CRUISE_RPM = 4000;
+const VISUAL_REV_PER_S_AT_CRUISE = 2.5;
+
+const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
+
+// 0..1 heat scales for the thermal colours and the glows.
+const chtHeat = (cht: number) => clamp01((cht - 25) / 175);    // healthy cruise ~80 °C
+const egtHeat = (egt: number) => clamp01((egt - 200) / 700);   // healthy cruise ~710 °C
+const oilHeat = (oil: number) => clamp01((oil - 25) / 175);    // healthy cruise ~105 °C
 
 type ViewPreset = "PERSPECTIVE" | "TOP" | "FRONT" | "SIDE" | "REAR";
 type DisplayMode = "TACTICAL" | "WIREFRAME" | "THERMAL";
@@ -111,12 +160,15 @@ function makeVerticalFin(
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function Drone3DViewer({
-    rpm = 3400,
-    throttle = 45,
-    vibration = 0.08,
-    cht = 175,
-    egt = 700,
-    oilTemperature = 105,
+    rpm = 0,
+    throttle = 0,
+    vibration = 0,
+    cht = 25,
+    egt = 25,
+    oilTemperature = 25,
+    faultFamily = null,
+    advisoryLevel = null,
+    advisoryTitle = null,
     height = "100%",
 }: Drone3DViewerProps) {
     const mountRef       = useRef<HTMLDivElement>(null);
@@ -128,7 +180,7 @@ export default function Drone3DViewer({
     const [autoRotate,  setAutoRotate]  = useState(true);
     const [displayMode, setDisplayMode] = useState<DisplayMode>("TACTICAL");
     const [viewPreset,  setViewPreset]  = useState<ViewPreset>("PERSPECTIVE");
-    const [hudData, setHudData] = useState({ yaw: 42, distance: 9.0 });
+    const [hudData, setHudData] = useState({ yaw: 42 });
 
     // Orbit state
     const isDraggingRef  = useRef(false);
@@ -143,11 +195,22 @@ export default function Drone3DViewer({
     useEffect(() => { autoRotateRef.current = autoRotate; }, [autoRotate]);
     useEffect(() => { displayModeRef.current = displayMode; }, [displayMode]);
 
-    // Telemetry ref
-    const telemetryRef = useRef({ rpm, throttle, vibration, cht, egt, oilTemperature });
+    // Vibration RMS over the latest samples (the raw 1 Hz signal oscillates
+    // around zero, so single samples say little).
+    const vibSamplesRef = useRef<number[]>([]);
+    const [vibRms, setVibRms] = useState(0);
     useEffect(() => {
-        telemetryRef.current = { rpm, throttle, vibration, cht, egt, oilTemperature };
-    }, [rpm, throttle, vibration, cht, egt, oilTemperature]);
+        const samples = vibSamplesRef.current;
+        samples.push(vibration);
+        if (samples.length > VIB_WINDOW) samples.shift();
+        setVibRms(Math.sqrt(samples.reduce((sum, v) => sum + v * v, 0) / samples.length));
+    }, [vibration]);
+
+    // Telemetry ref
+    const telemetryRef = useRef({ rpm, cht, egt, oilTemperature, vibRms, faultFamily, advisoryLevel });
+    useEffect(() => {
+        telemetryRef.current = { rpm, cht, egt, oilTemperature, vibRms, faultFamily, advisoryLevel };
+    }, [rpm, cht, egt, oilTemperature, vibRms, faultFamily, advisoryLevel]);
 
     // View presets
     const applyViewPreset = useCallback((preset: ViewPreset) => {
@@ -171,12 +234,14 @@ export default function Drone3DViewer({
                 mat.wireframe = true;
                 mat.color.setHex(0x00f0ff);
                 mat.emissive.setHex(0x003344);
+                mat.emissiveIntensity = mat.userData.origEmissiveIntensity;
             } else if (displayMode === "THERMAL") {
                 mat.wireframe = false;
             } else {
                 mat.wireframe = false;
                 if (mat.userData.origColor)    mat.color.copy(mat.userData.origColor);
                 if (mat.userData.origEmissive) mat.emissive.copy(mat.userData.origEmissive);
+                mat.emissiveIntensity = mat.userData.origEmissiveIntensity;
             }
         });
     }, [displayMode]);
@@ -237,6 +302,7 @@ export default function Drone3DViewer({
             const m = new THREE.MeshStandardMaterial(params);
             m.userData.origColor    = m.color.clone();
             m.userData.origEmissive = m.emissive.clone();
+            m.userData.origEmissiveIntensity = m.emissiveIntensity;
             mats.push(m);
             return m;
         };
@@ -250,7 +316,20 @@ export default function Drone3DViewer({
         const ledGreen  = mkMat({ color: 0x22ff55, emissive: new THREE.Color(0x00ff44), emissiveIntensity: 4.0, roughness: 0.1 });
         const ledRed    = mkMat({ color: 0xff2222, emissive: new THREE.Color(0xff0000), emissiveIntensity: 4.0, roughness: 0.1 });
         const ledWhite  = mkMat({ color: 0xffffff, emissive: new THREE.Color(0xffffff), emissiveIntensity: 2.5, roughness: 0.1 });
-        const exhaustMat = mkMat({ color: 0xff5500, emissive: new THREE.Color(0xff2200), emissiveIntensity: 1.8, roughness: 0.2 });
+
+        // Engine parts: one material each, so heat glow and fault highlights
+        // can colour them separately.
+        const partMats: Record<EnginePart, THREE.MeshStandardMaterial> = {
+            engine:     mkMat({ color: 0x4a5058, roughness: 0.45, metalness: 0.65 }),
+            scoop:      mkMat({ color: 0x3a424c, roughness: 0.60, metalness: 0.30 }),
+            exhaust:    mkMat({ color: 0x5a3a2a, roughness: 0.35, metalness: 0.80 }),
+            oil:        mkMat({ color: 0x3a424c, roughness: 0.55, metalness: 0.40 }),
+            fuel:       mkMat({ color: 0x5a6470, roughness: 0.40, metalness: 0.50 }),
+            alternator: mkMat({ color: 0x2c333c, roughness: 0.50, metalness: 0.50 }),
+            sensor:     mkMat({ color: 0x8a96a4, roughness: 0.30, metalness: 0.70 }),
+            prop:       mkMat({ color: 0x1a1f26, roughness: 0.35, metalness: 0.30, side: THREE.DoubleSide }),
+        };
+        (Object.keys(partMats) as EnginePart[]).forEach((part) => { partMats[part].userData.part = part; });
         const glassMat  = new THREE.MeshPhysicalMaterial({
             color: 0x050d1a, roughness: 0.04, metalness: 0.05,
             transmission: 0.88, transparent: true, reflectivity: 0.95,
@@ -260,15 +339,16 @@ export default function Drone3DViewer({
         const drone = new THREE.Group();
         scene.add(drone);
 
-        // ── 1. FUSELAGE (LatheGeometry, Global-Hawk / RQ-4 style) ──────────
-        // Profile from TAIL (y=0, thin) → NOSE (y=7, bulbous).
+        // ── 1. FUSELAGE (LatheGeometry, MALE UAV with a rear pusher engine) ─
+        // Profile from TAIL (y=0, blunt for the engine) → NOSE (y=7, bulbous).
         // After rotation.x = PI/2: axis maps to Z → nose at z=+3.5, tail at z=-3.5.
         const fusPts = [
-            new THREE.Vector2(0.00,  0.00),   // tail tip
-            new THREE.Vector2(0.07,  0.28),
-            new THREE.Vector2(0.13,  0.65),
-            new THREE.Vector2(0.20,  1.20),
-            new THREE.Vector2(0.28,  2.00),
+            new THREE.Vector2(0.00,  0.00),   // tail centre (under the spinner)
+            new THREE.Vector2(0.16,  0.00),   // engine flange
+            new THREE.Vector2(0.20,  0.25),
+            new THREE.Vector2(0.24,  0.60),
+            new THREE.Vector2(0.27,  1.20),
+            new THREE.Vector2(0.30,  2.00),
             new THREE.Vector2(0.33,  2.80),
             new THREE.Vector2(0.36,  3.50),   // mid-body
             new THREE.Vector2(0.38,  4.20),
@@ -300,28 +380,6 @@ export default function Drone3DViewer({
         const domeRing = new THREE.Mesh(domeRingGeo, darkMat);
         domeRing.position.set(0, 0.48, 2.0);
         drone.add(domeRing);
-
-        // ── 3. ENGINE INTAKE FAIRING (on top, mid-fuselage) ────────────────
-        const intakeGeo = new THREE.CylinderGeometry(0.20, 0.23, 0.72, 18);
-        const intake = new THREE.Mesh(intakeGeo, darkMat);
-        intake.position.set(0, 0.54, 0.75);
-        intake.rotation.x = Math.PI / 6;
-        intake.castShadow = true;
-        drone.add(intake);
-
-        // Intake lip ring
-        const lipGeo = new THREE.TorusGeometry(0.21, 0.026, 8, 22);
-        const lip = new THREE.Mesh(lipGeo, blackMat);
-        lip.position.set(0, 0.65, 0.45);
-        lip.rotation.x = Math.PI / 6;
-        drone.add(lip);
-
-        // Dark intake opening
-        const intakeCapGeo = new THREE.CircleGeometry(0.19, 18);
-        const intakeCap = new THREE.Mesh(intakeCapGeo, blackMat);
-        intakeCap.position.set(0, 0.67, 0.42);
-        intakeCap.rotation.x = -(Math.PI / 2 - Math.PI / 6);
-        drone.add(intakeCap);
 
         // ── 4. SENSOR BALL TURRET (under nose) ─────────────────────────────
         const sensorGeo = new THREE.SphereGeometry(0.19, 20, 20);
@@ -435,25 +493,114 @@ export default function Drone3DViewer({
         finGroupL.rotation.z = +vtailAngle; // tip goes left+up
         drone.add(finGroupL);
 
-        // ── 8. ENGINE EXHAUST ───────────────────────────────────────────────
-        const exhGeo = new THREE.CylinderGeometry(0.13, 0.09, 0.28, 18);
-        const exhaust = new THREE.Mesh(exhGeo, blackMat);
-        exhaust.position.set(0, 0, -3.52);
-        exhaust.rotation.x = Math.PI / 2;
-        drone.add(exhaust);
+        // ── 8. ENGINE BAY + PUSHER PROPELLER ────────────────────────────────
+        // Single-cylinder aero-piston engine in the rear fuselage. Everything
+        // that shakes with the engine lives in engineGroup.
+        const engineGroup = new THREE.Group();
+        drone.add(engineGroup);
 
-        const exhCapGeo = new THREE.CircleGeometry(0.10, 18);
-        const exhCap = new THREE.Mesh(exhCapGeo, exhaustMat);
-        exhCap.position.set(0, 0, -3.65);
-        drone.add(exhCap);
+        // Cowling (front radius 0.30 at z=-1.9, rear 0.245 at z=-3.0)
+        const cowl = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.245, 1.1, 28, 1, true), partMats.engine);
+        cowl.rotation.x = Math.PI / 2;
+        cowl.position.z = -2.45;
+        cowl.castShadow = true;
+        engineGroup.add(cowl);
 
-        // Heat shimmer glow
-        const exhGlowGeo = new THREE.CircleGeometry(0.22, 18);
-        const exhGlow = new THREE.Mesh(exhGlowGeo, new THREE.MeshBasicMaterial({
-            color: 0xff3300, transparent: true, opacity: 0.18,
-        }));
-        exhGlow.position.set(0, 0, -3.68);
-        drone.add(exhGlow);
+        // Cylinder cooling fins
+        for (let i = 0; i < 6; i++) {
+            const z = -2.05 - i * 0.16;
+            const r = 0.30 - (0.055 * (-1.9 - z)) / 1.1 + 0.012;
+            const fin = new THREE.Mesh(new THREE.TorusGeometry(r, 0.012, 6, 32), partMats.engine);
+            fin.position.z = z;
+            engineGroup.add(fin);
+        }
+
+        // Cooling-air scoop on top
+        const scoop = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.11, 0.48), partMats.scoop);
+        scoop.position.set(0, 0.33, -2.05);
+        scoop.castShadow = true;
+        engineGroup.add(scoop);
+        const scoopInlet = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.08), blackMat);
+        scoopInlet.position.set(0, 0.33, -1.80);
+        engineGroup.add(scoopInlet);
+
+        // Oil cooler under the belly
+        const oilCooler = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.08, 0.38), partMats.oil);
+        oilCooler.position.set(0, -0.31, -2.30);
+        engineGroup.add(oilCooler);
+        const oilSump = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.26, 16), partMats.oil);
+        oilSump.rotation.x = Math.PI / 2;
+        oilSump.position.set(0, -0.25, -2.75);
+        engineGroup.add(oilSump);
+
+        // Alternator on the lower right of the cowling
+        const alternator = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.16, 16), partMats.alternator);
+        alternator.rotation.x = Math.PI / 2;
+        alternator.position.set(0.23, -0.16, -2.0);
+        engineGroup.add(alternator);
+
+        // CHT probe on the cylinder head
+        const chtProbe = new THREE.Mesh(new THREE.SphereGeometry(0.035, 10, 10), partMats.sensor);
+        chtProbe.position.set(-0.2, 0.22, -2.35);
+        engineGroup.add(chtProbe);
+
+        // Exhaust stubs on both sides, angled back, with a glow at the outlet
+        const exhaustGlows: THREE.Mesh[] = [];
+        for (const sx of [1, -1]) {
+            const stub = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.04, 0.30, 12), partMats.exhaust);
+            stub.position.set(sx * 0.33, -0.06, -2.85);
+            stub.rotation.set(0, sx * 0.6, Math.PI / 2);
+            engineGroup.add(stub);
+
+            const glow = new THREE.Mesh(
+                new THREE.SphereGeometry(0.06, 12, 12),
+                new THREE.MeshBasicMaterial({ color: 0xff5500, transparent: true, opacity: 0.4, depthWrite: false, blending: THREE.AdditiveBlending })
+            );
+            glow.position.set(sx * 0.45, -0.06, -2.94);
+            engineGroup.add(glow);
+            exhaustGlows.push(glow);
+        }
+
+        // Fuel line along the belly from the tank to the engine
+        const fuelLine = new THREE.Mesh(
+            new THREE.TubeGeometry(new THREE.CatmullRomCurve3([
+                new THREE.Vector3(0, -0.41, 0.60),
+                new THREE.Vector3(0, -0.38, -0.60),
+                new THREE.Vector3(0, -0.33, -1.40),
+                new THREE.Vector3(0, -0.29, -1.95),
+            ]), 32, 0.02, 8),
+            partMats.fuel
+        );
+        drone.add(fuelLine);
+
+        // Spinner + 3-blade pusher propeller
+        const spinner = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.36, 24), partMats.prop);
+        spinner.rotation.x = -Math.PI / 2;
+        spinner.position.z = -3.68;
+        engineGroup.add(spinner);
+
+        const propeller = new THREE.Group();
+        propeller.position.z = -3.62;
+        engineGroup.add(propeller);
+        const bladeGeo = new THREE.BoxGeometry(0.12, 0.92, 0.025);
+        bladeGeo.translate(0, 0.54, 0);
+        for (let i = 0; i < 3; i++) {
+            const arm = new THREE.Group();
+            arm.rotation.z = (i * 2 * Math.PI) / 3;
+            const blade = new THREE.Mesh(bladeGeo, partMats.prop);
+            blade.rotation.y = 0.35;   // blade pitch
+            blade.castShadow = true;
+            arm.add(blade);
+            propeller.add(arm);
+        }
+
+        // Faint disc that shows the blur of the spinning blades
+        const propDisc = new THREE.Mesh(
+            new THREE.RingGeometry(0.16, 1.02, 48),
+            new THREE.MeshBasicMaterial({ color: 0xaabbcc, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false })
+        );
+        propDisc.position.z = -3.62;
+        engineGroup.add(propDisc);
 
         // ── 9. NAVIGATION LIGHTS ────────────────────────────────────────────
         // Wingtips (accounting for dihedral)
@@ -468,7 +615,7 @@ export default function Drone3DViewer({
 
         // Tail beacon
         const tailBeacon = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 8), ledWhite);
-        tailBeacon.position.set(0, 0.15, -3.58);
+        tailBeacon.position.set(0, 0.22, -3.2);
         drone.add(tailBeacon);
 
         // ── 10. STATUS STRIP (dorsal) ───────────────────────────────────────
@@ -504,7 +651,15 @@ export default function Drone3DViewer({
         let animId: number;
         const clock = new THREE.Clock();
         let strobeTimer = 0;
-        let exhaustFlicker = 0;
+        let elapsed = 0;
+        let smoothRpm = 0;
+        const glowColor = new THREE.Color();
+        const thermalColor = (heat: number) => new THREE.Color().setHSL(0.66 - heat * 0.66, 1.0, 0.45);
+        // Dark red → orange → yellow-white, like hot metal.
+        const hotMetal = (heat: number, out: THREE.Color) =>
+            heat < 0.5
+                ? out.setRGB(0.6 + heat * 0.8, heat * 0.5, 0)
+                : out.setRGB(1, 0.25 + (heat - 0.5) * 1.3, (heat - 0.5) * 0.8);
 
         const animate = () => {
             animId = requestAnimationFrame(animate);
@@ -530,46 +685,87 @@ export default function Drone3DViewer({
                 }
             }
 
-            // Live thermal rendering from CHT + EGT + oil temperature.
-            if (displayModeRef.current === "THERMAL") {
-                const t = telemetryRef.current;
+            const t = telemetryRef.current;
+            elapsed += delta;
 
-                const chtHeat = THREE.MathUtils.clamp((t.cht - 25) / 75, 0, 1);
-                const egtHeat = THREE.MathUtils.clamp((t.egt - 700) / 300, 0, 1);
-                const oilHeat = THREE.MathUtils.clamp((t.oilTemperature - 100) / 40, 0, 1);
+            // Propeller: smoothed RPM, scaled to a visible spin rate.
+            smoothRpm += (t.rpm - smoothRpm) * Math.min(1, delta * 3);
+            const revPerS = (smoothRpm / CRUISE_RPM) * VISUAL_REV_PER_S_AT_CRUISE;
+            propeller.rotation.z -= revPerS * 2 * Math.PI * delta;
+            (propDisc.material as THREE.MeshBasicMaterial).opacity = 0.05 * clamp01(smoothRpm / CRUISE_RPM);
 
-                const rawHeat = THREE.MathUtils.clamp(
-                chtHeat * 0.25 +
-                egtHeat * 0.50 +
-                oilHeat * 0.25,
-                0,
-                1
+            // Vibration: the engine and prop shake with the vibration RMS; a
+            // healthy engine only buzzes faintly.
+            const vib = clamp01((t.vibRms - VIB_RMS_HEALTHY) / (VIB_RMS_SEVERE - VIB_RMS_HEALTHY));
+            const running = smoothRpm > 300 ? 1 : 0;
+            const shake = running * (0.002 + vib * 0.035);
+            engineGroup.position.set(
+                shake * Math.sin(elapsed * 53),
+                shake * Math.sin(elapsed * 67 + 1.3),
+                0
             );
+            const frameShake = running * vib * 0.012;
+            drone.position.set(frameShake * Math.sin(elapsed * 41), frameShake * Math.sin(elapsed * 59 + 0.7), 0);
 
-            // Make the color transition much more responsive
-            const heat = THREE.MathUtils.clamp(
-                Math.pow(rawHeat, 0.3),
-                0,
-                1
-            );
-                const col = new THREE.Color().setHSL(0.66 - heat * 0.66, 1.0, 0.45);
+            // Heat: engine bay from CHT, exhaust from EGT, oil cooler from oil temperature.
+            const heat: Record<EnginePart, number> = {
+                engine: chtHeat(t.cht),
+                scoop: chtHeat(t.cht),
+                exhaust: egtHeat(t.egt),
+                oil: oilHeat(t.oilTemperature),
+                fuel: 0.15, alternator: 0.2, sensor: chtHeat(t.cht), prop: 0.1,
+            };
+            const mode = displayModeRef.current;
 
+            if (mode === "THERMAL") {
+                // Airframe cold, engine parts coloured by their own temperature.
+                const cold = new THREE.Color().setHSL(0.62, 0.7, 0.16);
                 materialsRef.current.forEach((mat) => {
+                    const part = mat.userData.part as EnginePart | undefined;
                     mat.wireframe = false;
-                    mat.color.copy(col);
-                    mat.emissive.copy(col);
-                    mat.emissiveIntensity = 0.4 + heat * 1.6;
+                    mat.color.copy(part ? thermalColor(heat[part]) : cold);
+                    mat.emissive.copy(mat.color);
+                    mat.emissiveIntensity = part ? 0.3 + heat[part] * 1.6 : 0.15;
+                });
+            } else {
+                // Glow only above healthy cruise temperature (heat ~0.3 for
+                // CHT/oil); the exhaust always glows a little while running.
+                (Object.keys(partMats) as EnginePart[]).forEach((part) => {
+                    const mat = partMats[part];
+                    let glow = 0;
+                    if (part === "engine" || part === "scoop") glow = clamp01((heat[part] - 0.3) / 0.6);
+                    else if (part === "oil") glow = clamp01((heat.oil - 0.5) / 0.5);
+                    else if (part === "exhaust") glow = running * heat.exhaust;
+                    if (mode === "WIREFRAME") mat.emissive.setHex(0x003344);
+                    else mat.emissive.copy(mat.userData.origEmissive);
+                    mat.emissive.lerp(hotMetal(glow, glowColor), glow);
+                    mat.emissiveIntensity = Math.max(mat.userData.origEmissiveIntensity, glow * 2.2);
                 });
             }
 
-            // Exhaust flicker
-            exhaustFlicker += delta * 8;
-            if (exhGlow.material instanceof THREE.MeshBasicMaterial) {
-                exhGlow.material.opacity = 0.10 + 0.12 * Math.abs(Math.sin(exhaustFlicker));
+            exhaustGlows.forEach((glow, i) => {
+                const material = glow.material as THREE.MeshBasicMaterial;
+                hotMetal(heat.exhaust, material.color);
+                material.opacity = running * (0.15 + 0.5 * heat.exhaust) * (0.75 + 0.25 * Math.sin(elapsed * 23 + i * 2));
+            });
+
+            // Fault highlight: the parts the advisory points at pulse in the
+            // advisory's colour, faster as it escalates.
+            const level = t.advisoryLevel;
+            const faultParts = level && t.faultFamily ? FAULT_PARTS[t.faultFamily] ?? FAULT_PARTS.unclassified : [];
+            if (level && faultParts.length) {
+                const style = LEVEL_STYLE[level];
+                const pulse = 0.5 + 0.5 * Math.sin(elapsed * style.speed);
+                glowColor.setHex(style.color);
+                faultParts.forEach((part) => {
+                    const mat = partMats[part];
+                    mat.emissive.lerp(glowColor, 0.4 + 0.6 * pulse);
+                    mat.emissiveIntensity = Math.max(mat.emissiveIntensity, 0.6 + 2.4 * pulse);
+                });
             }
 
             const degYaw = THREE.MathUtils.radToDeg(sphericalRef.current.theta) % 360;
-            setHudData({ yaw: Math.round((degYaw + 360) % 360), distance: Math.round(radius * 10) / 10 });
+            setHudData({ yaw: Math.round((degYaw + 360) % 360) });
 
             renderer.render(scene, camera);
         };
@@ -668,11 +864,24 @@ export default function Drone3DViewer({
                 <div style={{ background: "rgba(8,13,20,0.88)", border: "1px solid rgba(198,255,61,0.32)", borderRadius: 4, padding: "4px 10px", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", gap: 7 }}>
                     <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#C6FF3D", boxShadow: "0 0 8px #C6FF3D", flexShrink: 0 }} />
                     <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, fontWeight: 700, color: "#fff", letterSpacing: 1.4 }}>
-                        RQ-4 GLOBAL HAWK · DIGITAL TWIN
+                        MALE UAV · AERO-PISTON DIGITAL TWIN
                     </span>
                     <span style={{ fontSize: 9, color: "#666" }}>|</span>
                     <span style={{ fontSize: 9, color: "#C6FF3D", letterSpacing: 1 }}>LIVE 3D</span>
                 </div>
+                {advisoryLevel && (
+                    <div style={{ background: "rgba(8,13,20,0.88)", border: `1px solid ${LEVEL_STYLE[advisoryLevel].css}`, borderRadius: 4, padding: "4px 10px", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", gap: 7 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: "50%", background: LEVEL_STYLE[advisoryLevel].css, boxShadow: `0 0 8px ${LEVEL_STYLE[advisoryLevel].css}`, animation: "drone3d-pulse 1s ease-in-out infinite", flexShrink: 0 }} />
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, fontWeight: 700, color: LEVEL_STYLE[advisoryLevel].css, letterSpacing: 1.2 }}>
+                            {advisoryLevel}
+                        </span>
+                        {advisoryTitle && (
+                            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#ddd", letterSpacing: 0.5 }}>
+                                {advisoryTitle.toUpperCase()}
+                            </span>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* ── TOP-RIGHT CONTROLS ── */}
@@ -721,14 +930,18 @@ export default function Drone3DViewer({
             {/* ── HUD – Bottom Left ── */}
             <div style={{ position: "absolute", bottom: 10, left: 12, zIndex: 10, background: "rgba(6,10,18,0.88)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 4, padding: "6px 10px", fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#9aa", backdropFilter: "blur(8px)", display: "flex", flexDirection: "column", gap: 4, minWidth: 160 }}>
                 <HudRow icon={<Gauge size={9} />}     label="YAW"  value={`${hudData.yaw}°`}          color="#C6FF3D" />
-                <HudRow icon={<Gauge size={9} />}     label="RPM"  value={rpm.toLocaleString()}        color={rpm > 4500 ? "#e8543f" : "#60a5fa"} />
-                <HudRow icon={<ShieldAlert size={9} />} label="CHT"  value={`${cht}°C`}              color={cht > 200  ? "#e8543f" : "#aaa"} />
-                <HudRow icon={<Radio size={9} />}     label="DIST" value={`${hudData.distance} u`}     color="#a78bfa" />
-                {/* RPM bar */}
+                <HudRow icon={<Gauge size={9} />}     label="RPM"  value={Math.round(rpm).toLocaleString()} color={rpm > 4500 ? "#e8543f" : "#60a5fa"} />
+                <HudRow icon={<ShieldAlert size={9} />} label="CHT"  value={`${Math.round(cht)}°C`}  color={chtHeat(cht) > 0.6 ? "#e8543f" : "#aaa"} />
+                <HudRow icon={<ShieldAlert size={9} />} label="EGT"  value={`${Math.round(egt)}°C`}  color={egtHeat(egt) > 0.9 ? "#e8543f" : "#aaa"} />
+                <HudRow icon={<ShieldAlert size={9} />} label="OIL T" value={`${Math.round(oilTemperature)}°C`} color={oilHeat(oilTemperature) > 0.6 ? "#e8543f" : "#aaa"} />
+                <HudRow icon={<Radio size={9} />}     label="VIB"  value={`${vibRms.toFixed(2)} rms`}  color={vibRms > VIB_RMS_HEALTHY ? "#e8543f" : "#a78bfa"} />
+                {/* Throttle bar */}
                 <div style={{ marginTop: 2 }}>
-                    <div style={{ fontSize: 7, color: "#444", letterSpacing: 1, marginBottom: 2 }}>THROTTLE</div>
+                    <div style={{ fontSize: 7, color: "#444", letterSpacing: 1, marginBottom: 2, display: "flex", justifyContent: "space-between" }}>
+                        <span>THROTTLE</span><span>{Math.round(throttle)}%</span>
+                    </div>
                     <div style={{ width: "100%", height: 3, background: "rgba(255,255,255,0.07)", borderRadius: 2 }}>
-                        <div style={{ width: `${Math.min((rpm / 5000) * 100, 100)}%`, height: "100%", borderRadius: 2, background: `linear-gradient(90deg, #3b82f6, ${rpm / 5000 > 0.85 ? "#e8543f" : "#C6FF3D"})`, transition: "width 0.6s ease" }} />
+                        <div style={{ width: `${Math.min(Math.max(throttle, 0), 100)}%`, height: "100%", borderRadius: 2, background: `linear-gradient(90deg, #3b82f6, ${throttle > 85 ? "#e8543f" : "#C6FF3D"})`, transition: "width 0.6s ease" }} />
                     </div>
                 </div>
             </div>
@@ -741,7 +954,7 @@ export default function Drone3DViewer({
             </div>
 
 
-            <style>{`@keyframes drone3d-spin { to { transform: rotate(360deg); } }`}</style>
+            <style>{`@keyframes drone3d-spin { to { transform: rotate(360deg); } } @keyframes drone3d-pulse { 50% { opacity: 0.3; } }`}</style>
         </div>
     );
 }
